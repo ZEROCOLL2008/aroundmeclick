@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Around Me Click - Discover Stories Around You</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .font-serif {
+            font-family: 'Lora', serif;
+        }
+
+        /* Floating Social Media Buttons */
+.floating-social-buttons {
+    position: fixed;
+    bottom: 24px;
+    left: 24px; /* Change to 'right' if you want them on the right side */
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.social-btn {
+    padding: 8px;
+    background-color: white;
+    border-radius: 9999px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: transform 0.3s ease-in-out;
+}
+
+.social-btn:hover {
+    transform: scale(1.1);
+}
+
+.social-btn:active {
+    transform: scale(0.95);
+}
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+    <header class="sticky top-0 z-50 bg-white border-b border-slate-200">
+        <div class="flex justify-between items-center px-6 py-3">
+            <div class="text-xl font-bold text-blue-600">
+                Around Me Click
+            </div>
+
+            <div class="relative max-w-lg w-full">
+    <input type="text" id="search-input" placeholder="Search for posts..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+    <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+    </svg>
+</div>
+            
+            <div>
+    <div id="user-auth-links" class="flex gap-3">
+        <button id="login-btn" class="bg-slate-200 text-slate-800 px-4 py-2 rounded-full text-sm font-semibold hover:bg-slate-300 transition-colors">
+            Login
+        </button>
+        <button id="signup-btn" class="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 transition-colors">
+            Sign Up
+        </button>
+    </div>
+
+    <div id="login-modal" class="modal-overlay hidden fixed inset-0 bg-black/60 flex justify-center items-center z-50">
+    <div class="modal-content bg-white p-8 rounded-lg shadow-xl w-full max-w-md relative text-center">
+        <button class="close-modal-btn absolute top-2 right-4 text-3xl text-gray-500 hover:text-gray-800">&times;</button>
+        <h2 class="text-2xl font-bold mb-2">Sign in</h2>
+        <p class="text-slate-600 mb-6">Welcome back to Around Me Click</p>
+        <form id="login-form">
+            <div class="form-group mb-4 text-left">
+                <input type="email" id="login-email" placeholder="Email" class="w-full p-3 border rounded-lg" required>
+            </div>
+            <div class="form-group mb-4 text-left">
+                <input type="password" id="login-password" placeholder="Password" class="w-full p-3 border rounded-lg" required>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-full font-bold hover:bg-blue-700 transition-colors">Sign In</button>
+            <p id="login-error" class="text-red-500 text-sm mt-2 min-h-[20px]"></p>
+        </form>
+        <p class="mt-6 text-sm">New to Around Me? <a href="#" id="show-signup-link" class="text-blue-600 font-bold hover:underline">Join now</a></p>
+    </div>
+</div>
+
+<div id="signup-modal" class="modal-overlay hidden fixed inset-0 bg-black/60 flex justify-center items-center z-50">
+    <div class="modal-content bg-white p-8 rounded-lg shadow-xl w-full max-w-md relative text-center">
+        <button class="close-modal-btn absolute top-2 right-4 text-3xl text-gray-500 hover:text-gray-800">&times;</button>
+        <h2 class="text-2xl font-bold mb-2">Sign up</h2>
+        <p class="text-slate-600 mb-6">Join our community and start blogging</p>
+        <form id="signup-form">
+            <div class="form-group mb-4 text-left">
+                <input type="text" id="signup-name" placeholder="Your Name" class="w-full p-3 border rounded-lg" required>
+            </div>
+            <div class="form-group mb-4 text-left">
+                <input type="email" id="signup-email" placeholder="Email" class="w-full p-3 border rounded-lg" required>
+            </div>
+            <div class="form-group mb-4 text-left">
+                <input type="password" id="signup-password" placeholder="Password (6+ characters)" class="w-full p-3 border rounded-lg" required>
+            </div>
+            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-full font-bold hover:bg-blue-700 transition-colors">Agree & Join</button>
+            <p id="signup-error" class="text-red-500 text-sm mt-2 min-h-[20px]"></p>
+        </form>
+        <div class="my-4 text-sm text-slate-500">or</div>
+        <button id="google-signup-btn" class="w-full flex items-center justify-center gap-2 border border-slate-300 py-3 rounded-full font-bold text-slate-700 hover:bg-slate-100 transition-colors">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo" class="w-5 h-5">
+            Sign up with Google
+        </button>
+        <p class="mt-6 text-sm">Already on Around Me? <a href="#" id="show-login-link" class="text-blue-600 font-bold hover:underline">Sign in</a></p>
+    </div>
+</div>
+
+    <div id="user-profile-info" class="hidden">
+        <div class="flex items-center gap-2">
+            <button class="relative bg-slate-100 p-2 rounded-full text-slate-600 hover:bg-slate-200 hover:text-slate-800">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-5-5.917V5a1 1 0 00-2 0v.083A6 6 0 006 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                <span class="absolute top-0 right-0 flex h-4 w-4">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-white text-xs items-center justify-center">1</span>
+                </span>
+            </button>
+
+            <div class="relative">
+                <button id="profile-dropdown-btn" class="flex items-center">
+                    <img id="header-user-avatar" src="https://via.placeholder.com/40" alt="User Avatar" class="w-10 h-10 rounded-full">
+                </button>
+
+                <div id="profile-dropdown-menu" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-xl border z-50">
+                    <div class="p-4 border-b">
+                        <div class="flex items-center gap-3">
+                            <img id="dropdown-user-avatar" src="https://via.placeholder.com/40" alt="User Avatar" class="w-12 h-12 rounded-full">
+                            <div>
+                                <p id="dropdown-user-name" class="font-bold text-slate-800">User Name</p>
+                                <p id="dropdown-user-email" class="text-sm text-slate-500">user@example.com</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="py-2">
+                        <a href="profile.html" class="flex items-center gap-3 px-4 py-2 text-slate-700 hover:bg-slate-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                            <span>View Profile</span>
+                        </a>
+                    </div>
+
+                    <div class="p-2 border-t">
+                        <button id="logout-btn" class="w-full flex items-center gap-3 px-4 py-2 text-left text-slate-700 hover:bg-slate-100 rounded-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" /></svg>
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    </header>
+
+
+    <nav class="bg-white border-b border-slate-200">
+
+     <div class="container mx-auto px-4 py-8">
+    <div class="flex flex-wrap justify-center items-center gap-4 text-sm font-medium text-center text-slate-500">
+        <button class="category-button px-4 py-2 rounded-full border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 transition-colors" data-category="all">All</button>
+        <button class="category-button px-4 py-2 rounded-full border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 transition-colors" data-category="Technology">Technology</button>
+        <button class="category-button px-4 py-2 rounded-full border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 transition-colors" data-category="Travel">Travel</button>
+        <button class="category-button px-4 py-2 rounded-full border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 transition-colors" data-category="Food">Food</button>
+        <button class="category-button px-4 py-2 rounded-full border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 transition-colors" data-category="Lifestyle">Lifestyle</button>
+        <button class="category-button px-4 py-2 rounded-full border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 transition-colors" data-category="Health">Health</button>
+    </div>
+
+    
+</div>
+
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-7xl mx-auto px-6 py-8">
+        <main class="lg:col-span-2">
+            
+            <div class="mb-8">
+                 <h2 class="text-2xl font-bold text-slate-800 mb-4">Featured Posts</h2>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <article class="bg-white rounded-lg shadow-md overflow-hidden transition duration-300 ease-in-out hover:scale-[1.03] hover:shadow-xl cursor-pointer">
+                        <div class="relative overflow-hidden">
+                            <img src="https://picsum.photos/400/300?random=featured1" alt="Featured post image" class="w-full h-56 object-cover transition duration-300 ease-in-out hover:scale-110">
+                             <span class="absolute top-3 left-3 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide">Featured</span>
+                        </div>
+                        <div class="p-5">
+                            <h2 class="font-bold text-xl mb-2 text-slate-800 hover:text-blue-600 transition-colors">
+                                The Revolution of Digital Nomadism
+                            </h2>
+                            <p class="text-slate-600 text-sm mb-4 font-serif leading-relaxed">
+                                Discover how the rise of remote work is creating new opportunities for global collaboration...
+                            </p>
+                            <div class="flex items-center mt-4">
+                                <img src="https://picsum.photos/32/32?random=author1" alt="Author" class="w-8 h-8 rounded-full mr-3">
+                                <div>
+                                    <span class="font-semibold text-sm text-slate-700">Jessica Martinez</span>
+                                    <p class="text-xs text-slate-500">30 min read</p>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="bg-white rounded-lg shadow-md overflow-hidden transition duration-300 ease-in-out hover:scale-[1.03] hover:shadow-xl cursor-pointer">
+                        <div class="relative overflow-hidden">
+                            <img src="https://picsum.photos/400/300?random=featured2" alt="Featured post image" class="w-full h-56 object-cover transition duration-300 ease-in-out hover:scale-110">
+                             <span class="absolute top-3 left-3 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide">Featured</span>
+                        </div>
+                        <div class="p-5">
+                            <h2 class="font-bold text-xl mb-2 text-slate-800 hover:text-blue-600 transition-colors">
+                                Exploring the Alps: A Traveler's Guide
+                            </h2>
+                            <p class="text-slate-600 text-sm mb-4 font-serif leading-relaxed">
+                                A comprehensive guide to breathtaking destinations in the Alpine regions...
+                            </p>
+                            <div class="flex items-center mt-4">
+                                <img src="https://picsum.photos/32/32?random=author2" alt="Author" class="w-8 h-8 rounded-full mr-3">
+                                <div>
+                                    <span class="font-semibold text-sm text-slate-700">Mark Roberts</span>
+                                    <p class="text-xs text-slate-500">15 min read</p>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                 </div>
+            </div>
+            
+            <hr class="mb-8 border-slate-200">
+
+            <div id="blog-posts-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <p class="col-span-full text-center text-slate-500">Loading posts...</p>
+            </div>
+
+            <div class="text-center mt-8">
+                <button class="bg-blue-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-blue-700 transition-colors">
+                    Load More Posts
+                </button>
+            </div>
+        </main>
+        
+        <div id="post-modal" class="fixed inset-0 z-[200] hidden items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg mx-auto overflow-hidden relative transform transition-transform scale-95 duration-200">
+        <button id="close-post-modal" class="absolute top-2 right-2 text-white bg-gray-800 bg-opacity-50 hover:bg-opacity-75 rounded-full p-2 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        
+        <img id="post-modal-image" src="" alt="Post Image" class="w-full h-64 object-cover">
+        
+        <div class="p-6">
+            <h3 id="post-modal-title" class="text-2xl font-bold text-slate-800 mb-2"></h3>
+            <p id="post-modal-description" class="text-slate-600 font-serif leading-relaxed"></p>
+        </div>
+    </div>
+</div>
+
+   
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="font-bold text-lg mb-4 text-slate-800"></h3>
+       
+        <button class="w-full mt-4 bg-slate-100 text-slate-700 rounded-full py-2 text-sm font-semibold hover:bg-slate-200 transition-colors">
+           
+        </button>
+    </div>
+
+</aside>
+
+    </div>
+
+  <div class="fixed bottom-6 right-6 z-50 flex flex-col space-y-3">
+    <a href="https://www.facebook.com/AroundMeClick.Global" target="_blank" class="p-2 bg-white rounded-full shadow-lg transition-transform transform hover:scale-110 active:scale-95 text-blue-600 hover:text-blue-700">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2.049c-5.526 0-9.999 4.474-9.999 9.999 0 5.094 3.791 9.297 8.744 9.957v-7.042h-2.527v-2.915h2.527v-2.18c0-2.492 1.5-3.864 3.75-3.864 1.096 0 2.053.082 2.329.119v2.664h-1.58c-1.246 0-1.488.591-1.488 1.464v1.921h2.956l-.49 2.915h-2.466v7.042c4.953-.66 8.744-4.863 8.744-9.957.001-5.525-4.474-9.999-9.999-9.999z"/>
+        </svg>
+    </a>
+    <a href="https://www.instagram.com/aroundme.click" target="_blank" class="p-2 bg-white rounded-full shadow-lg transition-transform transform hover:scale-110 active:scale-95 text-pink-500 hover:text-pink-600">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.204-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.069-4.85.069-3.204 0-3.584-.012-4.849-.069-3.252-.149-4.771-1.699-4.919-4.92-.058-1.265-.069-1.644-.069-4.849 0-3.204.012-3.584.069-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.203-6.78 2.623-6.983 6.982-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.203 4.357 2.623 6.78 6.982 6.982 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.204 6.78-2.627 6.982-6.982.058-1.28.072-1.689.072-4.948 0-3.259-.014-3.667-.072-4.947-.204-4.359-2.625-6.78-6.982-6.982-1.281-.059-1.689-.073-4.948-.073zM12 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.791-4-4s1.791-4 4-4 4 1.791 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.442.645-1.442 1.44s.646 1.443 1.442 1.443 1.442-.646 1.442-1.443c0-.795-.646-1.44-1.442-1.44z"/>
+        </svg>
+    </a>
+    <a href="https://threads.net/@aroundme.click" target="_blank" class="p-2 bg-white rounded-full shadow-lg transition-transform transform hover:scale-110 active:scale-95 text-black hover:text-gray-700">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M11.996 9.873c-.023 2.531-2.115 5.163-5.225 5.163-2.132 0-3.793-1.488-3.793-3.955 0-2.327 1.55-3.843 3.697-3.843 2.113 0 3.992 1.348 4.093 3.737.056 1.312-.132 2.373-.772 3.193-1.076 1.365-2.706 1.47-3.929 1.47-1.127 0-2.316-.27-3.08-.948l.948-.948c.551.49 1.473.834 2.298.834 1.127 0 2.016-.484 2.016-1.571 0-1.062-.835-1.432-2.003-1.432h-1.341v-.931h1.341c.974 0 1.579-.379 1.579-1.298 0-.965-.87-1.432-2.328-1.432-1.897 0-3.328 1.134-3.328 2.923 0 1.947 1.638 3.013 3.868 3.013 1.442 0 2.768-.445 3.593-1.229.475-.45.74-.984.81-1.614.068-.621.055-1.235-.046-1.748l-.946-.948c.083.56.096 1.114.075 1.64-.019.467-.183 1.055-.658 1.604-.84.996-2.152.924-3.19.924-1.125 0-2.09-.434-2.09-1.471 0-.965.73-1.385 1.706-1.385h1.228v-.931h-1.238c-1.119 0-1.782-.416-1.782-1.38 0-.943.711-1.38 2.03-1.38 1.168 0 2.213.62 2.535 1.482l.947-.947c-.503-1.16-1.815-1.848-3.32-1.848-2.203 0-3.99 1.761-3.99 4.14 0 2.23 1.54 4.314 3.81 4.314 2.508 0 4.678-2.138 4.678-5.275zm4.848 10.669c-1.157 0-2.09-.434-2.09-1.471 0-.965.73-1.385 1.706-1.385h1.228v-.931h-1.228c-1.119 0-1.782-.416-1.782-1.38 0-.943.711-1.38 2.03-1.38 1.168 0 2.213.62 2.535 1.482l.947-.947c-.503-1.16-1.815-1.848-3.32-1.848-2.203 0-3.99 1.761-3.99 4.14 0 2.23 1.54 4.314 3.81 4.314 2.508 0 4.678-2.138 4.678-5.275v-.895l-.948-.948c.083.56.096 1.114.075 1.64-.019.467-.183 1.055-.658 1.604-.84.996-2.152.924-3.19.924z"/>
+        </svg>
+    </a>
+    <a href="https://www.tiktok.com/@aroundme.click" target="_blank" class="p-2 bg-white rounded-full shadow-lg transition-transform transform hover:scale-110 active:scale-95 text-black hover:text-gray-700">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-2.007 16.711c.974-.037 1.884-.131 2.827-.406v-3.834c.003-.541.042-1.077.065-1.614.062-.128.163-.205.32-.205 1.258 0 2.518.006 3.774-.006.136 0 .265-.11.378-.26.241-.322.483-.642.723-.96.223-.298.375-.6.284-.982-.095-.401-.58-.62-1.111-.599-1.259.049-2.52.029-3.778.029-.276 0-.399-.115-.402-.455-.008-.669-.009-1.339 0-2.008 0-.174-.117-.282-.267-.282-1.21 0-2.42-.007-3.63-.007-.093 0-.197-.008-.344-.008v5.895c-.328.115-.65.234-.967.359-.283.111-.56.229-.83.35-.119.053-.186.134-.185.258.002.383-.003.766 0 1.15-.002.213.109.324.329.323.072 0 .15-.003.228-.007 1.396-.076 2.793-.119 4.19-.117.151 0 .299.006.45.006z"/>
+        </svg>
+    </a>
+    <a href="https://x.com/AroundMeClick" target="_blank" class="p-2 bg-white rounded-full shadow-lg transition-transform transform hover:scale-110 active:scale-95 text-black hover:text-gray-700">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm7.152 6.554l-2.973 9.423-1.895-.008-1.745-3.411-1.337-.216.037.199c.997 2.052 1.319 3.037 1.298 3.518-.02.47-.281 1.053-.965 1.547-1.125.825-2.613.916-3.801.32-1.157-.577-1.849-1.713-2.126-3.235-.284-1.584-.22-3.136.216-4.504.42-1.332 1.144-2.42 2.128-3.093 1.157-.796 2.618-.847 4.147-.255l.89.349-1.92 5.068-1.554-1.071c-.742-.423-1.637-.624-2.583-.242-.693.284-1.139.739-1.341 1.252-.229.577-.246 1.171-.059 1.706.188.544.593.987 1.148 1.21.572.234 1.268.216 1.956.126.32-.042.66-.096 1.018-.168.046.331.06.666-.011.986-.118.529-.537.893-1.139 1.111-.637.234-1.346.155-1.956-.22-.387-.241-.741-.531-1.01-.849l-.916.32c.503.784 1.19 1.41 2.016 1.835.834.428 1.761.59 2.791.59 1.488 0 2.671-.355 3.593-.974.87-.63 1.346-1.464 1.41-2.457.078-.999-.148-2.032-.596-3.03l-1.96-5.181 2.768-1.006c.219-.115.421-.219.619-.327.24-.128.472-.259.697-.4.208-.135.393-.267.56-.395l-.658.077z"/>
+        </svg>
+    </a>
+    <a href="https://linkedin.com/company/aroundme-click" target="_blank" class="p-2 bg-white rounded-full shadow-lg transition-transform transform hover:scale-110 active:scale-95 text-blue-700 hover:text-blue-800">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2.163c-5.495 0-9.967 4.472-9.967 9.967s4.472 9.967 9.967 9.967 9.967-4.472 9.967-9.967-4.472-9.967-9.967-9.967zm1.745 16.598v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667h-3.564v-11.452h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286h-3.565zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019h-3.564v-11.452h3.564v11.452z"/>
+        </svg>
+    </a>
+    <a href="https://www.youtube.com/@AroundMeClick" target="_blank" class="p-2 bg-white rounded-full shadow-lg transition-transform transform hover:scale-110 active:scale-95 text-red-600 hover:text-red-700">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2.163c-5.495 0-9.967 4.472-9.967 9.967s4.472 9.967 9.967 9.967 9.967-4.472 9.967-9.967-4.472-9.967-9.967-9.967zm4.502 12.001c-.017.027-.034.053-.051.08.312.441.834.697 1.432.697 1.545 0 2.768-.902 2.768-2.483v-.002c0-1.581-1.223-2.482-2.768-2.482-.598 0-1.12.256-1.432.697-.017-.027-.034-.053-.051-.08-1.077-1.572-2.76-2.614-4.524-2.614-3.18 0-5.289 2.138-5.289 5.093s2.109 5.093 5.289 5.093c1.764 0 3.447-1.042 4.524-2.614z-4.502-3.107c-1.577 0-2.859-1.282-2.859-2.859s1.282-2.859 2.859-2.859 2.859 1.282 2.859 2.859-1.282 2.859-2.859 2.859z"/>
+        </svg>
+    </a>
+</div>
+
+   <footer class="bg-slate-100 border-t border-slate-200 mt-16">
+    <div class="max-w-7xl mx-auto px-6 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="space-y-4">
+                <h4 class="font-bold text-xl text-blue-600">Around Me Click</h4>
+                <p class="text-slate-600 font-serif leading-relaxed">
+                    Connecting voices from around the world. We believe every story matters and every perspective enriches our understanding of the human experience.
+                </p>
+            </div>
+
+            <div class="space-y-4">
+                <h5 class="font-bold text-lg text-slate-800">Quick Links</h5>
+                <ul class="space-y-3">
+                    <li><a href="#" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">About Us</a></li>
+                    <li><a href="#" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Contact</a></li>
+                    <li><a href="#" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Privacy Policy</a></li>
+                    <li><a href="#" class="text-slate-600 hover:text-blue-600 transition-colors font-medium">Terms of Service</a></li>
+                </ul>
+            </div>
+
+            <div class="space-y-4">
+                <h5 class="font-bold text-lg text-slate-800">Follow Us</h5>
+                <p class="text-slate-600 font-serif mb-4">
+                    Stay connected and join the conversation on social media.
+                </p>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-slate-600 hover:text-blue-500 transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg></a>
+                    <a href="#" class="text-slate-600 hover:text-blue-700 transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"/></svg></a>
+                    <a href="#" class="text-slate-600 hover:text-blue-600 transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5V12h3.642l.358-4H14V6.032c0-1.042.274-1.752 1.54-1.752H18V.084C16.923.058 15.292 0 13.386 0 10.042 0 8 2.09 8 5.642V8z"/></svg></a>
+                </div>
+            </div>
+        </div>
+        <div class="mt-8 border-t border-slate-300 pt-6 text-center">
+            <p class="text-sm text-slate-600">&copy; 2025 Around Me Click. All Rights Reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<script src="app.js"></script>
+<script src="create-post.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
