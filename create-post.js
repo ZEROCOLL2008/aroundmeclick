@@ -117,18 +117,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 else { const plainText = postDocument.body.textContent || ""; title = plainText.substring(0, 60); }
                 if (!title.trim()) throw new Error("Post must have a title or some text.");
                 
-                // Prepare and save data to Firestore
-                const postData = {
-                    title, content: contentHTML, 
-                    category: document.getElementById('post-category').value.toLowerCase(),
-                    imageUrls: imageUrls, // Saving an array of URLs
-                    imageUrl: imageUrls[0] || '', // Save the first image as the main cover image
-                    authorId: user.uid,
-                    authorName: user.displayName || 'Anonymous',
-                    authorAvatar: user.photoURL,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    likesCount: 0, commentsCount: 0
-                };
+               // Prepare and save data to Firestore
+                    const postData = {
+                        title,
+                        content: contentHTML,
+                        category: document.getElementById('post-category').value.toLowerCase(),
+                        imageUrls: imageUrls, // Saving an array of URLs
+                        imageUrl: imageUrls[0] || '', // Save the first image as the main cover image
+                        authorId: user.uid,
+                        authorName: user.displayName || 'Anonymous',
+                        authorAvatar: user.photoURL,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        status: 'pending',
+                        
+                        // --- Likes සහ Comments වලට අදාල අලුත් fields ---
+                        likesCount: 0,
+                        likedBy: [], // Like කරපු අයගේ ID ටික තියාගන්න හිස් Array එකක්
+                        commentsCount: 0
+                    };
                 await db.collection("posts").add(postData);
                 
                 alert("Blog post published successfully!");

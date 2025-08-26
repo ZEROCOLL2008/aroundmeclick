@@ -2,6 +2,7 @@
 //     PROFILE.JS - FINAL & COMPLETE SCRIPT (WITH IMAGE UPLOADS)
 // =================================================================
 document.addEventListener('DOMContentLoaded', () => {
+    let commentsListener = null;
 
     // 1. FIREBASE CONFIG & INIT
     const firebaseConfig = {
@@ -84,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const userData = docSnap.data();
                 displayProfileData(userData, user);
                 loadUserPosts(user.uid);
+                setupEventListeners(user);
                 
                 const avatarUrl = userData.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName || 'U')}&background=random`;
                 const displayName = userData.displayName || 'Anonymous';
@@ -114,50 +116,134 @@ document.addEventListener('DOMContentLoaded', () => {
         if(profileBio) profileBio.textContent = userData.bio || "This user hasn't written a bio yet.";
     }
 
-    async function loadUserPosts(userId) {
-        if (!myPostsGrid) return;
-        try {
-            const postsQuery = db.collection('posts').where('authorId', '==', userId).orderBy('createdAt', 'desc');
-            const snapshot = await postsQuery.get();
-            myPostsGrid.innerHTML = '';
+   async function loadUserPosts(userId) {
+    if (!myPostsGrid) return;
+    myPostsGrid.innerHTML = '<p class="text-slate-500 col-span-full">Loading your posts...</p>';
+    
+    try {
+        const snapshot = await db.collection('posts').where('authorId', '==', userId).orderBy('createdAt', 'desc').get();
+        
+        myPostsGrid.innerHTML = '';
+        if (snapshot.empty) {
+            myPostsGrid.innerHTML = '<p class="text-slate-500 col-span-full">You have not written any posts yet.</p>';
+            return;
+        }
 
-            if (snapshot.empty) {
-                myPostsGrid.innerHTML = '<p class="text-slate-500 col-span-full">You have not written any posts yet.</p>';
-                return;
-            } 
+        snapshot.forEach(doc => {
+            const post = { id: doc.id, ...doc.data() };
+            const article = document.createElement('article');
+            article.className = "bg-white rounded-lg shadow-md overflow-hidden flex flex-col";
             
+            // This is the new, correct UI for each post card
+            article.innerHTML = `
+                <div class="relative overflow-hidden h-48 bg-slate-200 cursor-pointer view-post-trigger" data-post-id="${post.id}">
+                    <img src="${post.imageUrl || 'https://picsum.photos/400/300'}" alt="Blog post image" class="w-full h-full object-cover transition-transform duration-300 hover:scale-110">
+                </div>
+                <div class="p-4 flex flex-col flex-grow">
+                    <h3 class="font-bold text-lg text-slate-800 truncate flex-grow cursor-pointer view-post-trigger" data-post-id="${post.id}">${post.title}</h3>
+                    <div class="mt-4 pt-3 border-t border-gray-200 flex justify-between items-center">
+                        <div class="flex space-x-4 text-sm text-gray-500">
+                            <span title="Likes">❤️ ${post.likesCount || 0}</span>
+                            <span title="Comments">💬 ${post.commentsCount || 0}</span>
+                        </div>
+                        <div class="relative">
+                            <button class="post-menu-button p-1 rounded-full hover:bg-gray-200">
+                                <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg>
+                            </button>
+                            <div class="post-menu hidden absolute right-0 bottom-full mb-2 w-32 bg-white rounded-md shadow-lg z-10 ring-1 ring-black ring-opacity-5">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 edit-post-btn" data-id="${post.id}">Edit</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 delete-post-btn" data-id="${post.id}">Delete</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            myPostsGrid.appendChild(article);
+        });
+
+    } catch (error) {
+        console.error("Error loading user posts:", error);
+        myPostsGrid.innerHTML = '<p class="text-red-500 col-span-full">Could not load posts. Please try again.</p>';
+    }
+}
+
+        const openPostViewModal = async (postId) => {
+    const postViewModal = document.getElementById('post-view-modal');
+    const commentForm = document.getElementById('comment-form');
+    if (!postViewModal || !commentForm) return;
+
+    const postDoc = await db.collection('posts').doc(postId).get();
+    if (!postDoc.exists) return;
+    const post = postDoc.data();
+    const user = auth.currentUser;
+    
+    commentForm.dataset.postId = postId;
+    document.getElementById('view-modal-title').textContent = post.title;
+    const modalImageContainer = document.getElementById('view-modal-image-container');
+    const modalImage = document.getElementById('view-modal-image');
+    if (post.imageUrl) {
+        modalImage.src = post.imageUrl;
+        modalImageContainer.classList.remove('hidden');
+    } else {
+        modalImageContainer.classList.add('hidden');
+    }
+    document.getElementById('view-modal-description').innerHTML = post.content;
+    
+    if (user) {
+        document.getElementById('comment-user-avatar').src = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || 'U'}`;
+    }
+
+    loadComments(postId);
+    postViewModal.classList.remove('hidden');
+    postViewModal.classList.add('flex');
+};
+
+const loadComments = (postId) => {
+    const commentsList = document.getElementById('comments-list');
+    if (!commentsList) return;
+    commentsList.innerHTML = '<p class="text-sm text-gray-500">Loading comments...</p>';
+    if (commentsListener) commentsListener();
+    
+    commentsListener = db.collection('posts').doc(postId).collection('comments').orderBy('createdAt', 'desc')
+        .onSnapshot(snapshot => {
+            commentsList.innerHTML = snapshot.empty ? '<p class="text-sm text-gray-500">No comments yet.</p>' : '';
             snapshot.forEach(doc => {
-                const post = doc.data();
-                const postDate = post.createdAt ? new Date(post.createdAt.seconds * 1000).toLocaleDateString() : 'Just now';
-                const article = document.createElement('article');
-                article.className = "bg-white rounded-lg shadow-md overflow-hidden transition duration-300 ease-in-out hover:shadow-xl";
-                
-                // Updated HTML with Edit and Delete buttons
-                article.innerHTML = `
-                    <div class="relative overflow-hidden h-48 bg-slate-200">
-                        <img src="${post.imageUrl || 'https://picsum.photos/400/300'}" alt="Blog post image" class="w-full h-full object-cover transition duration-300 ease-in-out hover:scale-110">
-                    </div>
-                    <div class="p-5 flex justify-between items-center">
-                        <div>
-                            <h3 class="font-bold text-lg mb-2 text-slate-800 truncate">${post.title}</h3>
-                            <p class="text-slate-500 text-sm">${postDate}</p>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <button class="edit-post-btn text-blue-500 hover:text-blue-700 transition" data-id="${doc.id}">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L15.232 5.232z" />
-                                </svg>
-                            </button>
-                            <button class="delete-post-btn text-red-500 hover:text-red-700 transition" data-id="${doc.id}">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.013 21H7.987a2 2 0 01-1.92-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                myPostsGrid.appendChild(article);
+                const comment = doc.data();
+                const commentDate = comment.createdAt ? new Date(comment.createdAt.toDate()).toLocaleString() : '';
+                const commentDiv = document.createElement('div');
+                commentDiv.className = 'flex items-start space-x-3';
+                commentDiv.innerHTML = `
+                    <img src="${comment.authorAvatar || 'https://ui-avatars.com/api/?name=User'}" alt="Author Avatar" class="w-10 h-10 rounded-full">
+                    <div class="flex-1 bg-gray-100 rounded-lg p-3">
+                        <p class="font-semibold text-sm text-gray-800">${comment.authorName}</p>
+                        <p class="text-sm text-gray-700 mt-1 whitespace-pre-wrap">${comment.text}</p>
+                    </div>`;
+                commentsList.appendChild(commentDiv);
             });
+        });
+};
+
+const handleCommentSubmit = async (postId, text) => {
+    const user = auth.currentUser;
+    if (!user || !text.trim()) return;
+
+    const userDoc = await db.collection('users').doc(user.uid).get();
+    if (!userDoc.exists) return;
+    const userData = userDoc.data();
+    
+    const commentData = {
+        text: text,
+        authorId: user.uid,
+        authorName: userData.displayName || 'Anonymous',
+        authorAvatar: userData.photoURL || `https://ui-avatars.com/api/?name=${userData.displayName || 'U'}`,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    const postRef = db.collection('posts').doc(postId);
+    await postRef.collection('comments').add(commentData);
+    await postRef.update({ commentsCount: firebase.firestore.FieldValue.increment(1) });
+    
+    loadUserPosts(user.uid);
+};
 
             // Attach event listeners for edit and delete buttons
             const editButtons = myPostsGrid.querySelectorAll('.edit-post-btn');
@@ -179,12 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
 
-        } catch (error) {
-            console.error("Error loading user posts:", error);
-            myPostsGrid.innerHTML = '<p class="text-red-500 col-span-full">Could not load posts. Please try again.</p>';
-        }
-    }
-
+    
     // =================================================================
     //     DELETE POST FUNCTION
     // =================================================================
@@ -428,18 +509,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 tempDiv.innerHTML = contentHTML;
                 const firstHeading = tempDiv.querySelector('h1, h2, h3, h4, h5, h6');
                 let title = firstHeading ? firstHeading.textContent.trim() : (tempDiv.textContent.trim().substring(0, 60) || "Untitled Post");
-                
-                const postData = {
-                    title, 
-                    content: contentHTML, 
-                    category: document.getElementById('post-category').value.toLowerCase(),
-                    imageUrls: imageUrls,
-                    imageUrl: imageUrls[0] || '',
-                    authorId: user.uid,
-                    authorName: user.displayName || 'Anonymous',
-                    authorAvatar: user.photoURL,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                };
+               // profile.js -> createPostForm event listener
+
+                                   const postData = {
+                        title,
+                        content: contentHTML,
+                        category: document.getElementById('post-category').value.toLowerCase(),
+                        imageUrls: imageUrls, // Saving an array of URLs
+                        imageUrl: imageUrls[0] || '', // Save the first image as the main cover image
+                        authorId: user.uid,
+                        authorName: user.displayName || 'Anonymous',
+                        authorAvatar: user.photoURL,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        status: 'pending',
+                        
+                        // --- Likes සහ Comments වලට අදාල අලුත් fields ---
+                        likesCount: 0,
+                        likedBy: [], // Like කරපු අයගේ ID ටික තියාගන්න හිස් Array එකක්
+                        commentsCount: 0
+                    };
                 await db.collection("posts").add(postData);
                 
                 alert("Blog post published successfully!");

@@ -1,211 +1,333 @@
-// =================================================================
-//     FINAL SCRIPT.JS - INDEX PAGE LOGIC
-// =================================================================
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Index Page Script (script.js) Loaded!");
 
+    // --- 1. GLOBAL VARIABLES & SELECTORS ---
+    let commentsListener = null; // Real-time listener for comments
     const blogPostsGrid = document.getElementById('blog-posts-grid');
     const searchInput = document.getElementById('search-input');
     const categoryButtons = document.querySelectorAll('.category-button');
+    const postModal = document.getElementById('post-modal');
+    const commentForm = document.getElementById('comment-form');
 
-    // Firestore එකෙන් posts අරගෙන පෙන්වන ප්‍රධාන function එක
-    const fetchAndDisplayPosts = async (searchTerm = '', selectedCategory = 'all') => {
-        if (!blogPostsGrid) {
-            console.error("Blog posts grid not found!");
+    // --- 2. HELPER & CORE FUNCTIONS ---
+
+    const updateLikeButtonUI = (postId, isLiked, newLikesCount) => {
+        const allLikeBtns = document.querySelectorAll(`[data-like-id="${postId}"]`);
+        allLikeBtns.forEach(btn => {
+            const countSpan = btn.querySelector('.like-count');
+            const svgIcon = btn.querySelector('svg');
+            if (countSpan) countSpan.textContent = newLikesCount;
+            if (svgIcon) {
+                if (isLiked) {
+                    svgIcon.classList.add('text-red-500');
+                    svgIcon.setAttribute('fill', 'currentColor');
+                } else {
+                    svgIcon.classList.remove('text-red-500');
+                    svgIcon.setAttribute('fill', 'none');
+                }
+            }
+        });
+    };
+
+    const checkInitialLikeStatus = (user) => {
+        if (!user || !document.querySelector('.like-btn')) return;
+        document.querySelectorAll('.like-btn').forEach(async (btn) => {
+            const postId = btn.dataset.likeId;
+            if (!postId) return;
+            const postRef = db.collection('posts').doc(postId);
+            try {
+                const doc = await postRef.get();
+                if (doc.exists) {
+                    const likedBy = doc.data().likedBy || [];
+                    if (likedBy.includes(user.uid)) {
+                        const svgIcon = btn.querySelector('svg');
+                        if (svgIcon) {
+                           svgIcon.classList.add('text-red-500');
+                           svgIcon.setAttribute('fill', 'currentColor');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Error checking initial like status for post:", postId, error);
+            }
+        });
+    };
+
+    const handleLikeClick = async (postId) => {
+        const user = auth.currentUser;
+        if (!user) {
+            alert("Please log in to like a post.");
+            document.getElementById('login-modal')?.classList.remove('hidden');
             return;
         }
-
+        const postRef = db.collection('posts').doc(postId);
         try {
-            blogPostsGrid.innerHTML = '<p class="col-span-full text-center text-slate-500">Loading posts...</p>';
+            await db.runTransaction(async (transaction) => {
+                const postDoc = await transaction.get(postRef);
+                if (!postDoc.exists) throw "Document does not exist!";
+                const postData = postDoc.data();
+                const likedBy = postData.likedBy || [];
+                const isCurrentlyLiked = likedBy.includes(user.uid);
+                
+                transaction.update(postRef, {
+                    likedBy: isCurrentlyLiked ? firebase.firestore.FieldValue.arrayRemove(user.uid) : firebase.firestore.FieldValue.arrayUnion(user.uid),
+                    likesCount: firebase.firestore.FieldValue.increment(isCurrentlyLiked ? -1 : 1)
+                });
+                const newLikesCount = (postData.likesCount || 0) + (isCurrentlyLiked ? -1 : 1);
+                updateLikeButtonUI(postId, !isCurrentlyLiked, newLikesCount);
+            });
+        } catch (e) {
+            console.error("Like transaction failed: ", e);
+        }
+    };
+    
+    const loadComments = (postId) => {
+        const commentsList = document.getElementById('comments-list');
+        if (!commentsList) return;
+        commentsList.innerHTML = '<p class="text-gray-500 text-sm">Loading comments...</p>';
+        if (commentsListener) commentsListener(); // Unsubscribe from previous listener
+        
+        commentsListener = db.collection('posts').doc(postId).collection('comments').orderBy('createdAt', 'desc')
+            .onSnapshot(snapshot => {
+                if (snapshot.empty) {
+                    commentsList.innerHTML = '<p class="text-gray-500 text-sm">No comments yet. Be the first to comment!</p>';
+                    return;
+                }
+                commentsList.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const comment = doc.data();
+                    const commentDate = comment.createdAt ? new Date(comment.createdAt.toDate()).toLocaleString() : '';
+                    const commentDiv = document.createElement('div');
+                    commentDiv.className = 'flex items-start space-x-3';
+                    commentDiv.innerHTML = `
+                        <img src="${comment.authorAvatar || 'https://ui-avatars.com/api/?name=User'}" alt="Author Avatar" class="w-10 h-10 rounded-full">
+                        <div class="flex-1 bg-gray-100 rounded-lg p-3">
+                            <div class="flex items-baseline space-x-2">
+                                <p class="font-semibold text-sm text-gray-800">${comment.authorName}</p>
+                                <p class="text-xs text-gray-500">${commentDate}</p>
+                            </div>
+                            <p class="text-sm text-gray-700 mt-1 whitespace-pre-wrap">${comment.text}</p>
+                        </div>`;
+                    commentsList.appendChild(commentDiv);
+                });
+            }, error => {
+                console.error("Error listening for comments: ", error);
+                commentsList.innerHTML = '<p class="text-red-500 text-sm">Could not load comments.</p>';
+            });
+    };
 
-            let query = db.collection('posts').orderBy('createdAt', 'desc');
+    const handleCommentSubmit = async (postId, text) => {
+        const user = auth.currentUser;
+        if (!user) { alert("Please log in to comment."); return; }
+        if (text.trim() === '') { alert("Comment cannot be empty."); return; }
+        
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (!userDoc.exists) return;
+        const userData = userDoc.data();
+        const commentData = {
+            text: text,
+            authorId: user.uid,
+            authorName: userData.displayName || 'Anonymous',
+            authorAvatar: userData.photoURL || `https://ui-avatars.com/api/?name=${userData.displayName || 'U'}`,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        const postRef = db.collection('posts').doc(postId);
+        await postRef.collection('comments').add(commentData);
+        await postRef.update({ commentsCount: firebase.firestore.FieldValue.increment(1) });
+        
+        const countModal = document.getElementById('comment-count-modal');
+        if(countModal) countModal.textContent = parseInt(countModal.textContent || '0') + 1;
+    };
 
+    const openPostModal = async (postId) => {
+        if (!postModal || !commentForm) return;
+        const postDoc = await db.collection('posts').doc(postId).get();
+        if (!postDoc.exists) { console.error("Post not found!"); return; }
+        const post = { id: postDoc.id, ...postDoc.data() };
+        const currentUser = auth.currentUser;
+
+        commentForm.dataset.postId = post.id;
+        document.getElementById('post-modal-title').textContent = post.title;
+        document.getElementById('post-modal-image').src = post.imageUrl || '';
+        document.getElementById('post-modal-description').innerHTML = post.content;
+        
+        const likeBtnModal = postModal.querySelector('.like-btn-modal');
+        const likeCountModal = postModal.querySelector('.like-count-modal');
+        const commentCountModal = document.getElementById('comment-count-modal');
+        
+        likeBtnModal.dataset.likeId = post.id;
+        likeCountModal.textContent = post.likesCount || 0;
+        if (commentCountModal) commentCountModal.textContent = post.commentsCount || 0;
+
+        const isLiked = currentUser && post.likedBy && post.likedBy.includes(currentUser.uid);
+        updateLikeButtonUI(post.id, isLiked, post.likesCount || 0);
+
+        const commentUserAvatar = document.getElementById('comment-user-avatar');
+        if (currentUser && commentUserAvatar) {
+             commentUserAvatar.src = currentUser.photoURL || `https://ui-avatars.com/api/?name=${currentUser.displayName || 'U'}`;
+        }
+        
+        loadComments(post.id);
+        postModal.classList.remove('hidden');
+        postModal.classList.add('flex');
+    };
+
+    const fetchAndDisplayPosts = async (searchTerm = '', selectedCategory = 'all') => {
+        if (!blogPostsGrid) return;
+        blogPostsGrid.innerHTML = '<p class="col-span-full text-center text-slate-500">Loading posts...</p>';
+        try {
+            let query = db.collection('posts').where('status', '==', 'approved').orderBy('createdAt', 'desc');
             if (selectedCategory !== 'all') {
                 query = query.where('category', '==', selectedCategory.toLowerCase());
             }
-
             const snapshot = await query.get();
-            
             if (snapshot.empty) {
                 blogPostsGrid.innerHTML = '<p class="col-span-full text-center text-slate-500">No matching posts found.</p>';
                 return;
             }
-
             const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             const filteredPosts = posts.filter(post => {
-                const title = post.title ? post.title.toLowerCase() : '';
-                const content = post.content ? post.content.toLowerCase() : '';
-                const searchLower = searchTerm.toLowerCase();
-                return title.includes(searchLower) || content.includes(searchLower);
-            });
-            
-            blogPostsGrid.innerHTML = '';
-
-            if (filteredPosts.length === 0) {
-                blogPostsGrid.innerHTML = '<p class="col-span-full text-center text-slate-500">No matching posts found.</p>';
-                return;
-            }
-            
-            filteredPosts.forEach(post => {
-                // Corrected: Using <article> instead of <a>
-                const postCard = document.createElement('article');
-                postCard.className = 'block rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-white cursor-pointer';
-
-                // Corrected: Using the full content for the popup, and a simple excerpt for the card
+                const title = (post.title || '').toLowerCase();
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = post.content || '';
-                const postText = tempDiv.textContent || tempDiv.innerText || '';
-                const excerpt = postText.substring(0, 150) + '...';
+                const content = (tempDiv.textContent || '').toLowerCase();
+                return title.includes(searchTerm.toLowerCase()) || content.includes(searchTerm.toLowerCase());
+            });
+
+            blogPostsGrid.innerHTML = '';
+            filteredPosts.forEach(post => {
+                const postCard = document.createElement('article');
+                postCard.className = 'post-card flex flex-col rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-white';
+                postCard.dataset.postId = post.id;
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = post.content || '';
+                const excerpt = (tempDiv.textContent || '').substring(0, 100) + '...';
                 
-                const authorAvatar = post.authorAvatar || 'https://ui-avatars.com/api/?name=User&background=random';
-                const authorName = post.authorName || 'Anonymous';
-                const postDate = post.createdAt ? new Date(post.createdAt.toDate()).toLocaleDateString() : 'N/A';
-                const postImage = post.imageUrl || '';
-
-                // Store full content in a data attribute for the popup
-                postCard.dataset.fullContent = post.content;
-
                 postCard.innerHTML = `
-                   <div class="relative overflow-hidden w-full">
-        <img src="${postImage}" alt="${post.title}" class="w-full object-cover transition duration-300 ease-in-out hover:scale-110">
-    </div>
-    <div class="p-5">
-        <h2 class="font-bold text-lg mb-2 text-slate-800 hover:text-blue-600 transition-colors">
-            ${post.title}
-        </h2>
-        <p class="text-slate-600 text-sm mb-4 font-serif leading-relaxed">
-            ${excerpt}
-        </p>
-        <div class="flex items-center mt-4">
-            <img src="${authorAvatar}" alt="Author" class="w-8 h-8 rounded-full mr-3">
-            <div>
-                <span class="font-semibold text-sm text-slate-700">${authorName}</span>
-                <p class="text-xs text-slate-500">
-                    ${postDate} 
-                    <span class="inline-block text-xs text-slate-400 ml-1">
-                        <svg class="w-3 h-3 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </span>
-                </p>
-            </div>
-        </div>
-    </div>
-`;
+                    <div class="relative overflow-hidden w-full h-56 cursor-pointer open-modal-trigger">
+                        <img src="${post.imageUrl || 'https://picsum.photos/400/300'}" alt="${post.title}" class="w-full h-full object-cover transition duration-300 ease-in-out hover:scale-110">
+                    </div>
+                    <div class="p-5 flex flex-col flex-grow">
+                        <h2 class="font-bold text-lg mb-2 text-slate-800 cursor-pointer open-modal-trigger">${post.title}</h2>
+                        <p class="text-slate-600 text-sm mb-4 font-serif leading-relaxed flex-grow cursor-pointer open-modal-trigger">${excerpt}</p>
+                        <div class="flex items-center mt-4">
+                            <img src="${post.authorAvatar || `https://ui-avatars.com/api/?name=${post.authorName || 'User'}`}" alt="Author" class="w-8 h-8 rounded-full mr-3">
+                            <div>
+                                <span class="font-semibold text-sm text-slate-700">${post.authorName || 'Anonymous'}</span>
+                                <p class="text-xs text-slate-500">${post.createdAt ? new Date(post.createdAt.toDate()).toLocaleDateString() : 'N/A'}</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-slate-200 flex items-center space-x-6">
+                            <button class="like-btn flex items-center space-x-2 text-gray-500 hover:text-red-500 transition-colors" data-like-id="${post.id}">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>
+                                <span class="like-count font-semibold">${post.likesCount || 0}</span>
+                            </button>
+                            <div class="flex items-center space-x-2 text-gray-500 cursor-pointer open-modal-trigger">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 5.523-4.477 10-10 10S1 17.523 1 12 5.477 2 11 2s10 4.477 10 10z"></path></svg>
+                                <span class="font-semibold">${post.commentsCount || 0}</span>
+                            </div>
+                        </div>
+                    </div>`;
                 blogPostsGrid.appendChild(postCard);
             });
             
-            // Corrected: Call the function to add popup listeners AFTER posts are added to the DOM
-            addPopupListeners();
-
+            checkInitialLikeStatus(auth.currentUser);
         } catch (error) {
-            console.error("Error fetching or filtering posts:", error);
-            blogPostsGrid.innerHTML = '<p class="col-span-full text-center text-red-500">Could not load posts. Please try again later.</p>';
+            console.error("Error fetching posts:", error);
+            blogPostsGrid.innerHTML = '<p class="col-span-full text-center text-red-500">Could not load posts.</p>';
         }
     };
-
-    // A dedicated function for popup logic to be called after posts are loaded
-    const addPopupListeners = () => {
-        const postModal = document.getElementById('post-modal');
-        const closePostModalBtn = document.getElementById('close-post-modal');
-        const postModalImage = document.getElementById('post-modal-image');
-        const postModalTitle = document.getElementById('post-modal-title');
-        const postModalDescription = document.getElementById('post-modal-description');
-        
-        // Get all the articles in the blog posts grid
-        const allPosts = document.querySelectorAll('#blog-posts-grid article');
-        
-        allPosts.forEach(post => {
-            post.addEventListener('click', () => {
-                const imageSrc = post.querySelector('img').src;
-                const postTitle = post.querySelector('h2').textContent.trim();
-                const postDescription = post.dataset.fullContent;
-
-                postModalImage.src = imageSrc;
-                postModalTitle.textContent = postTitle;
-                postModalDescription.innerHTML = postDescription; // Use innerHTML to render full content with formatting
-
-                postModal.classList.remove('hidden');
-                postModal.classList.add('flex');
+    
+    // --- 3. EVENT LISTENERS SETUP ---
+    
+    const setupListeners = () => {
+        // Category Buttons
+        categoryButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const selectedCategory = e.currentTarget.dataset.category;
+                searchInput.value = '';
+                categoryButtons.forEach(btn => {
+                    btn.classList.remove('bg-blue-600', 'text-white');
+                    btn.classList.add('bg-white', 'text-slate-700');
+                });
+                e.currentTarget.classList.add('bg-blue-600', 'text-white');
+                e.currentTarget.classList.remove('bg-white', 'text-slate-700');
+                fetchAndDisplayPosts('', selectedCategory);
             });
         });
 
-        if(closePostModalBtn){
-             closePostModalBtn.addEventListener('click', () => {
-                postModal.classList.add('hidden');
-                postModal.classList.remove('flex');
+        // Search Input
+        if (searchInput) {
+            let timeoutId;
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => {
+                    fetchAndDisplayPosts(e.target.value, 'all');
+                }, 300);
             });
         }
-       
-        window.addEventListener('click', (event) => {
-            if (event.target === postModal) {
-                postModal.classList.add('hidden');
-                postModal.classList.remove('flex');
-            }
-        });
-    }
 
-    // Category Buttons වලට Event Listeners එකතු කිරීම
-    categoryButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
-            const selectedCategory = e.target.dataset.category;
-            
-            categoryButtons.forEach(btn => {
-                btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
-                btn.classList.add('bg-white', 'text-slate-700', 'border-slate-300');
+        // Clicks on the main grid (Handles Likes and Modal Opening)
+        if (blogPostsGrid) {
+            blogPostsGrid.addEventListener('click', (e) => {
+                const likeBtn = e.target.closest('.like-btn');
+                const openTrigger = e.target.closest('.open-modal-trigger');
+
+                if (likeBtn) {
+                    handleLikeClick(likeBtn.dataset.likeId);
+                } else if (openTrigger) {
+                    const postId = e.target.closest('.post-card').dataset.postId;
+                    openPostModal(postId);
+                }
             });
-            e.target.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
-            e.target.classList.remove('bg-white', 'text-slate-700', 'border-slate-300');
-
-            if (searchInput) {
-                searchInput.value = '';
-            }
-
-            fetchAndDisplayPosts('', selectedCategory);
-        });
-    });
-
-    // Search bar එකේ input එක වෙනස් වෙනකොට posts ෆිල්ටර් කිරීම
-    if (searchInput) {
-        let timeoutId;
-        searchInput.addEventListener('input', (e) => {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => {
-                const searchTerm = e.target.value;
-                
-                categoryButtons.forEach(btn => {
-                    btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
-                    btn.classList.add('bg-white', 'text-slate-700', 'border-slate-300');
+        }
+        
+        // Clicks and closing logic for the post modal
+        if (postModal) {
+            const closeModalButton = document.getElementById('close-post-modal');
+            if (closeModalButton) {
+                closeModalButton.addEventListener('click', () => {
+                    postModal.classList.remove('flex');
+                    postModal.classList.add('hidden');
+                    if (commentsListener) commentsListener(); // Unsubscribe
                 });
-                
-                fetchAndDisplayPosts(searchTerm);
-            }, 300);
-        });
-    }
+            }
 
-    // Page එක load වූ වහාම posts ටික fetch කිරීම
+            postModal.addEventListener('click', e => {
+                if (e.target === postModal) {
+                    postModal.classList.remove('flex');
+                    postModal.classList.add('hidden');
+                    if (commentsListener) commentsListener(); // Unsubscribe
+                }
+                const likeBtn = e.target.closest('.like-btn-modal');
+                if (likeBtn) handleLikeClick(likeBtn.dataset.likeId);
+            });
+        }
+
+        // Comment Form Submission
+        if (commentForm) {
+            commentForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const postId = e.currentTarget.dataset.postId;
+                const commentTextarea = document.getElementById('comment-textarea');
+                if (postId && commentTextarea.value.trim() !== '') {
+                    handleCommentSubmit(postId, commentTextarea.value);
+                    commentTextarea.value = '';
+                }
+            });
+        }
+
+        // Close Modal with Escape Key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Escape" && postModal && !postModal.classList.contains('hidden')) {
+                postModal.classList.remove('flex');
+                postModal.classList.add('hidden');
+                if (commentsListener) commentsListener(); // Unsubscribe
+            }
+        });
+    };
+
+    // --- 4. INITIAL PAGE LOAD ---
     fetchAndDisplayPosts();
-
-    // Mobile Categories Modal Logic
-    const categoriesModal = document.getElementById('categories-modal');
-    const openCategoriesBtn = document.getElementById('open-categories-modal');
-    const closeCategoriesBtn = document.getElementById('close-categories-modal');
-
-    if (openCategoriesBtn) {
-        openCategoriesBtn.addEventListener('click', () => {
-            if (categoriesModal) {
-                categoriesModal.classList.remove('hidden');
-                categoriesModal.classList.add('flex');
-            }
-        });
-    }
-
-    if (closeCategoriesBtn) {
-        closeCategoriesBtn.addEventListener('click', () => {
-            if (categoriesModal) {
-                categoriesModal.classList.add('hidden');
-                categoriesModal.classList.remove('flex');
-            }
-        });
-    }
+    setupListeners();
 });
