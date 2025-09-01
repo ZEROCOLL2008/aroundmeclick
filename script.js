@@ -131,58 +131,56 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const handleShareClick = async (postId) => {
-    try {
-        const doc = await db.collection('posts').doc(postId).get();
-        if (!doc.exists) throw new Error("Post not found!");
-        const post = doc.data();
+        try {
+            const doc = await db.collection('posts').doc(postId).get();
+            if (!doc.exists) throw new Error("Post not found!");
+            const post = doc.data();
 
-        const url = `${window.location.origin}${window.location.pathname}?post=${postId}`;
-        const shareText = `Check out this amazing post from Around Me Click: "${post.title}"`;
-        const encodedUrl = encodeURIComponent(url);
-        const encodedText = encodeURIComponent(shareText);
+            const url = `${window.location.origin}${window.location.pathname}?post=${postId}`;
+            const shareText = `Check out this amazing post from Around Me Click: "${post.title}"`;
+            const encodedUrl = encodeURIComponent(url);
+            const encodedText = encodeURIComponent(shareText);
 
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        if (isMobile && navigator.share) {
-            await navigator.share({
-                title: post.title,
-                text: shareText,
-                url: url,
-            });
-        } else {
-            const shareModal = document.getElementById('share-modal');
-            const shareLinkInput = document.getElementById('share-link-input');
-            const copyLinkBtn = document.getElementById('copy-link-btn');
-            const closeShareModalBtn = shareModal.querySelector('.close-share-modal');
-            const facebookShareBtn = document.getElementById('facebook-share-btn');
-            const whatsappShareBtn = document.getElementById('whatsapp-share-btn');
-
-            shareLinkInput.value = url;
-            facebookShareBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
-            whatsappShareBtn.href = `https://api.whatsapp.com/send?text=${encodedText}%20${encodedUrl}`;
-            shareModal.classList.remove('hidden');
-            
-            copyLinkBtn.textContent = 'Copy';
-            copyLinkBtn.onclick = () => {
-                navigator.clipboard.writeText(url).then(() => {
-                    copyLinkBtn.textContent = 'Copied!';
-                    setTimeout(() => { copyLinkBtn.textContent = 'Copy'; }, 2000);
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile && navigator.share) {
+                await navigator.share({
+                    title: post.title,
+                    text: shareText,
+                    url: url,
                 });
-            };
-            
-            closeShareModalBtn.onclick = () => shareModal.classList.add('hidden');
+            } else {
+                const shareModal = document.getElementById('share-modal');
+                const shareLinkInput = document.getElementById('share-link-input');
+                const copyLinkBtn = document.getElementById('copy-link-btn');
+                const closeShareModalBtn = shareModal.querySelector('.close-share-modal');
+                const facebookShareBtn = document.getElementById('facebook-share-btn');
+                const whatsappShareBtn = document.getElementById('whatsapp-share-btn');
+
+                shareLinkInput.value = url;
+                facebookShareBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+                whatsappShareBtn.href = `https://api.whatsapp.com/send?text=${encodedText}%20${encodedUrl}`;
+                shareModal.classList.remove('hidden');
+                
+                copyLinkBtn.textContent = 'Copy';
+                copyLinkBtn.onclick = () => {
+                    navigator.clipboard.writeText(url).then(() => {
+                        copyLinkBtn.textContent = 'Copied!';
+                        setTimeout(() => { copyLinkBtn.textContent = 'Copy'; }, 2000);
+                    });
+                };
+                
+                closeShareModalBtn.onclick = () => shareModal.classList.add('hidden');
+            }
+        } catch (error) {
+            if (error.name !== 'AbortError') console.error("Error sharing post:", error);
         }
-    } catch (error) {
-        if (error.name !== 'AbortError') console.error("Error sharing post:", error);
-    }
-};
+    };
 
     const checkUrlForPostId = () => {
         const urlParams = new URLSearchParams(window.location.search);
         const postIdFromUrl = urlParams.get('post');
         if (postIdFromUrl) {
             openPostModal(postIdFromUrl);
-            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-            window.history.pushState({ path: newUrl }, '', newUrl);
         }
     };
 
@@ -366,7 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-const openPostModal = async (postId) => {
+    const openPostModal = async (postId) => {
         if (!postModal) return;
         try {
             const postDoc = await db.collection('posts').doc(postId).get();
@@ -388,16 +386,11 @@ const openPostModal = async (postId) => {
                 }
             }
             
-            // ### START: EMOJI ALIGNMENT FIX ###
             const postModalDescription = document.getElementById('post-modal-description');
             if (postModalDescription) {
-                // Use innerHTML to render HTML tags (like bold, italic) and emojis correctly.
                 postModalDescription.innerHTML = post.content;
-                
-                // Use className to apply styles. Changed font-lora to font-inter for better emoji alignment.
                 postModalDescription.className = 'text-ivory-brown font-inter leading-relaxed whitespace-pre-wrap text-base';
             }
-            // ### END: EMOJI ALIGNMENT FIX ###
             
             const currentUser = auth.currentUser;
             const likeBtnModal = postModal.querySelector('.like-btn-modal');
@@ -426,6 +419,10 @@ const openPostModal = async (postId) => {
             loadComments(post.id);
             postModal.classList.remove('hidden');
         
+            const url = new URL(window.location);
+            url.searchParams.set('post', postId);
+            window.history.pushState({ postId: postId }, '', url);
+
         } catch (error) {
             console.error("Error opening post modal:", error);
         }
@@ -470,10 +467,12 @@ const openPostModal = async (postId) => {
                 tempDiv.innerHTML = post.content || '';
                 const excerpt = (tempDiv.textContent || '').substring(0, 80) + '...';
                 postCard.innerHTML = `
-                    ${mediaHtml}
+                    <div class="open-modal-trigger cursor-pointer" data-post-id="${post.id}">
+                        ${mediaHtml}
+                    </div>
                     <div class="p-5 flex flex-col flex-grow">
-                        <h2 class="font-bold font-lora text-lg mb-2 text-ivory-brown cursor-pointer open-modal-trigger">${post.title}</h2>
-                        <p class="text-classic-taupe text-sm mb-4 leading-relaxed flex-grow cursor-pointer open-modal-trigger">${excerpt}</p>
+                        <h2 class="font-bold font-lora text-lg mb-2 text-ivory-brown cursor-pointer open-modal-trigger" data-post-id="${post.id}">${post.title}</h2>
+                        <p class="text-classic-taupe text-sm mb-4 leading-relaxed flex-grow cursor-pointer open-modal-trigger" data-post-id="${post.id}">${excerpt}</p>
                         <div class="mt-auto pt-4 border-t border-ivory-linen">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center">
@@ -488,7 +487,7 @@ const openPostModal = async (postId) => {
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>
                                         <span class="like-count font-medium text-sm">${post.likesCount || 0}</span>
                                     </button>
-                                    <div class="flex items-center space-x-1 text-classic-taupe cursor-pointer open-modal-trigger">
+                                    <div class="flex items-center space-x-1 text-classic-taupe cursor-pointer open-modal-trigger" data-post-id="${post.id}">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 5.523-4.477 10-10 10S1 17.523 1 12 5.477 2 11 2s10 4.477 10 10z"></path></svg>
                                         <span class="font-medium text-sm">${post.commentsCount || 0}</span>
                                     </div>
@@ -507,9 +506,13 @@ const openPostModal = async (postId) => {
             blogPostsGrid.innerHTML = '<p class="col-span-full text-center text-red-500">Could not load posts.</p>';
         }
     };
-
-    const closeModal = () => {
+    
+    const closeModalUI = () => {
         if (postModal) {
+            const mediaContainer = document.getElementById('post-modal-media-container');
+            if (mediaContainer) {
+                mediaContainer.innerHTML = '';
+            }
             postModal.classList.add('hidden');
         }
         if (commentsListener) commentsListener();
@@ -520,6 +523,13 @@ const openPostModal = async (postId) => {
             if (enterIcon) enterIcon.classList.remove('hidden');
             if (exitIcon) exitIcon.classList.add('hidden');
         }
+    };
+    
+    const closeModal = () => {
+        closeModalUI();
+        const url = new URL(window.location);
+        url.searchParams.delete('post');
+        window.history.pushState({}, '', url);
     };
 
     const setupListeners = () => {
@@ -551,6 +561,7 @@ const openPostModal = async (postId) => {
             const openTrigger = e.target.closest('.open-modal-trigger');
             const followBtn = e.target.closest('.follow-btn');
             const shareBtn = e.target.closest('.share-btn');
+            
             if (shareBtn) {
                 e.preventDefault();
                 const postId = shareBtn.dataset.postId;
@@ -559,7 +570,8 @@ const openPostModal = async (postId) => {
                 const postId = likeBtn.dataset.likeId;
                 if (postId) handleLikeClick(postId);
             } else if (openTrigger) {
-                const postId = e.target.closest('.post-card')?.dataset.postId;
+                // *** THIS IS THE CORRECTED LOGIC ***
+                const postId = openTrigger.dataset.postId;
                 if (postId) openPostModal(postId);
             } else if (followBtn) {
                 const authorId = followBtn.dataset.authorId;
@@ -609,6 +621,18 @@ const openPostModal = async (postId) => {
                 closeModal();
             }
         });
+
+        window.addEventListener('popstate', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const postId = urlParams.get('post');
+            const isModalOpen = postModal && !postModal.classList.contains('hidden');
+
+            if (postId && !isModalOpen) {
+                openPostModal(postId);
+            } else if (!postId && isModalOpen) {
+                closeModalUI();
+            }
+        });
     };
 
     if (loadMoreBtn) {
@@ -627,13 +651,11 @@ const openPostModal = async (postId) => {
     checkUrlForPostId();
 });
 
-// NEW FUNCTION TO DISPLAY AUTHORS RANKED BY LIKES
 async function displayTopAuthorsByLikes() {
     const container = document.getElementById('popular-authors-container');
     if (!container) return;
 
     try {
-        // 1. Fetch all approved posts to aggregate likes
         const postsSnapshot = await db.collection('posts').where('status', '==', 'approved').get();
 
         if (postsSnapshot.empty) {
@@ -641,7 +663,6 @@ async function displayTopAuthorsByLikes() {
             return;
         }
 
-        // 2. Aggregate likes and author data in a JavaScript object
         const authorData = {};
         postsSnapshot.forEach(doc => {
             const post = doc.data();
@@ -659,10 +680,7 @@ async function displayTopAuthorsByLikes() {
             authorData[authorId].totalLikes += likes;
         });
 
-        // 3. Convert the object to an array and sort it by totalLikes (descending)
         const sortedAuthors = Object.values(authorData).sort((a, b) => b.totalLikes - a.totalLikes);
-
-        // 4. Take the top 5 authors from the sorted list
         const topAuthors = sortedAuthors.slice(0, 5);
 
         if (topAuthors.length === 0) {
@@ -715,7 +733,6 @@ async function displayTopAuthorsByLikes() {
     }
 }
 
-// NEW FUNCTION TO SETUP THE HERO BACKGROUND SLIDER
 async function setupHeroBackgroundSlider() {
     const heroSwiperWrapper = document.querySelector('#hero-background-swiper .swiper-wrapper');
     if (!heroSwiperWrapper) return;
@@ -751,7 +768,6 @@ async function setupHeroBackgroundSlider() {
     });
 }
 
-// NEW FUNCTION TO SETUP THE FEATURED POSTS SLIDER
 async function setupFeaturedPostsSlider() {
     const wrapper = document.getElementById('featured-swiper-wrapper');
     if (!wrapper) return;
@@ -775,8 +791,9 @@ async function setupFeaturedPostsSlider() {
             tempDiv.innerHTML = post.content || '';
             const excerpt = (tempDiv.textContent || '').substring(0, 150) + '...';
 
+            // Each slide now has the .open-modal-trigger class and data-post-id attribute
             slidesHTML += `
-               <div class="swiper-slide flex flex-col md:flex-row bg-ivory cursor-pointer open-modal-trigger md:h-72" data-post-id="${post.id}">
+               <div class="swiper-slide flex flex-col md:flex-row bg-ivory cursor-pointer open-modal-trigger" data-post-id="${post.id}">
                     <div class="md:w-1/2 h-64 md:h-full">
                         <img src="${post.imageUrl || 'https://picsum.photos/800/600'}" alt="${post.title}" class="w-full h-full object-cover">
                     </div>

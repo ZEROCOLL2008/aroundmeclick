@@ -33,8 +33,6 @@
                 }
             }
         }
-
-        
     </script>
     
     <style>
@@ -51,23 +49,26 @@
             height: 100vh;
             border-radius: 0;
         }
-
-        /* ADD THIS NEW RULE FOR CENTERING THE MODAL */
         #post-modal-container {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
         }
-
-       /* Add this new rule for perfect emoji and text alignment */
-        #post-modal-description > * {
+       #post-modal-description > * {
             display: flex;
             align-items: center;
-            flex-wrap: wrap; /* Allows text to wrap to the next line */
-            line-height: 1.75; /* Optional: for better line spacing */
+            flex-wrap: wrap; 
+            line-height: 1.75; 
         }
-        
+        /* This hides scrollbar for the categories container but keeps functionality */
+        #categories-container::-webkit-scrollbar {
+            display: none;
+        }
+        #categories-container {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
     </style>
 </head>
 <body class="bg-off-white font-inter text-ivory-brown">
@@ -170,15 +171,19 @@
     
     <nav class="sticky top-16 z-40 bg-ivory/90 backdrop-blur-sm border-b border-ivory-linen">
         <div class="container mx-auto px-4 relative">
-             <button id="scroll-left-btn" class="absolute left-0 top-1/2 -translate-y-1/2 bg-ivory/80 rounded-full p-1 shadow-md hover:bg-pastel-ivory z-10">
+             <button id="scroll-left-btn" class="absolute left-0 top-1/2 -translate-y-1/2 bg-ivory/80 rounded-full p-1 shadow-md hover:bg-pastel-ivory z-10 hidden md:block">
                  <svg class="w-5 h-5 text-ivory-brown" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
              </button>
-             <div id="categories-container" class="flex space-x-2 overflow-x-auto py-4 px-8" style="scrollbar-width: none; -ms-overflow-style: none;">
+             <div id="categories-container" class="flex flex-wrap justify-center md:flex-nowrap md:justify-start gap-2 py-4 md:px-8 overflow-x-auto">
                 <button class="category-button px-6 py-2 bg-ivory-brown text-off-white rounded-full whitespace-nowrap font-medium" data-category="all">All Stories</button>
                 <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="technology">Technology</button>
                 <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="lifestyle">Lifestyle</button>
+                <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="travel">Travel</button>
+                <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="food">Food</button>
+                <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="health">Health</button>
+                <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="business">Business</button>
             </div>
-            <button id="scroll-right-btn" class="absolute right-0 top-1/2 -translate-y-1/2 bg-ivory/80 rounded-full p-1 shadow-md hover:bg-pastel-ivory z-10">
+            <button id="scroll-right-btn" class="absolute right-0 top-1/2 -translate-y-1/2 bg-ivory/80 rounded-full p-1 shadow-md hover:bg-pastel-ivory z-10 hidden md:block">
                 <svg class="w-5 h-5 text-ivory-brown" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
             </button>
         </div>
@@ -281,9 +286,11 @@
     
 <div id="post-modal" class="fixed inset-0 z-[200] hidden bg-black bg-opacity-70 backdrop-blur-sm p-4">
     <div id="post-modal-container" class="bg-white rounded-lg shadow-2xl w-full max-w-2xl mx-auto flex flex-col max-h-[90vh] transition-all duration-300">
-        <div class="p-4 border-b flex justify-between items-center flex-shrink-0">
-            <h3 id="post-modal-title" class="text-xl font-bold text-slate-800"></h3>
-            <div class="flex items-center space-x-4">
+        <div class="p-4 border-b flex justify-between items-center flex-shrink-0 gap-4">
+            <div class="flex-1 min-w-0">
+                <h3 id="post-modal-title" class="text-xl font-bold text-slate-800 truncate"></h3>
+            </div>
+            <div class="flex items-center space-x-2 flex-shrink-0">
                 <button id="toggle-fullscreen-btn" class="text-gray-500 hover:text-gray-800" title="Toggle Fullscreen">
                     <svg class="w-6 h-6 enter-fullscreen-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" /></svg>
                     <svg class="w-6 h-6 exit-fullscreen-icon hidden" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5M15 15l5.25 5.25" /></svg>
