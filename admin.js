@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Firebase initialization check
     if (typeof firebase === 'undefined') {
         console.error("Firebase not initialized. Make sure app.js is loaded first.");
         return;
@@ -9,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const db = firebase.firestore();
     let postsOverTimeChartInstance = null;
     let postsByCategoryChartInstance = null;
+    let allUsers = []; // Store all users to filter locally
 
     // --- DOM Elements ---
     const navLinks = document.querySelectorAll('.nav-link');
@@ -19,13 +19,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmationModal = document.getElementById('confirmation-modal');
     const confirmModalTitle = document.getElementById('confirm-modal-title');
     const confirmModalMessage = document.getElementById('confirm-modal-message');
+    const userSearchInput = document.getElementById('user-search-input');
+    const userFilterButtons = document.querySelectorAll('.user-filter-btn');
 
-    // --- AUTH GUARD: Checks if user is admin ---
+    // --- AUTH GUARD ---
     auth.onAuthStateChanged(async (user) => {
         if (user) {
             const userDoc = await db.collection('users').doc(user.uid).get();
             if (userDoc.exists && userDoc.data().role === 'admin') {
-                console.log("Admin access granted. Initializing app...");
                 initializeApp();
             } else {
                 console.warn("Access Denied. User is not an admin.");
@@ -37,36 +38,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-   // admin.js
+    const initializeApp = async () => {
+        postsTableBody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-500">Loading all data...</td></tr>`;
+        
+        const [postsSnapshot, usersSnapshot, pendingCountSnapshot] = await Promise.all([
+            db.collection('posts').orderBy('createdAt', 'desc').get(),
+            db.collection('users').get(),
+            db.collection('posts').where('status', '==', 'pending').get()
+        ]);
+        
+        allUsers = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-const initializeApp = async () => {
-    console.log("Initializing Admin App...");
-    postsTableBody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-500">Loading all data...</td></tr>`;
-    
-    // --- මෙතන තිබ්බ .count() එක අයින් කළා ---
-    const [postsSnapshot, usersSnapshot, pendingCountSnapshot] = await Promise.all([
-        db.collection('posts').orderBy('createdAt', 'desc').get(),
-        db.collection('users').get(),
-        db.collection('posts').where('status', '==', 'pending').get() // .count() නැතුව .get() විතරක්
-    ]);
-    
-    console.log("Data fetched. Processing...");
+        loadDashboardStats(postsSnapshot, usersSnapshot, pendingCountSnapshot);
+        loadPosts(postsSnapshot);
+        renderUsersTable(allUsers);
+        renderPostsOverTimeChart(postsSnapshot);
+        renderPostsByCategoryChart(postsSnapshot);
+        
+        setupMobileMenu();
+        setupNavigation();
+        setupModal();
+        setupActionListeners();
+        setupUserFilters();
+    };
 
-    // Pass snapshots to all rendering functions
-    loadDashboardStats(postsSnapshot, usersSnapshot, pendingCountSnapshot);
-    loadPosts(postsSnapshot);
-    loadUsers(usersSnapshot);
-    renderPostsOverTimeChart(postsSnapshot);
-    renderPostsByCategoryChart(postsSnapshot);
-    
-    // Setup listeners after initial load
-    setupMobileMenu();
-    setupNavigation();
-    setupModal();
-    setupActionListeners();
-};
-    // --- HELPER FUNCTIONS (Modals, Buttons) ---
-
+    // --- HELPER FUNCTIONS (Modals) ---
     const showConfirmationModal = (title, message) => {
         return new Promise((resolve) => {
             if (!confirmationModal) return resolve(false);
@@ -94,178 +90,78 @@ const initializeApp = async () => {
         });
     };
 
-   // admin.js
+    const openPostModal = (post) => {
+        if (!postModal) return;
+        document.getElementById('modal-title').textContent = post.title;
+        document.getElementById('modal-author').textContent = post.authorName;
+        document.getElementById('modal-category').textContent = post.category;
+        document.getElementById('modal-date').textContent = post.createdAt ? new Date(post.createdAt.toDate()).toLocaleString() : 'N/A';
+        document.getElementById('modal-content').innerHTML = post.content;
+        
+        // === UPDATED LOGIC TO HANDLE VIDEO/IMAGE IN MODAL ===
+        const modalMediaContainer = document.getElementById('modal-image-container');
+        
+        if (post.youtubeVideoId) {
+            modalMediaContainer.innerHTML = `<div class="aspect-video w-full"><iframe class="w-full h-full" src="https://www.youtube.com/embed/${post.youtubeVideoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+            modalMediaContainer.classList.remove('hidden');
+        } else if (post.imageUrl && post.imageUrl.trim() !== '') {
+            modalMediaContainer.innerHTML = `<img id="modal-image" src="${post.imageUrl}" alt="Post Image" class="w-full h-auto max-h-80 object-contain rounded-lg">`;
+            modalMediaContainer.classList.remove('hidden');
+        } else {
+            modalMediaContainer.innerHTML = '<img id="modal-image" src="" alt="Post Image" class="w-full h-auto max-h-80 object-contain rounded-lg">'; // Reset to original state
+            modalMediaContainer.classList.add('hidden');
+        }
+        
+        const modalApproveBtn = document.getElementById('modal-approve-btn');
+        const modalRejectBtn = document.getElementById('modal-reject-btn');
+        modalApproveBtn.dataset.id = post.id;
+        modalRejectBtn.dataset.id = post.id;
 
-// admin.js
-
-const openPostModal = (post) => {
-    if (!postModal) return;
-
-    // Modal එකේ elements ටික select කරගන්නවා
-    const modalImageContainer = document.getElementById('modal-image-container');
-    const modalImage = document.getElementById('modal-image');
-    const modalApproveBtn = document.getElementById('modal-approve-btn');
-    const modalRejectBtn = document.getElementById('modal-reject-btn');
-
-    // Modal එකේ data ටික පුරවනවා
-    document.getElementById('modal-title').textContent = post.title;
-    document.getElementById('modal-author').textContent = post.authorName;
-    document.getElementById('modal-category').textContent = post.category;
-    document.getElementById('modal-date').textContent = post.createdAt ? new Date(post.createdAt.toDate()).toLocaleString() : 'N/A';
-    document.getElementById('modal-content').innerHTML = post.content;
-    
-    // Image එක තියෙනවද බලලා load කරනවා
-    if (post.imageUrl && post.imageUrl.trim() !== '') {
-        modalImage.src = post.imageUrl;
-        modalImageContainer.classList.remove('hidden');
-    } else {
-        modalImageContainer.classList.add('hidden');
-    }
-    
-    // ===== අලුතෙන් එකතු කළ කොටස =====
-    // Post එකේ status එක අනුව modal එකේ buttons පෙන්වන/හංගන තැන
-    if (post.status === 'approved') {
-        modalApproveBtn.classList.add('hidden'); // Approve button එක හංගනවා
-        modalRejectBtn.classList.remove('hidden'); // Reject button එක පෙන්වනවා
-    } else if (post.status === 'rejected') {
-        modalApproveBtn.classList.remove('hidden'); // Approve button එක පෙන්වනවා
-        modalRejectBtn.classList.add('hidden'); // Reject button එක හංගනවා
-    } else { // 'pending' සහ වෙනත් ඕනෑම status එකකට
-        modalApproveBtn.classList.remove('hidden'); // Approve button එක පෙන්වනවා
-        modalRejectBtn.classList.remove('hidden'); // Reject button එක පෙන්වනවා
-    }
-    // ===================================
-
-    // Modal එකේ buttons වලට post ID එක දානවා
-    modalApproveBtn.dataset.id = post.id;
-    modalRejectBtn.dataset.id = post.id;
-
-    // Modal එක පෙන්වනවා
-    postModal.classList.add('flex');
-};
-
-   // admin.js
-
-const generateActionButtonsHTML = (post) => {
-    let buttonsHTML = '';
-    const status = post.status;
-
-    // --- Post එකේ status එක අනුව buttons තීරණය කරන තැන ---
-
-    if (status === 'pending') {
-        buttonsHTML += `<button class="approve-post-btn px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-700 hover:bg-green-200">Approve</button>`;
-        buttonsHTML += `<button class="reject-post-btn px-2 py-1 text-xs font-medium rounded bg-amber-100 text-amber-700 hover:bg-amber-200">Reject</button>`;
-    } 
-    else if (status === 'approved') {
-        buttonsHTML += `<button class="reject-post-btn px-2 py-1 text-xs font-medium rounded bg-amber-100 text-amber-700 hover:bg-amber-200">Unpublish</button>`;
-    } 
-    else if (status === 'rejected') {
-        buttonsHTML += `<button class="approve-post-btn px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-700 hover:bg-green-200">Approve</button>`;
-    }
-
-    // Delete button එක හැම status එකකටම පොදුවේ එකතු කරනවා
-    buttonsHTML += `<button class="delete-post-btn px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-700 hover:bg-red-200">Delete</button>`;
-
-    // හැම button එකකටම data-id එක එකතු කරනවා
-    // (This is a bit tricky, so we'll add it to a wrapper div)
-    const buttonsWithId = buttonsHTML.replace(/<button/g, `<button data-id="${post.id}"`);
-
-    return `<div class="flex items-center space-x-2">${buttonsWithId}</div>`;
-};
-    // --- UI SETUP & EVENT LISTENERS ---
-
-    const setupNavigation = () => {
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const targetView = link.dataset.view;
-                if (!targetView) return;
-                navLinks.forEach(nl => nl.classList.remove('active-nav'));
-                link.classList.add('active-nav');
-                contentViews.forEach(view => view.classList.add('hidden'));
-                document.getElementById(`${targetView}-view`).classList.remove('hidden');
-            });
-        });
-    };
-
-    const setupModal = () => {
-        const closeButtons = document.querySelectorAll('#close-modal-btn, #modal-close-btn');
-        closeButtons.forEach(btn => btn.addEventListener('click', () => postModal.classList.remove('flex')));
-        postModal.addEventListener('click', (e) => {
-            if (e.target === postModal) postModal.classList.remove('flex');
-        });
-    };
-
-    const setupActionListeners = () => {
-        document.body.addEventListener('click', async (e) => {
-            const actionMenuButton = e.target.closest('.action-menu-button');
-            if (actionMenuButton) {
-                e.preventDefault();
-                const menu = actionMenuButton.nextElementSibling;
-                document.querySelectorAll('.action-menu').forEach(m => {
-                    if (m !== menu) m.classList.add('hidden');
-                });
-                menu.classList.toggle('hidden');
-                return;
-            }
-            if (!e.target.closest('.action-menu')) {
-                document.querySelectorAll('.action-menu').forEach(m => m.classList.add('hidden'));
-            }
-
-            const id = e.target.dataset.id;
-            if (!id) return;
-
-            if (e.target.matches('.approve-post-btn, #modal-approve-btn')) {
-                await db.collection('posts').doc(id).update({ status: 'approved' });
-                await initializeApp();
-                if(postModal) postModal.classList.remove('flex');
-            }
-            if (e.target.matches('.reject-post-btn, #modal-reject-btn')) {
-                await db.collection('posts').doc(id).update({ status: 'rejected' });
-                await initializeApp();
-                if(postModal) postModal.classList.remove('flex');
-            }
-            if (e.target.matches('.view-post')) {
-                e.preventDefault();
-                const doc = await db.collection('posts').doc(id).get();
-                if (doc.exists) openPostModal({ id: doc.id, ...doc.data() });
-            }
-            if (e.target.matches('.delete-post-btn')) {
-                const isConfirmed = await showConfirmationModal('Delete Post', 'This action is permanent and cannot be undone.');
-                if (isConfirmed) {
-                    await db.collection('posts').doc(id).delete();
-                    await initializeApp();
-                }
-            }
-            if (e.target.matches('.make-admin-btn')) {
-                await db.collection('users').doc(id).update({ role: 'admin' });
-                await initializeApp();
-            }
-            if (e.target.matches('.remove-admin-btn')) {
-                await db.collection('users').doc(id).update({ role: 'user' });
-                await initializeApp();
-            }
-        });
+        postModal.classList.add('flex');
     };
 
     // --- DATA RENDERING FUNCTIONS ---
+    const renderUsersTable = (usersToRender) => {
+        usersTableBody.innerHTML = '';
+        if (usersToRender.length === 0) {
+            usersTableBody.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-gray-500">No users found.</td></tr>`;
+            return;
+        }
+        usersToRender.forEach(user => {
+            const joinDate = user.createdAt ? new Date(user.createdAt.toDate()).toLocaleDateString() : 'N/A';
+            const roleColors = { admin: 'bg-blue-100 text-blue-800', user: 'bg-gray-100 text-gray-800' };
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-gray-50';
 
-            // admin.js
+            let actionButtonHTML = '';
+            if (user.id === auth.currentUser.uid) {
+                actionButtonHTML = '<span>(You)</span>';
+            } else if (user.role === 'admin') {
+                actionButtonHTML = `<button class="remove-admin-btn text-amber-600 hover:text-amber-800" data-id="${user.id}">Remove Admin</button>`;
+            } else {
+                actionButtonHTML = `<button class="make-admin-btn text-blue-600 hover:text-blue-800" data-id="${user.id}">Make Admin</button>`;
+            }
 
-            const loadDashboardStats = (postsSnapshot, usersSnapshot, pendingCountSnapshot) => {
-                let publishedCount = 0;
-                postsSnapshot.forEach(doc => {
-                    if (doc.data().status === 'approved') publishedCount++;
-                });
-                
-                // --- pendingCountSnapshot.data().count වෙනුවට .size පාවිච්චි කරනවා ---
-                const pendingCount = pendingCountSnapshot.size;
-
-                document.getElementById('pending-posts-stat').textContent = pendingCount;
-                document.getElementById('pending-count-badge').textContent = pendingCount;
-                document.getElementById('published-posts-stat').textContent = publishedCount;
-                document.getElementById('total-users-stat').textContent = usersSnapshot.size;
-            };
+            tr.innerHTML = `
+                <td class="px-6 py-4"><div class="text-sm font-medium text-gray-900">${user.displayName}</div><div class="text-sm text-gray-500">${user.email}</div></td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${joinDate}</td>
+                <td class="px-6 py-4 whitespace-nowrap"><span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${roleColors[user.role] || roleColors.user}">${user.role}</span></td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">${actionButtonHTML}</td>`;
+            usersTableBody.appendChild(tr);
+        });
+    };
+    
+    const loadDashboardStats = (postsSnapshot, usersSnapshot, pendingCountSnapshot) => {
+        let publishedCount = 0;
+        postsSnapshot.forEach(doc => {
+            if (doc.data().status === 'approved') publishedCount++;
+        });
+        const pendingCount = pendingCountSnapshot.size;
+        document.getElementById('pending-posts-stat').textContent = pendingCount;
+        document.getElementById('pending-count-badge').textContent = pendingCount;
+        document.getElementById('published-posts-stat').textContent = publishedCount;
+        document.getElementById('total-users-stat').textContent = usersSnapshot.size;
+    };
 
     const loadPosts = (snapshot) => {
         postsTableBody.innerHTML = '';
@@ -293,25 +189,123 @@ const generateActionButtonsHTML = (post) => {
         });
     };
 
-    const loadUsers = (snapshot) => {
-        usersTableBody.innerHTML = '';
-        if (snapshot.empty) {
-            usersTableBody.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-gray-500">No users found.</td></tr>`;
-            return;
-        }
-        snapshot.forEach(doc => {
-            const user = { id: doc.id, ...doc.data() };
-            const joinDate = user.createdAt ? new Date(user.createdAt.toDate()).toLocaleDateString() : 'N/A';
-            const roleColors = { admin: 'bg-blue-100 text-blue-800', user: 'bg-gray-100 text-gray-800' };
-            const tr = document.createElement('tr');
-            tr.className = 'hover:bg-gray-50';
-            tr.innerHTML = `
-                <td class="px-6 py-4"><div class="text-sm font-medium text-gray-900">${user.displayName}</div><div class="text-sm text-gray-500">${user.email}</div></td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${joinDate}</td>
-                <td class="px-6 py-4 whitespace-nowrap"><span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${roleColors[user.role] || roleColors.user}">${user.role}</span></td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">${user.id === auth.currentUser.uid ? '<span>(You)</span>' : (user.role === 'admin' ? `<button class="remove-admin-btn text-amber-600 hover:text-amber-800" data-id="${user.id}">Remove Admin</button>` : `<button class="make-admin-btn text-blue-600 hover:text-blue-800" data-id="${user.id}">Make Admin</button>`)}</td>`;
-            usersTableBody.appendChild(tr);
+    // --- UI SETUP & EVENT LISTENERS ---
+
+    const setupUserFilters = () => {
+        const applyFilters = () => {
+            const searchTerm = userSearchInput.value.toLowerCase();
+            const activeFilter = document.querySelector('.user-filter-btn.active').dataset.role;
+
+            let filteredUsers = allUsers;
+
+            if (activeFilter !== 'all') {
+                filteredUsers = filteredUsers.filter(user => user.role === activeFilter);
+            }
+
+            if (searchTerm) {
+                filteredUsers = filteredUsers.filter(user => 
+                    (user.displayName && user.displayName.toLowerCase().includes(searchTerm)) || 
+                    (user.email && user.email.toLowerCase().includes(searchTerm))
+                );
+            }
+            renderUsersTable(filteredUsers);
+        };
+
+        userSearchInput.addEventListener('input', applyFilters);
+        userFilterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                userFilterButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                applyFilters();
+            });
         });
+    };
+
+    const setupActionListeners = () => {
+        document.body.addEventListener('click', async (e) => {
+            const id = e.target.dataset.id;
+
+            // Post Actions
+            if (e.target.matches('.view-post')) {
+                e.preventDefault();
+                if(id){
+                    const doc = await db.collection('posts').doc(id).get();
+                    if (doc.exists) openPostModal({ id: doc.id, ...doc.data() });
+                }
+            }
+            if (e.target.matches('.approve-post-btn, #modal-approve-btn')) {
+                if(id) {
+                    await db.collection('posts').doc(id).update({ status: 'approved' });
+                    await initializeApp();
+                    if(postModal) postModal.classList.remove('flex');
+                }
+            }
+            if (e.target.matches('.reject-post-btn, #modal-reject-btn')) {
+                 if(id) {
+                    await db.collection('posts').doc(id).update({ status: 'rejected' });
+                    await initializeApp();
+                    if(postModal) postModal.classList.remove('flex');
+                }
+            }
+            if (e.target.matches('.delete-post-btn')) {
+                 if(id) {
+                    const isConfirmed = await showConfirmationModal('Delete Post', 'This action is permanent and cannot be undone.');
+                    if (isConfirmed) {
+                        await db.collection('posts').doc(id).delete();
+                        await initializeApp();
+                    }
+                }
+            }
+
+            // User Role Update Logic
+            const updateUserRole = async (userId, newRole) => {
+                await db.collection('users').doc(userId).update({ role: newRole });
+                const userIndex = allUsers.findIndex(u => u.id === userId);
+                if (userIndex > -1) allUsers[userIndex].role = newRole;
+                
+                const currentSearchTerm = userSearchInput.value.toLowerCase();
+                const currentActiveFilter = document.querySelector('.user-filter-btn.active').dataset.role;
+                
+                let usersToDisplay = allUsers;
+                if (currentActiveFilter !== 'all') {
+                    usersToDisplay = usersToDisplay.filter(user => user.role === currentActiveFilter);
+                }
+                if (currentSearchTerm) {
+                    usersToDisplay = usersToDisplay.filter(user =>
+                        (user.displayName && user.displayName.toLowerCase().includes(currentSearchTerm)) ||
+                        (user.email && user.email.toLowerCase().includes(currentSearchTerm))
+                    );
+                }
+                renderUsersTable(usersToDisplay);
+            };
+
+            if (e.target.matches('.make-admin-btn')) {
+                if(id) await updateUserRole(id, 'admin');
+            }
+            if (e.target.matches('.remove-admin-btn')) {
+                if(id) await updateUserRole(id, 'user');
+            }
+        });
+    };
+
+    // --- OTHER FUNCTIONS ---
+    
+    const generateActionButtonsHTML = (post) => {
+        let buttonsHTML = '';
+        const status = post.status;
+        if (status === 'pending') {
+            buttonsHTML += `<button class="approve-post-btn px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-700 hover:bg-green-200">Approve</button>`;
+            buttonsHTML += `<button class="reject-post-btn px-2 py-1 text-xs font-medium rounded bg-amber-100 text-amber-700 hover:bg-amber-200">Reject</button>`;
+        } 
+        else if (status === 'approved') {
+            buttonsHTML += `<button class="reject-post-btn px-2 py-1 text-xs font-medium rounded bg-amber-100 text-amber-700 hover:bg-amber-200">Unpublish</button>`;
+        } 
+        else if (status === 'rejected') {
+            buttonsHTML += `<button class="approve-post-btn px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-700 hover:bg-green-200">Approve</button>`;
+        }
+        buttonsHTML += `<button class="delete-post-btn px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-700 hover:bg-red-200">Delete</button>`;
+        const buttonsWithId = buttonsHTML.replace(/<button/g, `<button data-id="${post.id}"`);
+        return `<div class="flex items-center space-x-2">${buttonsWithId}</div>`;
     };
 
     const renderPostsOverTimeChart = (snapshot) => {
@@ -329,7 +323,7 @@ const generateActionButtonsHTML = (post) => {
             const d = new Date();
             d.setDate(d.getDate() - i);
             const dateString = d.toISOString().split('T')[0];
-            labels.push(dateString.slice(5)); // Show MM-DD
+            labels.push(dateString.slice(5));
             data.push(postCountsByDate[dateString] || 0);
         }
         const ctx = document.getElementById('postsOverTimeChart').getContext('2d');
@@ -358,27 +352,44 @@ const generateActionButtonsHTML = (post) => {
         });
     };
 
-    // admin.js
+    const setupMobileMenu = () => {
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
 
-// --- අලුතෙන් මේ සම්පූර්ණ function එක එකතු කරන්න ---
-const setupMobileMenu = () => {
-    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    const sidebar = document.getElementById('sidebar');
+        if (mobileMenuBtn && sidebar) {
+            mobileMenuBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+            });
+            
+            document.querySelectorAll('#sidebar .nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth < 768) {
+                        sidebar.classList.add('-translate-x-full');
+                    }
+                });
+            });
+        }
+    };
 
-    if (mobileMenuBtn && sidebar) {
-        mobileMenuBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('-translate-x-full');
-        });
-        
-        // Mobile වලදී sidebar link එකක් click කළාම sidebar එක වැහෙන්න
-        document.querySelectorAll('#sidebar .nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth < 768) { // md breakpoint in Tailwind
-                    sidebar.classList.add('-translate-x-full');
-                }
+    const setupNavigation = () => {
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetView = link.dataset.view;
+                if (!targetView) return;
+                navLinks.forEach(nl => nl.classList.remove('active-nav'));
+                link.classList.add('active-nav');
+                contentViews.forEach(view => view.classList.add('hidden'));
+                document.getElementById(`${targetView}-view`).classList.remove('hidden');
             });
         });
-    }
-};
+    };
 
+    const setupModal = () => {
+        const closeButtons = document.querySelectorAll('#close-modal-btn, #modal-close-btn');
+        closeButtons.forEach(btn => btn.addEventListener('click', () => postModal.classList.remove('flex')));
+        postModal.addEventListener('click', (e) => {
+            if (e.target === postModal) postModal.classList.remove('flex');
+        });
+    };
 });

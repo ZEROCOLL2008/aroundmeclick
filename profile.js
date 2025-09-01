@@ -1,5 +1,5 @@
 // =================================================================
-//     PROFILE.JS - FINAL, COMPLETE, AND CORRECTED SCRIPT
+//     PROFILE.JS - FINAL, COMPLETE, AND CORRECTED SCRIPT (WITH YOUTUBE SUPPORT & BUG FIX)
 // =================================================================
 document.addEventListener('DOMContentLoaded', () => {
     let commentsListener = null;
@@ -81,14 +81,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. FUNCTION DEFINITIONS
     // =================================================================
 
-    function displayProfileData(userData, user) {
-        const avatarUrl = userData.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName || 'U')}&background=random`;
-        if(profileBanner) profileBanner.src = userData.coverPhotoURL || 'https://picsum.photos/1200/400';
-        if(profileAvatar) profileAvatar.src = avatarUrl;
-        if(profileDisplayName) profileDisplayName.textContent = userData.displayName || 'No Name Set';
-        if(profileEmail) profileEmail.textContent = user.email;
-        if(profileBio) profileBio.textContent = userData.bio || "This user hasn't written a bio yet.";
+    function getYouTubeVideoId(url) {
+        if (!url) return null;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
     }
+// This is inside profile.js
+
+function displayProfileData(userData, user) {
+    const avatarUrl = userData.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName || 'U')}&background=random`;
+    if(profileBanner) profileBanner.src = userData.coverPhotoURL || 'https://picsum.photos/1200/400';
+    if(profileAvatar) profileAvatar.src = avatarUrl;
+    if(profileDisplayName) profileDisplayName.textContent = userData.displayName || 'No Name Set';
+    if(profileEmail) profileEmail.textContent = user.email;
+    if(profileBio) profileBio.textContent = userData.bio || "This user hasn't written a bio yet.";
+
+    // ADD THESE TWO NEW LINES
+    if(document.getElementById('followers-count')) document.getElementById('followers-count').textContent = userData.followersCount || 0;
+    if(document.getElementById('following-count')) document.getElementById('following-count').textContent = userData.followingCount || 0;
+}
 
     async function loadUserPosts(userId) {
         if (!myPostsGrid) return;
@@ -102,11 +114,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             snapshot.forEach(doc => {
                 const post = { id: doc.id, ...doc.data() };
+                const mediaHtml = post.youtubeVideoId
+                    ? `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${post.youtubeVideoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`
+                    : `<img src="${post.imageUrl || 'https://picsum.photos/400/300'}" alt="Blog post image" class="w-full h-full object-cover transition-transform duration-300 hover:scale-110">`;
+
                 const article = document.createElement('article');
                 article.className = "bg-white rounded-lg shadow-md overflow-hidden flex flex-col";
                 article.innerHTML = `
-                <div class="relative overflow-hidden h-48 bg-slate-200 cursor-pointer view-post-trigger" data-post-id="${post.id}">
-                    <img src="${post.imageUrl || 'https://picsum.photos/400/300'}" alt="Blog post image" class="w-full h-full object-cover transition-transform duration-300 hover:scale-110">
+                <div class="relative overflow-hidden h-48 bg-slate-900 cursor-pointer view-post-trigger" data-post-id="${post.id}">
+                    ${mediaHtml}
                     <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold uppercase ${post.status === 'pending' ? 'bg-amber-500 text-white' : post.status === 'approved' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}">${post.status}</span>
                 </div>
                 <div class="p-4 flex flex-col flex-grow">
@@ -147,14 +163,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const user = auth.currentUser;
         commentForm.dataset.postId = postId;
         document.getElementById('view-modal-title').textContent = post.title;
-        const modalImageContainer = document.getElementById('view-modal-image-container');
-        const modalImage = document.getElementById('view-modal-image');
-        if (post.imageUrl) {
-            modalImage.src = post.imageUrl;
-            modalImageContainer.classList.remove('hidden');
+
+        const modalMediaContainer = document.getElementById('view-modal-media-container');
+        if (post.youtubeVideoId) {
+            modalMediaContainer.innerHTML = `<iframe class="w-full h-full rounded-lg" src="https://www.youtube.com/embed/${post.youtubeVideoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+            modalMediaContainer.classList.remove('hidden');
+        } else if (post.imageUrl) {
+            modalMediaContainer.innerHTML = `<img src="${post.imageUrl}" alt="Post Image" class="w-full h-auto max-h-96 object-contain rounded-lg">`;
+            modalMediaContainer.classList.remove('hidden');
         } else {
-            modalImageContainer.classList.add('hidden');
+            modalMediaContainer.innerHTML = '';
+            modalMediaContainer.classList.add('hidden');
         }
+
         document.getElementById('view-modal-description').innerHTML = post.content;
         if (user) {
             document.getElementById('comment-user-avatar').src = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || 'U'}`;
@@ -211,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
         await postRef.collection('comments').add(commentData);
         await postRef.update({ commentsCount: firebase.firestore.FieldValue.increment(1) });
         
-        commentTextarea.value = ''; // Clear textarea after submit
+        commentTextarea.value = '';
         loadUserPosts(user.uid);
     };
 
@@ -247,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 console.error("TinyMCE editor for 'edit-post-content' not found.");
             }
-            editPostModal.classList.remove('hidden');
+            if(editPostModal) editPostModal.classList.remove('hidden');
         } catch (error) {
             console.error("Error fetching post data for edit:", error);
             alert(`Error: ${error.message}`);
@@ -280,7 +301,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 4. EVENT LISTENERS & FORM HANDLERS
     // =================================================================
 
-    // Delegated listener for all actions within the posts grid
     if (myPostsGrid) {
         myPostsGrid.addEventListener('click', async (e) => {
             const viewTrigger = e.target.closest('.view-post-trigger');
@@ -312,20 +332,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Listener for general UI elements
     if(logoutBtn) logoutBtn.addEventListener('click', () => auth.signOut());
     if(profileDropdownBtn) profileDropdownBtn.addEventListener('click', () => profileDropdownMenu.classList.toggle('hidden'));
     
-    // Listeners to open various modals
     openModalBtns.forEach(btn => {
         if (btn) btn.addEventListener('click', (e) => {
             e.preventDefault();
             if (createPostModal) createPostModal.classList.remove('hidden');
         });
     });
+
     if (openEditModalBtn) {
         openEditModalBtn.addEventListener('click', () => {
-            // Populate the edit profile modal with current data before showing
             if(profileDisplayName) document.getElementById('display-name-input').value = profileDisplayName.textContent;
             if(profileBio) document.getElementById('bio-input').value = profileBio.textContent;
             if(profileAvatar) avatarPreview.src = profileAvatar.src;
@@ -336,20 +354,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Listeners for closing modals
     if (closeViewModalBtn) closeViewModalBtn.addEventListener('click', () => { if(postViewModal) postViewModal.classList.add('hidden'); });
     if (postViewModal) postViewModal.addEventListener('click', (e) => { if (e.target === postViewModal) postViewModal.classList.add('hidden'); });
     if(closeEditModalBtn) closeEditModalBtn.addEventListener('click', () => { if(editProfileModal) editProfileModal.classList.add('hidden'); });
     if(closeEditPostModalBtn) closeEditPostModalBtn.addEventListener('click', () => { if(editPostModal) editPostModal.classList.add('hidden'); });
     if(closeCreateModalBtn) closeCreateModalBtn.addEventListener('click', () => { if(createPostModal) createPostModal.classList.add('hidden'); });
 
-    // Listener for Comment Form Submission
     const commentForm = document.getElementById('comment-form');
     if (commentForm) {
         commentForm.addEventListener('submit', handleCommentSubmit);
     }
 
-    // Listener for Edit Profile Form Submission
     if (editProfileForm) {
         editProfileForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -381,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 await db.collection('users').doc(user.uid).update(updatedData);
                 alert('Profile updated successfully!');
-                editProfileModal.classList.add('hidden');
+                if(editProfileModal) editProfileModal.classList.add('hidden');
                 location.reload(); 
             } catch (error) {
                 console.error("Error updating profile:", error);
@@ -393,7 +408,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Listeners and Logic for Create Post Form
     if(postImageInput) {
         postImageInput.addEventListener('change', (event) => {
             const files = event.target.files;
@@ -411,6 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+    
     if (createPostForm) {
         createPostForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -419,25 +434,35 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const user = auth.currentUser;
                 if (!user) throw new Error("You must be logged in.");
-                const uploadPromises = uploadedFiles.map(file => {
-                    const formData = new FormData();
-                    formData.append('image', file);
-                    return fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData })
-                        .then(response => response.json());
-                });
-                const uploadResults = await Promise.all(uploadPromises);
-                const imageUrls = uploadResults.map(result => result.success ? result.data.url : null).filter(Boolean);
+
+                const youtubeUrl = document.getElementById('post-youtube-link').value;
+                const youtubeVideoId = getYouTubeVideoId(youtubeUrl);
+                let imageUrls = [];
+
+                if (!youtubeVideoId && uploadedFiles.length > 0) {
+                    const uploadPromises = uploadedFiles.map(file => {
+                        const formData = new FormData();
+                        formData.append('image', file);
+                        return fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData })
+                            .then(response => response.json());
+                    });
+                    const uploadResults = await Promise.all(uploadPromises);
+                    imageUrls = uploadResults.map(result => result.success ? result.data.url : null).filter(Boolean);
+                }
+
                 const contentHTML = tinymce.get('post-content').getContent();
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = contentHTML;
                 const firstHeading = tempDiv.querySelector('h1, h2, h3, h4, h5, h6');
                 let title = firstHeading ? firstHeading.textContent.trim() : (tempDiv.textContent.trim().substring(0, 60) || "Untitled Post");
+                
                 const postData = {
                     title,
                     content: contentHTML,
                     category: document.getElementById('post-category').value.toLowerCase(),
                     imageUrls: imageUrls,
                     imageUrl: imageUrls[0] || '',
+                    youtubeVideoId: youtubeVideoId || null,
                     authorId: user.uid,
                     authorName: user.displayName || 'Anonymous',
                     authorAvatar: user.photoURL,
@@ -451,9 +476,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert("Blog post published successfully!");
                 createPostForm.reset();
                 tinymce.get('post-content').setContent('');
+                document.getElementById('post-youtube-link').value = '';
                 uploadedFiles = [];
                 renderPreviews();
-                createPostModal.classList.add('hidden');
+                if(createPostModal) createPostModal.classList.add('hidden');
                 loadUserPosts(user.uid);
             } catch (error) {
                 console.error("Error creating post:", error);
@@ -515,4 +541,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-}); // This is the closing bracket for 'DOMContentLoaded'
+});
