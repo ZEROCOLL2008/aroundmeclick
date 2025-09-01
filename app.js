@@ -1,5 +1,5 @@
 // =================================================================
-//     APP.JS - CORE/GLOBAL LOGIC (WITH NOTIFICATIONS & FIXES)
+//     APP.JS - CORE LOGIC (WITH MOBILE HAMBURGER MENU)
 // =================================================================
 
 const firebaseConfig = {
@@ -32,40 +32,16 @@ function listenForNotifications(userId) {
 
     notificationListener = notificationsRef.onSnapshot(snapshot => {
         const notificationBadge = document.getElementById('notification-badge');
-        const notificationList = document.getElementById('notification-list-container'); // Assuming you have a container for notifications
+        // This part requires a notification list container in your dropdown, which is not in the provided HTML.
+        // const notificationList = document.getElementById('notification-list-container');
+        if (!notificationBadge) return;
 
-        if (!notificationBadge || !notificationList) return;
-
-        notificationList.innerHTML = '';
         let unreadCount = 0;
-
-        if (snapshot.empty) {
-            notificationList.innerHTML = '<p class="px-4 py-8 text-center text-sm text-gray-500">No new notifications.</p>';
-            notificationBadge.classList.add('hidden');
-            return;
-        }
-
         snapshot.forEach(doc => {
             const notif = doc.data();
             if (!notif.isRead) {
                 unreadCount++;
             }
-
-            const notifItem = document.createElement('a');
-            const postLink = `index.html#post-${notif.postId}`; // Create a link to the post
-            notifItem.href = postLink; 
-            notifItem.className = `block px-4 py-3 text-sm text-classic-taupe hover:bg-pastel-ivory border-b border-ivory-linen ${!notif.isRead ? 'bg-pastel-ivory' : ''}`;
-            
-            let message = '';
-            if (notif.type === 'like') {
-                message = `❤️ <strong>${notif.senderName}</strong> liked your post: "${notif.postTitle}"`;
-            } else if (notif.type === 'comment') {
-                message = `💬 <strong>${notif.senderName}</strong> commented on your post: "${notif.postTitle}"`;
-            } else if (notif.type === 'follow') {
-                message = `👋 <strong>${notif.senderName}</strong> started following you.`;
-            }
-            notifItem.innerHTML = message;
-            notificationList.appendChild(notifItem);
         });
 
         if (unreadCount > 0) {
@@ -83,24 +59,48 @@ function listenForNotifications(userId) {
 document.addEventListener('DOMContentLoaded', () => {
     console.log("app.js (Core) Script Loaded!");
 
-    // --- ELEMENT SELECTORS ---
+    // --- ELEMENT SELECTORS (DESKTOP & MOBILE) ---
     const loginModal = document.getElementById('login-modal');
     const signupModal = document.getElementById('signup-modal');
+    
+    // Desktop elements
     const userAuthLinks = document.getElementById('user-auth-links');
     const userProfileInfo = document.getElementById('user-profile-info');
-    const loginForm = document.getElementById('login-form');
-    const signupForm = document.getElementById('signup-form');
+    const loginBtn = document.getElementById('login-btn');
+    const signupBtn = document.getElementById('signup-btn');
     const logoutBtn = document.getElementById('logout-btn');
     const profileDropdownBtn = document.getElementById('profile-dropdown-btn');
     const profileDropdownMenu = document.getElementById('profile-dropdown-menu');
-    const notificationBellBtn = document.getElementById('notification-bell-btn');
 
-    // --- AUTH STATE LISTENER (UPDATED FOR ROBUSTNESS) ---
+    // Mobile elements
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileAuthLinks = document.getElementById('mobile-auth-links');
+    const mobileProfileInfo = document.getElementById('mobile-profile-info');
+    const mobileLoginBtn = document.getElementById('mobile-login-btn');
+    const mobileSignupBtn = document.getElementById('mobile-signup-btn');
+    const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+
+    // --- HAMBURGER MENU TOGGLE ---
+    if (hamburgerBtn && mobileMenu) {
+        hamburgerBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+    }
+
+    // --- AUTH STATE LISTENER (UPDATED FOR MOBILE) ---
     auth.onAuthStateChanged(async (user) => {
+        const adminPanelLink = document.getElementById('admin-panel-link');
+        const mobileAdminPanelLink = document.getElementById('mobile-admin-panel-link');
+
         if (user) {
-            // User is logged in
+            // User is LOGGED IN
+            // Desktop view
             if (userAuthLinks) userAuthLinks.classList.add('hidden');
             if (userProfileInfo) userProfileInfo.classList.remove('hidden');
+            // Mobile view
+            if (mobileAuthLinks) mobileAuthLinks.classList.add('hidden');
+            if (mobileProfileInfo) mobileProfileInfo.classList.remove('hidden');
             
             listenForNotifications(user.uid);
 
@@ -113,10 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const displayName = userData.displayName || user.displayName || 'User';
                 const userEmail = user.email || '';
-                
-                // --- ROBUST AVATAR LOGIC ---
-                // This ensures there is always a valid image source
-                let userAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=8B5E34&color=fff`; // Default fallback
+                let userAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=8B5E34&color=fff`;
                 
                 if (userData.photoURL) {
                     userAvatar = userData.photoURL;
@@ -124,59 +121,89 @@ document.addEventListener('DOMContentLoaded', () => {
                     userAvatar = user.photoURL;
                 }
 
-                // Update all relevant UI elements
                 const headerAvatar = document.getElementById('header-user-avatar');
                 const dropdownName = document.getElementById('dropdown-user-name');
                 const dropdownEmail = document.getElementById('dropdown-user-email');
-                const adminPanelLink = document.getElementById('admin-panel-link');
 
                 if (headerAvatar) headerAvatar.src = userAvatar;
                 if (dropdownName) dropdownName.textContent = displayName;
                 if (dropdownEmail) dropdownEmail.textContent = userEmail;
 
-                if (adminPanelLink) {
-                    if (userData.role === 'admin') {
-                        adminPanelLink.classList.remove('hidden');
-                    } else {
-                        adminPanelLink.classList.add('hidden');
-                    }
+                if (userData.role === 'admin') {
+                    if (adminPanelLink) adminPanelLink.classList.remove('hidden');
+                    if (mobileAdminPanelLink) mobileAdminPanelLink.classList.remove('hidden');
+                } else {
+                    if (adminPanelLink) adminPanelLink.classList.add('hidden');
+                    if (mobileAdminPanelLink) mobileAdminPanelLink.classList.add('hidden');
                 }
             } catch (error) {
                 console.error("Error fetching user data for header:", error);
             }
 
         } else {
-            // User is logged out
+            // User is LOGGED OUT
+            // Desktop view
             if (userAuthLinks) userAuthLinks.classList.remove('hidden');
             if (userProfileInfo) userProfileInfo.classList.add('hidden');
+            // Mobile view
+            if (mobileAuthLinks) mobileAuthLinks.classList.remove('hidden');
+            if (mobileProfileInfo) mobileProfileInfo.classList.add('hidden');
+
             if (notificationListener) {
-                notificationListener(); // Stop listening for notifications
+                notificationListener(); // Stop listening
             }
         }
     });
 
-    // --- MODAL & FORM LOGIC ---
-    if (loginModal && signupModal) {
-        const loginBtn = document.getElementById('login-btn');
-        const signupBtn = document.getElementById('signup-btn');
-        const closeModalButtons = document.querySelectorAll('.close-modal-btn');
-        const showSignupLink = document.getElementById('show-signup-link');
-        const showLoginLink = document.getElementById('show-login-link');
+    // --- MODAL & FORM LOGIC (REUSING FOR MOBILE BUTTONS) ---
+    const showLoginModal = () => loginModal?.classList.remove('hidden');
+    const showSignupModal = () => signupModal?.classList.remove('hidden');
 
-        if (loginBtn) loginBtn.addEventListener('click', () => loginModal.classList.remove('hidden'));
-        if (signupBtn) signupBtn.addEventListener('click', () => signupModal.classList.remove('hidden'));
-        
-        closeModalButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                loginModal.classList.add('hidden');
-                signupModal.classList.add('hidden');
-            });
+    // Desktop buttons
+    if(loginBtn) loginBtn.addEventListener('click', showLoginModal);
+    if(signupBtn) signupBtn.addEventListener('click', showSignupModal);
+    
+    // Mobile buttons
+    if (mobileLoginBtn) mobileLoginBtn.addEventListener('click', showLoginModal);
+    if (mobileSignupBtn) mobileSignupBtn.addEventListener('click', showSignupModal);
+
+    // Close modals
+    document.querySelectorAll('.close-modal-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            loginModal?.classList.add('hidden');
+            signupModal?.classList.add('hidden');
         });
+    });
 
-        if (showSignupLink) showSignupLink.addEventListener('click', (e) => { e.preventDefault(); loginModal.classList.add('hidden'); signupModal.classList.remove('hidden'); });
-        if (showLoginLink) showLoginLink.addEventListener('click', (e) => { e.preventDefault(); signupModal.classList.add('hidden'); loginModal.classList.remove('hidden'); });
+    // Switch between modals
+    document.getElementById('show-signup-link')?.addEventListener('click', (e) => { e.preventDefault(); loginModal?.classList.add('hidden'); signupModal?.classList.remove('hidden'); });
+    document.getElementById('show-login-link')?.addEventListener('click', (e) => { e.preventDefault(); signupModal?.classList.add('hidden'); loginModal?.classList.remove('hidden'); });
+
+    // --- Sign Out Logic (for both buttons) ---
+    const signOutUser = () => auth.signOut();
+    if (logoutBtn) logoutBtn.addEventListener('click', signOutUser);
+    if (mobileLogoutBtn) mobileLogoutBtn.addEventListener('click', signOutUser);
+    
+    // --- DROPDOWN (DESKTOP ONLY) ---
+    if (profileDropdownBtn && profileDropdownMenu) {
+        profileDropdownBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileDropdownMenu.classList.toggle('hidden');
+        });
     }
 
+    // Hide dropdown if clicking outside
+    document.addEventListener('click', (e) => {
+        if (profileDropdownMenu && !profileDropdownMenu.classList.contains('hidden')) {
+            const isClickInside = profileDropdownMenu.contains(e.target) || profileDropdownBtn.contains(e.target);
+            if (!isClickInside) {
+                 profileDropdownMenu.classList.add('hidden');
+            }
+        }
+    });
+
+    // --- Login/Signup Form Submission Logic ---
+    const loginForm = document.getElementById('login-form');
     if (loginForm) {
         const loginError = document.getElementById('login-error');
         loginForm.addEventListener('submit', async (e) => {
@@ -194,6 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const signupForm = document.getElementById('signup-form');
     if (signupForm) {
         const signupError = document.getElementById('signup-error');
         signupForm.addEventListener('submit', async (e) => {
@@ -208,17 +236,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 await user.updateProfile({ displayName: name });
                 
                 await db.collection('users').doc(user.uid).set({
-                    displayName: name,
-                    email: email,
-                    role: 'user',
+                    displayName: name, email: email, role: 'user',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    photoURL: '',
-                    bio: '',
-                    coverPhotoURL: '',
-                    followers: [],
-                    following: [],
-                    followersCount: 0,
-                    followingCount: 0
+                    photoURL: '', bio: '', coverPhotoURL: '',
+                    followers: [], following: [], followersCount: 0, followingCount: 0
                 });
                 
                 if (signupModal) signupModal.classList.add('hidden');
@@ -228,35 +249,4 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
-    // --- DROPDOWN & NOTIFICATION LISTENERS ---
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => auth.signOut());
-    }
-    
-    if (profileDropdownBtn && profileDropdownMenu) {
-        profileDropdownBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            profileDropdownMenu.classList.toggle('hidden');
-        });
-    }
-
-    if (notificationBellBtn && profileDropdownMenu) {
-        notificationBellBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            profileDropdownMenu.classList.toggle('hidden');
-            // Here you can add logic to mark notifications as read
-        });
-    }
-
-    // Hide dropdown if clicking outside
-    document.addEventListener('click', (e) => {
-        if (profileDropdownMenu && !profileDropdownMenu.classList.contains('hidden')) {
-            const isClickInside = profileDropdownMenu.contains(e.target.parentElement);
-            const isClickOnBtn = profileDropdownBtn && profileDropdownBtn.contains(e.target);
-            if (!isClickInside && !isClickOnBtn) {
-                 profileDropdownMenu.classList.add('hidden');
-            }
-        }
-    });
 });
