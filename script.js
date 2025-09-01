@@ -792,8 +792,8 @@ async function setupFeaturedPostsSlider() {
             const excerpt = (tempDiv.textContent || '').substring(0, 150) + '...';
 
             // Each slide now has the .open-modal-trigger class and data-post-id attribute
-            slidesHTML += `
-               <div class="swiper-slide flex flex-col md:flex-row bg-ivory cursor-pointer open-modal-trigger" data-post-id="${post.id}">
+          slidesHTML += `
+               <div class="swiper-slide flex flex-col md:flex-row bg-ivory cursor-pointer open-modal-trigger md:h-80" data-post-id="${post.id}">
                     <div class="md:w-1/2 h-64 md:h-full">
                         <img src="${post.imageUrl || 'https://picsum.photos/800/600'}" alt="${post.title}" class="w-full h-full object-cover">
                     </div>
