@@ -175,12 +175,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (error.name !== 'AbortError') console.error("Error sharing post:", error);
         }
     };
-
+    
     const checkUrlForPostId = () => {
+        console.log("Checking URL for post ID on page load...");
         const urlParams = new URLSearchParams(window.location.search);
         const postIdFromUrl = urlParams.get('post');
         if (postIdFromUrl) {
+            console.log(`Found post ID in URL: ${postIdFromUrl}. Attempting to open modal.`);
             openPostModal(postIdFromUrl);
+        } else {
+            console.log("No post ID found in URL.");
         }
     };
 
@@ -365,10 +369,18 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const openPostModal = async (postId) => {
-        if (!postModal) return;
+        console.log(`openPostModal called for post ID: ${postId}`);
+        if (!postModal) {
+            console.error("Post modal element not found!");
+            return;
+        }
         try {
             const postDoc = await db.collection('posts').doc(postId).get();
-            if (!postDoc.exists) { console.error("Post not found!"); return; }
+            if (!postDoc.exists) {
+                console.error("Post not found in Firestore for ID:", postId);
+                alert("Sorry, the post you are looking for could not be found.");
+                return;
+            }
             const post = { id: postDoc.id, ...postDoc.data() };
             if(commentForm) commentForm.dataset.postId = post.id;
             document.getElementById('post-modal-title').textContent = post.title;
@@ -417,6 +429,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (commentLoginPrompt) commentLoginPrompt.classList.remove('hidden');
             }
             loadComments(post.id);
+
+            console.log("Successfully fetched post data. Displaying modal.");
+            document.body.classList.add('overflow-hidden'); // Prevent background scrolling
             postModal.classList.remove('hidden');
         
             const url = new URL(window.location);
@@ -425,6 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error("Error opening post modal:", error);
+            alert("An error occurred while trying to load the post.");
         }
     };
 
@@ -508,6 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     const closeModalUI = () => {
+        document.body.classList.remove('overflow-hidden'); // Re-enable background scrolling
         if (postModal) {
             const mediaContainer = document.getElementById('post-modal-media-container');
             if (mediaContainer) {
@@ -570,7 +587,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const postId = likeBtn.dataset.likeId;
                 if (postId) handleLikeClick(postId);
             } else if (openTrigger) {
-                // *** THIS IS THE CORRECTED LOGIC ***
                 const postId = openTrigger.dataset.postId;
                 if (postId) openPostModal(postId);
             } else if (followBtn) {
@@ -791,8 +807,7 @@ async function setupFeaturedPostsSlider() {
             tempDiv.innerHTML = post.content || '';
             const excerpt = (tempDiv.textContent || '').substring(0, 150) + '...';
 
-            // Each slide now has the .open-modal-trigger class and data-post-id attribute
-          slidesHTML += `
+            slidesHTML += `
                <div class="swiper-slide flex flex-col md:flex-row bg-ivory cursor-pointer open-modal-trigger md:h-80" data-post-id="${post.id}">
                     <div class="md:w-1/2 h-64 md:h-full">
                         <img src="${post.imageUrl || 'https://picsum.photos/800/600'}" alt="${post.title}" class="w-full h-full object-cover">

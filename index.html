@@ -78,13 +78,13 @@
         <div class="flex items-center justify-between h-16">
             <a href="index.html" class="flex items-center space-x-3 flex-shrink-0">
                 <img src="5.png" alt="Around Me Click Logo" class="h-10 w-10 rounded-full object-cover">
-                <span class="text-2xl font-bold text-ivory-brown">AroundMe.Click</span>
+                <span class="text-2xl font-bold text-ivory-brown">Around Me Click</span>
             </a>
             
             <div class="flex items-center space-x-2">
                 <form id="search-form" class="relative hidden sm:flex items-center">
                     <input type="text" id="search-input" placeholder="Search..." class="w-full pl-4 pr-10 py-2 text-ivory-brown border border-ivory-linen rounded-full outline-none focus:ring-1 focus:ring-classic-taupe bg-white/50">
-                    <button type-="submit" class="absolute right-2 p-1 text-classic-taupe hover:text-ivory-brown">
+                    <button type="submit" class="absolute right-2 p-1 text-classic-taupe hover:text-ivory-brown">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </button>
                 </form>
@@ -104,8 +104,33 @@
                             <button id="profile-dropdown-btn" class="flex items-center">
                                 <img id="header-user-avatar" src="https://via.placeholder.com/40" alt="User" class="w-8 h-8 rounded-full">
                             </button>
-                            <div id="profile-dropdown-menu" class="hidden absolute right-0 mt-2 w-64 bg-ivory rounded-lg shadow-xl z-20">
+                            <div id="profile-dropdown-menu" class="hidden absolute right-0 mt-2 w-64 bg-ivory rounded-lg shadow-xl z-20 border border-ivory-linen">
+                                <div class="p-3 border-b border-ivory-linen">
+                                    <div class="flex items-center gap-3">
+                                        <img id="dropdown-user-avatar" src="https://via.placeholder.com/40" alt="User Avatar" class="w-11 h-11 rounded-full object-cover">
+                                        <div>
+                                            <p id="dropdown-user-name" class="font-semibold text-ivory-brown truncate">Loading...</p>
+                                            <p id="dropdown-user-email" class="text-sm text-classic-taupe truncate">loading...</p>
+                                        </div>
+                                    </div>
                                 </div>
+                                <div class="py-2">
+                                    <a href="profile.html" class="flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
+                                        <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                        <span>My Profile</span>
+                                    </a>
+                                    <a id="admin-panel-link" href="admin.html" class="hidden flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"></path></svg>
+                                        <span>Admin Panel</span>
+                                    </a>
+                                </div>
+                                <div class="border-t border-ivory-linen py-2">
+                                    <button id="logout-btn" class="w-full text-left flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"></path></svg>
+                                        <span>Sign Out</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -117,6 +142,7 @@
         </div>
     </div>
 </header>
+
 <div id="mobile-menu" class="hidden md:hidden bg-ivory/95 backdrop-blur-sm shadow-md absolute top-16 left-0 w-full z-40">
     <div id="mobile-auth-links">
         <div class="p-4 flex flex-col space-y-3">
