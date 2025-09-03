@@ -48,6 +48,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 2. HELPER & CORE FUNCTIONS ---
 
+    // ===== NEWSLETTER SUBSCRIPTION LOGIC START =====
+    const setupSubscriptionForm = () => {
+        const subscribeForm = document.getElementById('subscribe-form');
+        if (!subscribeForm) {
+            return; // If the form doesn't exist on the page, do nothing.
+        }
+
+        subscribeForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Stop the page from reloading on submit
+
+            const emailInput = document.getElementById('subscribe-email');
+            const messageEl = document.getElementById('subscribe-message');
+            const subscribeBtn = document.getElementById('subscribe-btn');
+            const email = emailInput.value.trim();
+
+            if (!email) {
+                messageEl.textContent = "Please enter your email address.";
+                messageEl.className = "text-sm text-center mt-3 text-red-500";
+                return;
+            }
+
+            subscribeBtn.disabled = true;
+            subscribeBtn.textContent = 'Subscribing...';
+            messageEl.textContent = '';
+
+            try {
+                // We will NOT check for existing emails to keep the read rules secure.
+                // We directly add the new subscriber.
+                await db.collection('subscribers').add({
+                    email: email,
+                    subscribedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // We assume it's successful and show the success message.
+                messageEl.textContent = "Thank you for subscribing! 🎉";
+                messageEl.className = "text-sm text-center mt-3 text-green-600";
+                emailInput.value = '';
+
+            } catch (error) {
+                console.error("Error subscribing:", error);
+                messageEl.textContent = "Could not subscribe. Check console for errors.";
+                messageEl.className = "text-sm text-center mt-3 text-red-500";
+            } finally {
+                setTimeout(() => {
+                    subscribeBtn.disabled = false;
+                    subscribeBtn.textContent = 'Subscribe';
+                }, 3000);
+            }
+        });
+    };
+    // ===== NEWSLETTER SUBSCRIPTION LOGIC END =====
+
     const handleFollowClick = async (authorIdToFollow) => {
         const currentUser = auth.currentUser;
         if (!currentUser) {
@@ -658,7 +710,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+
     // --- 4. INITIAL PAGE LOAD ---
+    setupSubscriptionForm();
     setupHeroBackgroundSlider(); 
     setupFeaturedPostsSlider(); 
     fetchAndDisplayPosts();
@@ -727,12 +781,12 @@ async function displayTopAuthorsByLikes() {
                 }
             }
 
-            authorsHTML += `
+           authorsHTML += `
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <img src="${authorAvatar}" alt="${author.displayName || 'Author'}" class="w-10 h-10 rounded-full object-cover">
-                        <div>
-                            <p class="font-semibold text-ivory-brown">${author.displayName || 'Anonymous'}</p>
+                    <div class="flex items-center gap-3 min-w-0">
+                        <img src="${authorAvatar}" alt="${author.displayName || 'Author'}" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
+                        <div class="min-w-0">
+                            <p class="font-semibold text-ivory-brown truncate">${author.displayName || 'Anonymous'}</p>
                             <p class="text-xs text-classic-taupe">❤️ ${author.totalLikes} Likes</p>
                         </div>
                     </div>
@@ -754,7 +808,7 @@ async function setupHeroBackgroundSlider() {
     if (!heroSwiperWrapper) return;
 
     const backgroundImages = [
-        'https://images.unsplash.com/photo-1755429562521-cb944ea054ab?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        'https://images.unsplash.com/photo-175542 shinobi.com/photo-1755429562521-cb944ea054ab?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         'https://plus.unsplash.com/premium_photo-1755895180436-1acb3275ab96?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     ];
 

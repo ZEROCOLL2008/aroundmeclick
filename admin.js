@@ -1,11 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
-    if (typeof firebase === 'undefined') {
-        console.error("Firebase not initialized. Make sure app.js is loaded first.");
+    // This check is important. It ensures the config file has loaded.
+    if (typeof firebase === 'undefined' || typeof auth === 'undefined' || typeof db === 'undefined') {
+        console.error("Firebase not initialized. Make sure firebase-config.js is loaded before admin.js.");
         return;
     }
 
-    const auth = firebase.auth();
-    const db = firebase.firestore();
     let postsOverTimeChartInstance = null;
     let postsByCategoryChartInstance = null;
     let allUsers = []; // Store all users to filter locally
@@ -39,8 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const initializeApp = async () => {
-        postsTableBody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-500">Loading all data...</td></tr>`;
-        
+        if(postsTableBody) {
+             postsTableBody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-500">Loading all data...</td></tr>`;
+        }
+       
         const [postsSnapshot, usersSnapshot, pendingCountSnapshot] = await Promise.all([
             db.collection('posts').orderBy('createdAt', 'desc').get(),
             db.collection('users').get(),
@@ -60,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupModal();
         setupActionListeners();
         setupUserFilters();
+        setupNewsletterForm(); // <-- Calling the new newsletter function
     };
 
     // --- HELPER FUNCTIONS (Modals) ---
@@ -74,19 +76,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const actionButton = document.getElementById('confirm-action-btn');
             const cancelButton = document.getElementById('confirm-cancel-btn');
 
-            const actionListener = () => {
+            const resolvePromise = (value) => {
                 confirmationModal.classList.add('hidden');
                 confirmationModal.classList.remove('flex');
-                resolve(true);
-            };
-            const cancelListener = () => {
-                confirmationModal.classList.add('hidden');
-                confirmationModal.classList.remove('flex');
-                resolve(false);
+                actionButton.removeEventListener('click', actionHandler);
+                cancelButton.removeEventListener('click', cancelHandler);
+                resolve(value);
             };
 
-            actionButton.addEventListener('click', actionListener, { once: true });
-            cancelButton.addEventListener('click', cancelListener, { once: true });
+            const actionHandler = () => resolvePromise(true);
+            const cancelHandler = () => resolvePromise(false);
+            
+            actionButton.addEventListener('click', actionHandler, { once: true });
+            cancelButton.addEventListener('click', cancelHandler, { once: true });
         });
     };
 
@@ -98,9 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('modal-date').textContent = post.createdAt ? new Date(post.createdAt.toDate()).toLocaleString() : 'N/A';
         document.getElementById('modal-content').innerHTML = post.content;
         
-        // === UPDATED LOGIC TO HANDLE VIDEO/IMAGE IN MODAL ===
         const modalMediaContainer = document.getElementById('modal-image-container');
-        
         if (post.youtubeVideoId) {
             modalMediaContainer.innerHTML = `<div class="aspect-video w-full"><iframe class="w-full h-full" src="https://www.youtube.com/embed/${post.youtubeVideoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
             modalMediaContainer.classList.remove('hidden');
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modalMediaContainer.innerHTML = `<img id="modal-image" src="${post.imageUrl}" alt="Post Image" class="w-full h-auto max-h-80 object-contain rounded-lg">`;
             modalMediaContainer.classList.remove('hidden');
         } else {
-            modalMediaContainer.innerHTML = '<img id="modal-image" src="" alt="Post Image" class="w-full h-auto max-h-80 object-contain rounded-lg">'; // Reset to original state
+            modalMediaContainer.innerHTML = '';
             modalMediaContainer.classList.add('hidden');
         }
         
@@ -117,11 +117,13 @@ document.addEventListener('DOMContentLoaded', () => {
         modalApproveBtn.dataset.id = post.id;
         modalRejectBtn.dataset.id = post.id;
 
+        postModal.classList.remove('hidden');
         postModal.classList.add('flex');
     };
 
     // --- DATA RENDERING FUNCTIONS ---
     const renderUsersTable = (usersToRender) => {
+        if (!usersTableBody) return;
         usersTableBody.innerHTML = '';
         if (usersToRender.length === 0) {
             usersTableBody.innerHTML = `<tr><td colspan="4" class="text-center p-4 text-gray-500">No users found.</td></tr>`;
@@ -164,6 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const loadPosts = (snapshot) => {
+        if (!postsTableBody) return;
         postsTableBody.innerHTML = '';
         if (snapshot.empty) {
             postsTableBody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-500">No posts found.</td></tr>`;
@@ -192,16 +195,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- UI SETUP & EVENT LISTENERS ---
 
     const setupUserFilters = () => {
+        if (!userSearchInput) return;
         const applyFilters = () => {
             const searchTerm = userSearchInput.value.toLowerCase();
             const activeFilter = document.querySelector('.user-filter-btn.active').dataset.role;
 
             let filteredUsers = allUsers;
-
             if (activeFilter !== 'all') {
                 filteredUsers = filteredUsers.filter(user => user.role === activeFilter);
             }
-
             if (searchTerm) {
                 filteredUsers = filteredUsers.filter(user => 
                     (user.displayName && user.displayName.toLowerCase().includes(searchTerm)) || 
@@ -224,36 +226,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const setupActionListeners = () => {
         document.body.addEventListener('click', async (e) => {
             const id = e.target.dataset.id;
+            if (!id) return; // Exit if no ID is found
 
             // Post Actions
             if (e.target.matches('.view-post')) {
                 e.preventDefault();
-                if(id){
-                    const doc = await db.collection('posts').doc(id).get();
-                    if (doc.exists) openPostModal({ id: doc.id, ...doc.data() });
-                }
+                const doc = await db.collection('posts').doc(id).get();
+                if (doc.exists) openPostModal({ id: doc.id, ...doc.data() });
             }
             if (e.target.matches('.approve-post-btn, #modal-approve-btn')) {
-                if(id) {
-                    await db.collection('posts').doc(id).update({ status: 'approved' });
-                    await initializeApp();
-                    if(postModal) postModal.classList.remove('flex');
+                await db.collection('posts').doc(id).update({ status: 'approved' });
+                await initializeApp();
+                if(postModal) {
+                    postModal.classList.remove('flex');
+                    postModal.classList.add('hidden');
                 }
             }
             if (e.target.matches('.reject-post-btn, #modal-reject-btn')) {
-                 if(id) {
-                    await db.collection('posts').doc(id).update({ status: 'rejected' });
-                    await initializeApp();
-                    if(postModal) postModal.classList.remove('flex');
-                }
+                 await db.collection('posts').doc(id).update({ status: 'rejected' });
+                 await initializeApp();
+                 if(postModal) {
+                    postModal.classList.remove('flex');
+                    postModal.classList.add('hidden');
+                 }
             }
             if (e.target.matches('.delete-post-btn')) {
-                 if(id) {
-                    const isConfirmed = await showConfirmationModal('Delete Post', 'This action is permanent and cannot be undone.');
-                    if (isConfirmed) {
-                        await db.collection('posts').doc(id).delete();
-                        await initializeApp();
-                    }
+                const isConfirmed = await showConfirmationModal('Delete Post', 'This action is permanent and cannot be undone.');
+                if (isConfirmed) {
+                    await db.collection('posts').doc(id).delete();
+                    await initializeApp();
                 }
             }
 
@@ -263,9 +264,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const userIndex = allUsers.findIndex(u => u.id === userId);
                 if (userIndex > -1) allUsers[userIndex].role = newRole;
                 
+                // Re-apply current filters to update the view
                 const currentSearchTerm = userSearchInput.value.toLowerCase();
                 const currentActiveFilter = document.querySelector('.user-filter-btn.active').dataset.role;
-                
                 let usersToDisplay = allUsers;
                 if (currentActiveFilter !== 'all') {
                     usersToDisplay = usersToDisplay.filter(user => user.role === currentActiveFilter);
@@ -280,13 +281,77 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             if (e.target.matches('.make-admin-btn')) {
-                if(id) await updateUserRole(id, 'admin');
+                await updateUserRole(id, 'admin');
             }
             if (e.target.matches('.remove-admin-btn')) {
-                if(id) await updateUserRole(id, 'user');
+                await updateUserRole(id, 'user');
             }
         });
     };
+    
+    // ===== NEWSLETTER LOGIC START =====
+    const setupNewsletterForm = () => {
+        // Initialize TinyMCE for the newsletter
+        if (typeof tinymce !== 'undefined') {
+            tinymce.init({
+                selector: '#newsletter-content',
+                plugins: 'autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table help wordcount',
+                toolbar: 'undo redo | blocks | bold italic underline | bullist numlist | link image | removeformat | help',
+                height: 300,
+                menubar: false,
+                placeholder: 'Write your greeting message here...',
+            }).catch(err => console.error("TinyMCE Init Error:", err));
+        }
+
+        const newsletterForm = document.getElementById('newsletter-form');
+        if (!newsletterForm) return;
+
+        newsletterForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const subjectInput = document.getElementById('newsletter-subject');
+            const content = tinymce.get('newsletter-content').getContent();
+            const statusEl = document.getElementById('newsletter-status');
+            const sendBtn = document.getElementById('send-newsletter-btn');
+
+            if (!subjectInput.value.trim() || !content.trim()) {
+                alert('Please fill in both the subject and the message.');
+                return;
+            }
+
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Scheduling...';
+            statusEl.textContent = '';
+            statusEl.className = 'text-sm text-gray-600 font-medium';
+
+            try {
+                // Create a "task" in Firestore for the Cloud Function to handle.
+                await db.collection('emailCampaigns').add({
+                    subject: subjectInput.value,
+                    htmlContent: content,
+                    status: 'pending', // The Cloud Function will look for this
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                statusEl.textContent = '✅ Campaign scheduled!';
+                statusEl.className = 'text-sm text-green-600 font-medium';
+                newsletterForm.reset();
+                tinymce.get('newsletter-content').setContent('');
+
+            } catch (error) {
+                console.error("Error scheduling campaign:", error);
+                statusEl.textContent = '❌ Error! Could not schedule.';
+                statusEl.className = 'text-sm text-red-600 font-medium';
+            } finally {
+                setTimeout(() => {
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = 'Send to All Subscribers';
+                    statusEl.textContent = '';
+                }, 5000);
+            }
+        });
+    };
+    // ===== NEWSLETTER LOGIC END =====
 
     // --- OTHER FUNCTIONS ---
     
@@ -294,21 +359,22 @@ document.addEventListener('DOMContentLoaded', () => {
         let buttonsHTML = '';
         const status = post.status;
         if (status === 'pending') {
-            buttonsHTML += `<button class="approve-post-btn px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-700 hover:bg-green-200">Approve</button>`;
-            buttonsHTML += `<button class="reject-post-btn px-2 py-1 text-xs font-medium rounded bg-amber-100 text-amber-700 hover:bg-amber-200">Reject</button>`;
+            buttonsHTML += `<button class="approve-post-btn px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-700 hover:bg-green-200" data-id="${post.id}">Approve</button>`;
+            buttonsHTML += `<button class="reject-post-btn px-2 py-1 text-xs font-medium rounded bg-amber-100 text-amber-700 hover:bg-amber-200" data-id="${post.id}">Reject</button>`;
         } 
         else if (status === 'approved') {
-            buttonsHTML += `<button class="reject-post-btn px-2 py-1 text-xs font-medium rounded bg-amber-100 text-amber-700 hover:bg-amber-200">Unpublish</button>`;
+            buttonsHTML += `<button class="reject-post-btn px-2 py-1 text-xs font-medium rounded bg-amber-100 text-amber-700 hover:bg-amber-200" data-id="${post.id}">Unpublish</button>`;
         } 
         else if (status === 'rejected') {
-            buttonsHTML += `<button class="approve-post-btn px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-700 hover:bg-green-200">Approve</button>`;
+            buttonsHTML += `<button class="approve-post-btn px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-700 hover:bg-green-200" data-id="${post.id}">Approve</button>`;
         }
-        buttonsHTML += `<button class="delete-post-btn px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-700 hover:bg-red-200">Delete</button>`;
-        const buttonsWithId = buttonsHTML.replace(/<button/g, `<button data-id="${post.id}"`);
-        return `<div class="flex items-center space-x-2">${buttonsWithId}</div>`;
+        buttonsHTML += `<button class="delete-post-btn px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-700 hover:bg-red-200" data-id="${post.id}">Delete</button>`;
+        return `<div class="flex items-center space-x-2 justify-end">${buttonsHTML}</div>`;
     };
 
     const renderPostsOverTimeChart = (snapshot) => {
+        const ctx = document.getElementById('postsOverTimeChart');
+        if (!ctx) return;
         const postCountsByDate = {};
         snapshot.forEach(doc => {
             const post = doc.data();
@@ -326,9 +392,8 @@ document.addEventListener('DOMContentLoaded', () => {
             labels.push(dateString.slice(5));
             data.push(postCountsByDate[dateString] || 0);
         }
-        const ctx = document.getElementById('postsOverTimeChart').getContext('2d');
         if (postsOverTimeChartInstance) postsOverTimeChartInstance.destroy();
-        postsOverTimeChartInstance = new Chart(ctx, {
+        postsOverTimeChartInstance = new Chart(ctx.getContext('2d'), {
             type: 'line',
             data: { labels, datasets: [{ label: 'New Posts', data, backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: 'rgba(59, 130, 246, 1)', borderWidth: 2, tension: 0.4, fill: true }] },
             options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
@@ -336,6 +401,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const renderPostsByCategoryChart = (snapshot) => {
+        const ctx = document.getElementById('postsByCategoryChart');
+        if (!ctx) return;
         const categoryCounts = {};
         snapshot.forEach(doc => {
             const category = doc.data().category || 'Uncategorized';
@@ -344,9 +411,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         const labels = Object.keys(categoryCounts);
         const data = Object.values(categoryCounts);
-        const ctx = document.getElementById('postsByCategoryChart').getContext('2d');
         if (postsByCategoryChartInstance) postsByCategoryChartInstance.destroy();
-        postsByCategoryChartInstance = new Chart(ctx, {
+        postsByCategoryChartInstance = new Chart(ctx.getContext('2d'), {
             type: 'doughnut',
             data: { labels, datasets: [{ label: 'Posts', data, backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#6366F1', '#EC4899'], hoverOffset: 4 }] }
         });
@@ -355,17 +421,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const setupMobileMenu = () => {
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const sidebar = document.getElementById('sidebar');
-
         if (mobileMenuBtn && sidebar) {
-            mobileMenuBtn.addEventListener('click', () => {
-                sidebar.classList.toggle('-translate-x-full');
-            });
-            
+            mobileMenuBtn.addEventListener('click', () => sidebar.classList.toggle('-translate-x-full'));
             document.querySelectorAll('#sidebar .nav-link').forEach(link => {
                 link.addEventListener('click', () => {
-                    if (window.innerWidth < 768) {
-                        sidebar.classList.add('-translate-x-full');
-                    }
+                    if (window.innerWidth < 768) sidebar.classList.add('-translate-x-full');
                 });
             });
         }
@@ -375,21 +435,31 @@ document.addEventListener('DOMContentLoaded', () => {
         navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
-                const targetView = link.dataset.view;
+                const targetViewId = link.dataset.view;
+                const targetView = document.getElementById(`${targetViewId}-view`);
                 if (!targetView) return;
+                
                 navLinks.forEach(nl => nl.classList.remove('active-nav'));
                 link.classList.add('active-nav');
+                
                 contentViews.forEach(view => view.classList.add('hidden'));
-                document.getElementById(`${targetView}-view`).classList.remove('hidden');
+                targetView.classList.remove('hidden');
             });
         });
     };
 
     const setupModal = () => {
         const closeButtons = document.querySelectorAll('#close-modal-btn, #modal-close-btn');
-        closeButtons.forEach(btn => btn.addEventListener('click', () => postModal.classList.remove('flex')));
+        if (!postModal) return;
+        closeButtons.forEach(btn => btn.addEventListener('click', () => {
+            postModal.classList.remove('flex');
+            postModal.classList.add('hidden');
+        }));
         postModal.addEventListener('click', (e) => {
-            if (e.target === postModal) postModal.classList.remove('flex');
+            if (e.target === postModal) {
+                postModal.classList.remove('flex');
+                postModal.classList.add('hidden');
+            }
         });
     };
 });

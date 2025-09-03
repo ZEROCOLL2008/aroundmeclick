@@ -250,3 +250,46 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// =========================================================================
+//     MOBILE CATEGORIES TOGGLE & HIDE ON SCROLL (FINAL SIMPLIFIED VERSION)
+// =========================================================================
+document.addEventListener('DOMContentLoaded', () => {
+    // This check ensures the code only runs if the relevant elements are on the page
+    if (document.getElementById('category-nav-bar')) {
+        
+        const categoryNavBar = document.getElementById('category-nav-bar');
+        const toggleCategoriesBtn = document.getElementById('toggle-categories-btn');
+        let lastScrollY = window.scrollY;
+
+        // Scroll listener: Always controls visibility based on scroll direction
+        window.addEventListener('scroll', () => {
+            // Only run on mobile screens
+            if (window.innerWidth >= 768) {
+                // On larger screens, ensure the bar is always visible and in position
+                categoryNavBar.classList.remove('-translate-y-full');
+                return;
+            }
+
+            const currentScrollY = window.scrollY;
+
+            // On scroll up, show. On scroll down (past 100px), hide.
+            if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                categoryNavBar.classList.add('-translate-y-full'); // Hide
+            } else if (currentScrollY < lastScrollY) {
+                categoryNavBar.classList.remove('-translate-y-full'); // Show
+            }
+
+            // Update the last scroll position
+            lastScrollY = currentScrollY <= 0 ? 0 : currentScrollY;
+        });
+
+        // Button listener: Simply toggles the current state
+        if (toggleCategoriesBtn && categoryNavBar) {
+            toggleCategoriesBtn.addEventListener('click', () => {
+                // The button just toggles the same class used by the scroll listener
+                categoryNavBar.classList.toggle('-translate-y-full');
+            });
+        }
+    }
+});

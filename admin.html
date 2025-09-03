@@ -7,6 +7,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tiny.cloud/1/g05mtt7puthyc4poi4et7fmwzo82ouqpbq3sqfwlmbm3qheq/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+
     <style>
         body { font-family: 'Inter', sans-serif; }
         .active-nav { background-color: #3B82F6; color: white !important; }
@@ -48,6 +51,7 @@
                     <li><a href="#" class="nav-link active-nav flex items-center px-6 py-3 text-gray-300 hover:bg-blue-600 rounded-md mx-2 transition-colors" data-view="dashboard">Dashboard</a></li>
                     <li><a href="#" class="nav-link flex items-center px-6 py-3 text-gray-300 hover:bg-blue-600 rounded-md mx-2 transition-colors" data-view="posts">Posts <span id="pending-count-badge" class="ml-auto bg-amber-500 text-white text-xs px-2 py-1 rounded-full">0</span></a></li>
                     <li><a href="#" class="nav-link flex items-center px-6 py-3 text-gray-300 hover:bg-blue-600 rounded-md mx-2 transition-colors" data-view="users">Users</a></li>
+                    <li><a href="#" class="nav-link flex items-center px-6 py-3 text-gray-300 hover:bg-blue-600 rounded-md mx-2 transition-colors" data-view="newsletter">Newsletter</a></li>
                 </ul>
             </nav>
         </div>
@@ -78,11 +82,8 @@
                 </div>
             </div>
 
-            <!-- === USERS VIEW UPDATED === -->
             <div id="users-view" class="content-view hidden">
                 <div class="mb-8"><h1 class="text-2xl md:text-3xl font-bold text-gray-900">User Management</h1><p class="text-gray-600 mt-2">Manage user accounts and permissions.</p></div>
-                
-                <!-- Search and Filter Controls -->
                 <div class="mb-4 p-4 bg-white rounded-lg shadow flex flex-col sm:flex-row items-center gap-4">
                     <div class="relative w-full sm:flex-1">
                         <input type="text" id="user-search-input" placeholder="Search by name or email..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -94,7 +95,6 @@
                         <button class="user-filter-btn px-4 py-2 text-sm font-medium border rounded-full transition-colors" data-role="user">Users</button>
                     </div>
                 </div>
-
                 <div class="bg-white rounded-lg shadow overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date Joined</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th><th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th></tr></thead>
@@ -103,6 +103,35 @@
                     </div>
                 </div>
             </div>
+
+            <div id="newsletter-view" class="content-view hidden">
+                <div class="mb-8">
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Send Newsletter</h1>
+                    <p class="text-gray-600 mt-2">Send a greeting or update to all your subscribers.</p>
+                </div>
+            
+                <div class="bg-white rounded-lg shadow p-6">
+                    <form id="newsletter-form">
+                        <div class="mb-4">
+                            <label for="newsletter-subject" class="block text-sm font-medium text-gray-700 mb-1">Email Subject</label>
+                            <input type="text" id="newsletter-subject" name="subject" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="e.g., Happy New Year!" required>
+                        </div>
+            
+                        <div class="mb-6">
+                            <label for="newsletter-content" class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                            <textarea id="newsletter-content" name="content"></textarea>
+                        </div>
+            
+                        <div class="flex justify-end items-center gap-4">
+                             <p id="newsletter-status" class="text-sm text-green-600 font-medium"></p>
+                             <button type="submit" id="send-newsletter-btn" class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300">
+                                Send to All Subscribers
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
         </main>
     </div>
     
@@ -146,10 +175,12 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
     <script src="app.js"></script>
+
     <script src="admin.js"></script>
 </body>
 </html>
