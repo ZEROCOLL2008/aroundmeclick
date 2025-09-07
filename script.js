@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 1. GLOBAL VARIABLES & SELECTORS ---
     let commentsListener = null;
     let lastVisiblePost = null;
+    let actionCode = null; // To store the password reset code
 
     const blogPostsGrid = document.getElementById('blog-posts-grid');
     const searchInput = document.getElementById('search-input');
@@ -11,33 +12,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const commentForm = document.getElementById('comment-form');
     const postModalContainer = document.getElementById('post-modal-container');
     const toggleFullscreenBtn = document.getElementById('toggle-fullscreen-btn');
-    const searchContainer = document.getElementById('search-container');
-    const searchIconBtn = document.getElementById('search-icon-btn');
     const categoriesContainer = document.getElementById('categories-container');
     const scrollLeftBtn = document.getElementById('scroll-left-btn');
     const scrollRightBtn = document.getElementById('scroll-right-btn');
     const loadMoreBtn = document.getElementById('load-more-btn');
+    
+    // Auth Modal Selectors
+    const loginModal = document.getElementById('login-modal');
+    const signupModal = document.getElementById('signup-modal'); // Added for close button logic
+    const resetPasswordModal = document.getElementById('reset-password-modal');
+    const resetPasswordForm = document.getElementById('reset-password-form');
+    const showResetPasswordLink = document.getElementById('show-reset-password-link');
+    const backToLoginLink = document.getElementById('back-to-login-link');
+    
+    // New Password Modal Selectors
+    const newPasswordModal = document.getElementById('new-password-modal');
+    const newPasswordForm = document.getElementById('new-password-form');
 
-    // --- Animated Search Bar Logic ---
-    if (searchIconBtn && searchInput && searchContainer) {
-        searchIconBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const isInactive = searchInput.classList.contains('w-0');
-            if (isInactive) {
-                searchInput.classList.remove('w-0', 'opacity-0');
-                searchInput.classList.add('w-full', 'opacity-100');
-                searchInput.focus();
+    // FIX: Add a listener for all modal close buttons
+    const allCloseButtons = document.querySelectorAll('.close-modal-btn');
+    allCloseButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const modal = button.closest('.modal-overlay');
+            if (modal) {
+                modal.classList.add('hidden');
             }
         });
-        document.addEventListener('click', (e) => {
-            const isClickInside = searchContainer.contains(e.target);
-            const isInactive = searchInput.classList.contains('w-0');
-            if (!isClickInside && !isInactive) {
-                searchInput.classList.remove('w-full', 'opacity-100');
-                searchInput.classList.add('w-0', 'opacity-0');
-            }
-        });
-    }
+    });
+
 
     // --- Categories Horizontal Scrolling Logic ---
     if (categoriesContainer && scrollLeftBtn && scrollRightBtn) {
@@ -51,60 +53,199 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===== NEWSLETTER SUBSCRIPTION LOGIC START =====
     const setupSubscriptionForm = () => {
         const subscribeForm = document.getElementById('subscribe-form');
-        if (!subscribeForm) {
-            return; // If the form doesn't exist on the page, do nothing.
+        // FIX: Check if the element exists before adding a listener
+        if (subscribeForm) {
+            subscribeForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const emailInput = document.getElementById('subscribe-email');
+                const messageEl = document.getElementById('subscribe-message');
+                const subscribeBtn = document.getElementById('subscribe-btn');
+                const email = emailInput.value.trim();
+
+                if (!email) {
+                    messageEl.textContent = "Please enter your email address.";
+                    messageEl.className = "text-sm text-center mt-3 text-red-500";
+                    return;
+                }
+
+                subscribeBtn.disabled = true;
+                subscribeBtn.textContent = 'Subscribing...';
+                messageEl.textContent = '';
+
+                try {
+                    await db.collection('subscribers').add({
+                        email: email,
+                        subscribedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    messageEl.textContent = "Thank you for subscribing! 🎉";
+                    messageEl.className = "text-sm text-center mt-3 text-green-600";
+                    emailInput.value = '';
+                } catch (error) {
+                    console.error("Error subscribing:", error);
+                    messageEl.textContent = "Could not subscribe. Check console for errors.";
+                    messageEl.className = "text-sm text-center mt-3 text-red-500";
+                } finally {
+                    setTimeout(() => {
+                        subscribeBtn.disabled = false;
+                        subscribeBtn.textContent = 'Subscribe';
+                    }, 3000);
+                }
+            });
         }
-
-        subscribeForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Stop the page from reloading on submit
-
-            const emailInput = document.getElementById('subscribe-email');
-            const messageEl = document.getElementById('subscribe-message');
-            const subscribeBtn = document.getElementById('subscribe-btn');
-            const email = emailInput.value.trim();
-
-            if (!email) {
-                messageEl.textContent = "Please enter your email address.";
-                messageEl.className = "text-sm text-center mt-3 text-red-500";
-                return;
-            }
-
-            subscribeBtn.disabled = true;
-            subscribeBtn.textContent = 'Subscribing...';
-            messageEl.textContent = '';
-
-            try {
-                // We will NOT check for existing emails to keep the read rules secure.
-                // We directly add the new subscriber.
-                await db.collection('subscribers').add({
-                    email: email,
-                    subscribedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                // We assume it's successful and show the success message.
-                messageEl.textContent = "Thank you for subscribing! 🎉";
-                messageEl.className = "text-sm text-center mt-3 text-green-600";
-                emailInput.value = '';
-
-            } catch (error) {
-                console.error("Error subscribing:", error);
-                messageEl.textContent = "Could not subscribe. Check console for errors.";
-                messageEl.className = "text-sm text-center mt-3 text-red-500";
-            } finally {
-                setTimeout(() => {
-                    subscribeBtn.disabled = false;
-                    subscribeBtn.textContent = 'Subscribe';
-                }, 3000);
-            }
-        });
     };
     // ===== NEWSLETTER SUBSCRIPTION LOGIC END =====
+    
+    // ===== PASSWORD RESET LOGIC START (UPDATED) =====
+   // ### UPDATED FUNCTION with Better Error Logging ###
+    const handlePasswordReset = () => {
+        if (resetPasswordForm) {
+            const actionCodeSettings = {
+                url: window.location.origin + window.location.pathname,
+                handleCodeInApp: true
+            };
+
+            resetPasswordForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const emailInput = document.getElementById('reset-email');
+                const messageEl = document.getElementById('reset-message');
+                const submitBtn = resetPasswordForm.querySelector('button[type="submit"]');
+                const email = emailInput.value.trim();
+
+                if (!email) {
+                    messageEl.textContent = 'Please enter your email.';
+                    messageEl.className = 'text-sm mt-3 text-red-500 text-center';
+                    return;
+                }
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Sending...';
+                messageEl.textContent = '';
+                
+                auth.sendPasswordResetEmail(email, actionCodeSettings).then(() => {
+                    messageEl.textContent = 'Success! Please check your email for a reset link.';
+                    messageEl.className = 'text-sm mt-3 text-green-600 text-center';
+                }).catch(error => {
+                    // This part is updated to show the real error
+                    console.error("Password Reset Error:", error.code, error.message); 
+                    
+                    if (error.code === 'auth/user-not-found') {
+                        messageEl.textContent = 'No account found with that email address.';
+                    } else {
+                        messageEl.textContent = 'An error occurred. Please try again.';
+                    }
+                    messageEl.className = 'text-sm mt-3 text-red-500 text-center';
+                }).finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Send Reset Link';
+                });
+            });
+        }
+    };
+    // ===== PASSWORD RESET LOGIC END =====
+
+    const handleNewPasswordSubmit = () => {
+        // FIX: Check if the element exists before adding a listener
+        if (newPasswordForm) {
+            newPasswordForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newPassword = document.getElementById('new-password-input').value;
+                const confirmPassword = document.getElementById('confirm-password-input').value;
+                const errorEl = document.getElementById('new-password-error');
+                const submitBtn = newPasswordForm.querySelector('button[type="submit"]');
+
+                errorEl.textContent = '';
+
+                if (newPassword.length < 6) {
+                    errorEl.textContent = 'Password must be at least 6 characters long.';
+                    return;
+                }
+                if (newPassword !== confirmPassword) {
+                    errorEl.textContent = 'Passwords do not match.';
+                    return;
+                }
+                if (!actionCode) {
+                    errorEl.textContent = 'Invalid or expired link. Please try again.';
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Saving...';
+                
+                auth.confirmPasswordReset(actionCode, newPassword).then(() => {
+                    alert('Password has been reset successfully! Please sign in with your new password.');
+                    if(newPasswordModal) newPasswordModal.classList.add('hidden');
+                    if(loginModal) loginModal.classList.remove('hidden');
+                    
+                    const url = new URL(window.location);
+                    url.searchParams.delete('mode');
+                    url.searchParams.delete('oobCode');
+                    url.searchParams.delete('apiKey');
+                    url.searchParams.delete('lang');
+                    window.history.replaceState({}, '', url);
+
+                }).catch(error => {
+                    console.error("Confirm Password Reset Error:", error);
+                    errorEl.textContent = 'Failed to reset password. The link may have expired.';
+                }).finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Save New Password';
+                    actionCode = null;
+                });
+            });
+        }
+    };
+    
+ // ### DEBUGGING FUNCTION ###
+    const handleActionFromURL = () => {
+        console.log("1. handleActionFromURL function CALLED.");
+
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            console.log("2. onAuthStateChanged listener FIRED.");
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+            const oobCode = urlParams.get('oobCode');
+
+            console.log("3. Checking URL params:", { mode, oobCode });
+
+            if (mode === 'resetPassword' && oobCode) {
+                console.log("4. Password reset mode DETECTED. Verifying code...");
+                actionCode = oobCode;
+
+                auth.verifyPasswordResetCode(oobCode)
+                .then(email => {
+                    console.log(`5. SUCCESS: Code verified for email: ${email}. Opening modal...`);
+                    document.querySelectorAll('.modal-overlay').forEach(modal => modal.classList.add('hidden'));
+                    
+                    if (newPasswordModal) {
+                        newPasswordModal.classList.remove('hidden');
+                        console.log("6. New password modal should be VISIBLE now.");
+                    } else {
+                        console.error("ERROR: newPasswordModal element not found on page!");
+                    }
+                })
+                .catch(error => {
+                    console.error("5. FAILED: Could not verify password reset code.", error);
+                    alert('The password reset link is invalid or has expired. Please try again.');
+                    actionCode = null;
+
+                    const url = new URL(window.location);
+                    url.searchParams.delete('mode');
+                    url.searchParams.delete('oobCode');
+                    window.history.replaceState({}, '', url);
+                });
+            } else {
+                console.log("4. No password reset mode detected in URL.");
+            }
+            
+            unsubscribe();
+        });
+    };
 
     const handleFollowClick = async (authorIdToFollow) => {
         const currentUser = auth.currentUser;
         if (!currentUser) {
             alert("Please sign in to follow authors.");
-            document.getElementById('login-modal')?.classList.remove('hidden');
+            if(loginModal) loginModal.classList.remove('hidden');
             return;
         }
         if (currentUser.uid === authorIdToFollow) {
@@ -165,9 +306,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (buttons.length === 0) return;
         let isFollowing = false;
         if (currentUser) {
-            const userDoc = await db.collection('users').doc(currentUser.uid).get();
-            const followingList = userDoc.data()?.following || [];
-            isFollowing = followingList.includes(authorId);
+            try {
+                const userDoc = await db.collection('users').doc(currentUser.uid).get();
+                if(userDoc.exists) {
+                    const followingList = userDoc.data().following || [];
+                    isFollowing = followingList.includes(authorId);
+                }
+            } catch (e) { console.error("Could not check follow status: ", e); }
         }
         buttons.forEach(button => {
             if (isFollowing) {
@@ -202,26 +347,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             } else {
                 const shareModal = document.getElementById('share-modal');
-                const shareLinkInput = document.getElementById('share-link-input');
-                const copyLinkBtn = document.getElementById('copy-link-btn');
-                const closeShareModalBtn = shareModal.querySelector('.close-share-modal');
-                const facebookShareBtn = document.getElementById('facebook-share-btn');
-                const whatsappShareBtn = document.getElementById('whatsapp-share-btn');
+                if (shareModal) {
+                    const shareLinkInput = document.getElementById('share-link-input');
+                    const copyLinkBtn = document.getElementById('copy-link-btn');
+                    const closeShareModalBtn = shareModal.querySelector('.close-share-modal');
+                    const facebookShareBtn = document.getElementById('facebook-share-btn');
+                    const whatsappShareBtn = document.getElementById('whatsapp-share-btn');
 
-                shareLinkInput.value = url;
-                facebookShareBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
-                whatsappShareBtn.href = `https://api.whatsapp.com/send?text=${encodedText}%20${encodedUrl}`;
-                shareModal.classList.remove('hidden');
-                
-                copyLinkBtn.textContent = 'Copy';
-                copyLinkBtn.onclick = () => {
-                    navigator.clipboard.writeText(url).then(() => {
-                        copyLinkBtn.textContent = 'Copied!';
-                        setTimeout(() => { copyLinkBtn.textContent = 'Copy'; }, 2000);
-                    });
-                };
-                
-                closeShareModalBtn.onclick = () => shareModal.classList.add('hidden');
+                    if(shareLinkInput) shareLinkInput.value = url;
+                    if(facebookShareBtn) facebookShareBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+                    if(whatsappShareBtn) whatsappShareBtn.href = `https://api.whatsapp.com/send?text=${encodedText}%20${encodedUrl}`;
+                    
+                    shareModal.classList.remove('hidden');
+                    
+                    if (copyLinkBtn) {
+                        copyLinkBtn.textContent = 'Copy';
+                        copyLinkBtn.onclick = () => {
+                            navigator.clipboard.writeText(url).then(() => {
+                                copyLinkBtn.textContent = 'Copied!';
+                                setTimeout(() => { copyLinkBtn.textContent = 'Copy'; }, 2000);
+                            });
+                        };
+                    }
+                    if(closeShareModalBtn) closeShareModalBtn.onclick = () => shareModal.classList.add('hidden');
+                }
             }
         } catch (error) {
             if (error.name !== 'AbortError') console.error("Error sharing post:", error);
@@ -229,14 +378,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     const checkUrlForPostId = () => {
-        console.log("Checking URL for post ID on page load...");
         const urlParams = new URLSearchParams(window.location.search);
         const postIdFromUrl = urlParams.get('post');
         if (postIdFromUrl) {
-            console.log(`Found post ID in URL: ${postIdFromUrl}. Attempting to open modal.`);
             openPostModal(postIdFromUrl);
-        } else {
-            console.log("No post ID found in URL.");
         }
     };
 
@@ -286,7 +431,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const user = auth.currentUser;
         if (!user) {
             alert("Please log in to like a post.");
-            document.getElementById('login-modal')?.classList.remove('hidden');
+            if(loginModal) loginModal.classList.remove('hidden');
             return;
         }
         const postRef = db.collection('posts').doc(postId);
@@ -367,6 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("Comment cannot be empty.");
             return;
         }
+        if (!commentForm) return;
         const submitButton = commentForm.querySelector('button[type="submit"]');
         submitButton.disabled = true;
         submitButton.textContent = 'Posting...';
@@ -421,21 +567,29 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const openPostModal = async (postId) => {
-        console.log(`openPostModal called for post ID: ${postId}`);
-        if (!postModal) {
-            console.error("Post modal element not found!");
-            return;
-        }
+        if (!postModal) return;
+
+        const loader = document.getElementById('post-modal-loader');
+        const contentWrapper = document.getElementById('post-modal-content-wrapper');
+
+        postModal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        if(loader) loader.classList.remove('hidden');
+        if(contentWrapper) contentWrapper.classList.add('invisible');
+
         try {
             const postDoc = await db.collection('posts').doc(postId).get();
             if (!postDoc.exists) {
-                console.error("Post not found in Firestore for ID:", postId);
                 alert("Sorry, the post you are looking for could not be found.");
+                closeModal();
                 return;
             }
             const post = { id: postDoc.id, ...postDoc.data() };
             if(commentForm) commentForm.dataset.postId = post.id;
-            document.getElementById('post-modal-title').textContent = post.title;
+            
+            const modalTitle = document.getElementById('post-modal-title');
+            if(modalTitle) modalTitle.textContent = post.title;
+
             const mediaContainer = document.getElementById('post-modal-media-container');
             if (mediaContainer) {
                 if (post.youtubeVideoId) {
@@ -453,7 +607,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const postModalDescription = document.getElementById('post-modal-description');
             if (postModalDescription) {
                 postModalDescription.innerHTML = post.content;
-                postModalDescription.className = 'text-ivory-brown font-inter leading-relaxed whitespace-pre-wrap text-base';
             }
             
             const currentUser = auth.currentUser;
@@ -467,6 +620,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (shareBtnModal) shareBtnModal.dataset.postId = post.id;
             const isLiked = currentUser && post.likedBy && post.likedBy.includes(currentUser.uid);
             updateLikeButtonUI(post.id, isLiked, post.likesCount || 0);
+            
             const commentFormContainer = document.getElementById('comment-form-container');
             const commentLoginPrompt = document.getElementById('comment-login-prompt');
             const commentUserAvatar = document.getElementById('comment-user-avatar');
@@ -482,10 +636,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             loadComments(post.id);
 
-            console.log("Successfully fetched post data. Displaying modal.");
-            document.body.classList.add('overflow-hidden'); // Prevent background scrolling
-            postModal.classList.remove('hidden');
-        
+            if(loader) loader.classList.add('hidden');
+            if(contentWrapper) contentWrapper.classList.remove('invisible');
+            
             const url = new URL(window.location);
             url.searchParams.set('post', postId);
             window.history.pushState({ postId: postId }, '', url);
@@ -493,6 +646,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error("Error opening post modal:", error);
             alert("An error occurred while trying to load the post.");
+            closeModal();
         }
     };
 
@@ -516,31 +670,38 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             lastVisiblePost = snapshot.docs[snapshot.docs.length - 1];
             if (loadMoreBtn) loadMoreBtn.classList.toggle('hidden', snapshot.docs.length < 12);
-            let posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            if (searchTerm) {
-                posts = posts.filter(post =>
-                    (post.title && post.title.toLowerCase().includes(searchTerm)) ||
-                    (post.tags && post.tags.some(tag => tag.toLowerCase().includes(searchTerm))) ||
-                    (post.content && post.content.toLowerCase().includes(searchTerm))
-                );
+            
+            const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            // Note: Client-side search is not ideal for large datasets.
+            const filteredPosts = searchTerm ? posts.filter(post =>
+                (post.title && post.title.toLowerCase().includes(searchTerm)) ||
+                (post.tags && post.tags.some(tag => tag.toLowerCase().includes(searchTerm))) ||
+                (post.content && post.content.toLowerCase().includes(searchTerm))
+            ) : posts;
+
+            if (filteredPosts.length === 0 && !loadMore) {
+                 blogPostsGrid.innerHTML = '<p class="col-span-full text-center text-slate-500">No posts match your search.</p>';
             }
-            posts.forEach(post => {
+
+            filteredPosts.forEach(post => {
                 const postCard = document.createElement('article');
-                postCard.className = 'post-card flex flex-col rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-ivory';
+                postCard.className = 'post-card flex flex-col rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-ivory cursor-pointer open-modal-trigger';
                 postCard.dataset.postId = post.id;
+
                 const mediaHtml = post.youtubeVideoId ?
-                    `<div class="aspect-video bg-black cursor-pointer open-modal-trigger"><iframe class="w-full h-full pointer-events-none" src="https://www.youtube.com/embed/${post.youtubeVideoId}" title="YouTube video player" frameborder="0"></iframe></div>` :
-                    `<div class="relative overflow-hidden w-full h-56 cursor-pointer open-modal-trigger"><img src="${post.imageUrl || 'https://picsum.photos/400/300'}" alt="${post.title}" class="w-full h-full object-cover transition duration-300 ease-in-out hover:scale-110"></div>`;
+                    `<div class="aspect-video bg-black"><iframe class="w-full h-full pointer-events-none" src="https://www.youtube.com/embed/${post.youtubeVideoId}" title="YouTube video player" frameborder="0"></iframe></div>` :
+                    `<div class="relative overflow-hidden w-full h-56"><img src="${post.imageUrl || 'https://picsum.photos/400/300'}" alt="${post.title}" class="w-full h-full object-cover transition duration-300 ease-in-out hover:scale-110"></div>`;
+                
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = post.content || '';
                 const excerpt = (tempDiv.textContent || '').substring(0, 80) + '...';
+
                 postCard.innerHTML = `
-                    <div class="open-modal-trigger cursor-pointer" data-post-id="${post.id}">
-                        ${mediaHtml}
-                    </div>
+                    ${mediaHtml}
                     <div class="p-5 flex flex-col flex-grow">
-                        <h2 class="font-bold font-lora text-lg mb-2 text-ivory-brown cursor-pointer open-modal-trigger" data-post-id="${post.id}">${post.title}</h2>
-                        <p class="text-classic-taupe text-sm mb-4 leading-relaxed flex-grow cursor-pointer open-modal-trigger" data-post-id="${post.id}">${excerpt}</p>
+                        <h2 class="font-bold font-lora text-lg mb-2 text-ivory-brown">${post.title}</h2>
+                        <p class="text-classic-taupe text-sm mb-4 leading-relaxed flex-grow">${excerpt}</p>
                         <div class="mt-auto pt-4 border-t border-ivory-linen">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center">
@@ -551,16 +712,16 @@ document.addEventListener('DOMContentLoaded', () => {
                                     </div>
                                 </div>
                                 <div class="flex items-center space-x-4">
-                                    <button class="like-btn flex items-center space-x-1 text-classic-taupe hover:text-red-500 transition-colors" data-like-id="${post.id}">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>
-                                        <span class="like-count font-medium text-sm">${post.likesCount || 0}</span>
+                                    <button class="like-btn flex items-center space-x-1 text-classic-taupe hover:text-red-500 transition-colors z-10 relative" data-like-id="${post.id}">
+                                        <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>
+                                        <span class="like-count font-medium text-sm pointer-events-none">${post.likesCount || 0}</span>
                                     </button>
-                                    <div class="flex items-center space-x-1 text-classic-taupe cursor-pointer open-modal-trigger" data-post-id="${post.id}">
+                                    <div class="flex items-center space-x-1 text-classic-taupe">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 5.523-4.477 10-10 10S1 17.523 1 12 5.477 2 11 2s10 4.477 10 10z"></path></svg>
                                         <span class="font-medium text-sm">${post.commentsCount || 0}</span>
                                     </div>
-                                    <button class="share-btn flex items-center justify-center w-8 h-8 rounded-full text-classic-taupe hover:bg-pastel-ivory hover:text-blue-500 transition-colors" data-post-id="${post.id}">
-                                        <span class="text-xl font-bold transform rotate-90 inline-block">&#10144;</span>
+                                    <button class="share-btn flex items-center justify-center w-8 h-8 rounded-full text-classic-taupe hover:bg-pastel-ivory hover:text-blue-500 transition-colors z-10 relative" data-post-id="${post.id}">
+                                        <span class="text-xl font-bold transform rotate-90 inline-block pointer-events-none">&#10144;</span>
                                     </button>
                                 </div>
                             </div>
@@ -571,17 +732,15 @@ document.addEventListener('DOMContentLoaded', () => {
             checkInitialLikeStatus(auth.currentUser);
         } catch (error) {
             console.error("Error fetching posts:", error);
-            blogPostsGrid.innerHTML = '<p class="col-span-full text-center text-red-500">Could not load posts.</p>';
+            if(blogPostsGrid) blogPostsGrid.innerHTML = '<p class="col-span-full text-center text-red-500">Could not load posts.</p>';
         }
     };
     
     const closeModalUI = () => {
-        document.body.classList.remove('overflow-hidden'); // Re-enable background scrolling
+        document.body.classList.remove('overflow-hidden');
         if (postModal) {
             const mediaContainer = document.getElementById('post-modal-media-container');
-            if (mediaContainer) {
-                mediaContainer.innerHTML = '';
-            }
+            if (mediaContainer) mediaContainer.innerHTML = '';
             postModal.classList.add('hidden');
         }
         if (commentsListener) commentsListener();
@@ -607,7 +766,7 @@ document.addEventListener('DOMContentLoaded', () => {
             searchInput.addEventListener('input', (e) => {
                 clearTimeout(debounceTimer);
                 debounceTimer = setTimeout(() => {
-                    const activeCategory = document.querySelector('.category-button.active')?.dataset.category || 'all';
+                    const activeCategory = document.querySelector('.category-button.bg-ivory-brown')?.dataset.category || 'all';
                     fetchAndDisplayPosts(e.target.value.toLowerCase(), activeCategory);
                 }, 500);
             });
@@ -616,10 +775,10 @@ document.addEventListener('DOMContentLoaded', () => {
         categoryButtons.forEach(button => {
             button.addEventListener('click', () => {
                 categoryButtons.forEach(btn => {
-                    btn.classList.remove('active', 'bg-ivory-brown', 'text-off-white');
+                    btn.classList.remove('bg-ivory-brown', 'text-off-white');
                     btn.classList.add('bg-pastel-ivory', 'text-ivory-brown');
                 });
-                button.classList.add('active', 'bg-ivory-brown', 'text-off-white');
+                button.classList.add('bg-ivory-brown', 'text-off-white');
                 button.classList.remove('bg-pastel-ivory', 'text-ivory-brown');
                 fetchAndDisplayPosts(searchInput.value.toLowerCase(), button.dataset.category);
             });
@@ -631,6 +790,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const followBtn = e.target.closest('.follow-btn');
             const shareBtn = e.target.closest('.share-btn');
             
+            if (likeBtn || followBtn || shareBtn) {
+                e.stopPropagation(); 
+            }
+
             if (shareBtn) {
                 e.preventDefault();
                 const postId = shareBtn.dataset.postId;
@@ -677,7 +840,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         const loginFromCommentBtn = document.getElementById('login-from-comment-btn');
-        const loginModal = document.getElementById('login-modal');
         if (loginFromCommentBtn && loginModal) {
             loginFromCommentBtn.addEventListener('click', () => {
                 closeModal();
@@ -701,11 +863,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 closeModalUI();
             }
         });
+
+        if (showResetPasswordLink && loginModal && resetPasswordModal) {
+            showResetPasswordLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                loginModal.classList.add('hidden');
+                resetPasswordModal.classList.remove('hidden');
+            });
+        }
+        if (backToLoginLink && loginModal && resetPasswordModal) {
+            backToLoginLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                resetPasswordModal.classList.add('hidden');
+                loginModal.classList.remove('hidden');
+            });
+        }
     };
 
     if (loadMoreBtn) {
         loadMoreBtn.addEventListener('click', () => {
-            const selectedCategory = document.querySelector('.category-button.active')?.dataset.category || 'all';
+            const selectedCategory = document.querySelector('.category-button.bg-ivory-brown')?.dataset.category || 'all';
             fetchAndDisplayPosts(searchInput.value.toLowerCase(), selectedCategory, true);
         });
     }
@@ -713,6 +890,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 4. INITIAL PAGE LOAD ---
     setupSubscriptionForm();
+    handlePasswordReset();
+    handleNewPasswordSubmit();
+    handleActionFromURL();
     setupHeroBackgroundSlider(); 
     setupFeaturedPostsSlider(); 
     fetchAndDisplayPosts();
@@ -721,6 +901,7 @@ document.addEventListener('DOMContentLoaded', () => {
     checkUrlForPostId();
 });
 
+// Helper functions (unchanged)
 async function displayTopAuthorsByLikes() {
     const container = document.getElementById('popular-authors-container');
     if (!container) return;
@@ -739,15 +920,17 @@ async function displayTopAuthorsByLikes() {
             const authorId = post.authorId;
             const likes = post.likesCount || 0;
 
-            if (!authorData[authorId]) {
-                authorData[authorId] = {
-                    id: authorId,
-                    displayName: post.authorName,
-                    photoURL: post.authorAvatar,
-                    totalLikes: 0
-                };
+            if (authorId) {
+                if (!authorData[authorId]) {
+                    authorData[authorId] = {
+                        id: authorId,
+                        displayName: post.authorName,
+                        photoURL: post.authorAvatar,
+                        totalLikes: 0
+                    };
+                }
+                authorData[authorId].totalLikes += likes;
             }
-            authorData[authorId].totalLikes += likes;
         });
 
         const sortedAuthors = Object.values(authorData).sort((a, b) => b.totalLikes - a.totalLikes);
@@ -850,17 +1033,15 @@ async function setupFeaturedPostsSlider() {
             .get();
 
         if (snapshot.empty) {
-            document.getElementById('featured-swiper').parentElement.style.display = 'none';
+            const featuredSection = document.getElementById('featured-swiper');
+            if(featuredSection) featuredSection.parentElement.style.display = 'none';
             return;
         }
 
         let slidesHTML = '';
         snapshot.forEach(doc => {
             const post = { id: doc.id, ...doc.data() };
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = post.content || '';
-            const excerpt = (tempDiv.textContent || '').substring(0, 150) + '...';
-
+            
             slidesHTML += `
                <div class="swiper-slide flex flex-col md:flex-row bg-ivory cursor-pointer open-modal-trigger md:h-80" data-post-id="${post.id}">
                     <div class="md:w-1/2 h-64 md:h-full">
@@ -907,6 +1088,7 @@ async function setupFeaturedPostsSlider() {
 
     } catch (error) {
         console.error("Error setting up featured posts slider:", error);
-        document.getElementById('featured-swiper').parentElement.style.display = 'none';
+        const featuredSection = document.getElementById('featured-swiper');
+        if(featuredSection) featuredSection.parentElement.style.display = 'none';
     }
 }

@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // This check is important. It ensures the config file has loaded.
     if (typeof firebase === 'undefined' || typeof auth === 'undefined' || typeof db === 'undefined') {
-        console.error("Firebase not initialized. Make sure firebase-config.js is loaded before admin.js.");
+        console.error("Firebase not initialized. Make sure app.js is loaded before admin.js.");
         return;
     }
 
@@ -20,15 +20,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmModalMessage = document.getElementById('confirm-modal-message');
     const userSearchInput = document.getElementById('user-search-input');
     const userFilterButtons = document.querySelectorAll('.user-filter-btn');
+    const applicationsTableBody = document.getElementById('applications-table-body');
+    const pendingAppsBadge = document.getElementById('pending-apps-badge');
+    const appFilterButtons = document.querySelectorAll('.app-filter-btn'); // ** NEW **
 
     // --- AUTH GUARD ---
     auth.onAuthStateChanged(async (user) => {
         if (user) {
             const userDoc = await db.collection('users').doc(user.uid).get();
-            if (userDoc.exists && userDoc.data().role === 'admin') {
-                initializeApp();
+            if (userDoc.exists) {
+                const userData = userDoc.data();
+                if (userData.role === 'admin' || userData.role === 'pro') {
+                    initializeApp(userData.role);
+                } else {
+                    console.warn("Access Denied. User is not an admin or pro user.");
+                    window.location.href = 'index.html';
+                }
             } else {
-                console.warn("Access Denied. User is not an admin.");
+                console.warn("User document not found.");
                 window.location.href = 'index.html';
             }
         } else {
@@ -37,31 +46,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const initializeApp = async () => {
-        if(postsTableBody) {
-             postsTableBody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-500">Loading all data...</td></tr>`;
+    // --- INITIALIZE APP ---
+    const initializeApp = async (userRole) => {
+        if (postsTableBody) {
+            postsTableBody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-500">Loading all data...</td></tr>`;
         }
-       
-        const [postsSnapshot, usersSnapshot, pendingCountSnapshot] = await Promise.all([
+        
+        const [postsSnapshot, usersSnapshot, pendingPostsSnapshot] = await Promise.all([
             db.collection('posts').orderBy('createdAt', 'desc').get(),
-            db.collection('users').get(),
+            db.collection('users').orderBy('createdAt', 'desc').get(),
             db.collection('posts').where('status', '==', 'pending').get()
         ]);
         
         allUsers = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        loadDashboardStats(postsSnapshot, usersSnapshot, pendingCountSnapshot);
+        const appLink = document.querySelector('.nav-link[data-view="applications"]');
+        if (userRole === 'pro') {
+            document.querySelector('.nav-link[data-view="dashboard"]').parentElement.style.display = 'none';
+            document.querySelector('.nav-link[data-view="users"]').parentElement.style.display = 'none';
+            document.querySelector('.nav-link[data-view="newsletter"]').parentElement.style.display = 'none';
+            if (appLink) appLink.parentElement.style.display = 'none';
+
+            contentViews.forEach(view => view.classList.add('hidden'));
+            document.getElementById('posts-view').classList.remove('hidden');
+            navLinks.forEach(nl => nl.classList.remove('active-nav'));
+            document.querySelector('.nav-link[data-view="posts"]').classList.add('active-nav');
+        } else if (userRole === 'admin') {
+            loadDashboardStats(postsSnapshot, usersSnapshot, pendingPostsSnapshot);
+            renderPostsOverTimeChart(postsSnapshot);
+            renderPostsByCategoryChart(postsSnapshot);
+            loadApplications('plusApplications'); // Load default application tab
+        }
+        
         loadPosts(postsSnapshot);
         renderUsersTable(allUsers);
-        renderPostsOverTimeChart(postsSnapshot);
-        renderPostsByCategoryChart(postsSnapshot);
         
         setupMobileMenu();
         setupNavigation();
         setupModal();
         setupActionListeners();
         setupUserFilters();
-        setupNewsletterForm(); // <-- Calling the new newsletter function
+        setupApplicationFilters(); // ** NEW **
+        setupNewsletterForm();
     };
 
     // --- HELPER FUNCTIONS (Modals) ---
@@ -131,24 +157,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         usersToRender.forEach(user => {
             const joinDate = user.createdAt ? new Date(user.createdAt.toDate()).toLocaleDateString() : 'N/A';
-            const roleColors = { admin: 'bg-blue-100 text-blue-800', user: 'bg-gray-100 text-gray-800' };
+            const roleColors = {
+                admin: 'bg-blue-100 text-blue-800',
+                pro: 'bg-purple-100 text-purple-800',
+                plus: 'bg-sky-100 text-sky-800',
+                normal: 'bg-gray-100 text-gray-800'
+            };
             const tr = document.createElement('tr');
             tr.className = 'hover:bg-gray-50';
 
-            let actionButtonHTML = '';
+            let actionControlHTML = '';
+            const roles = ['normal', 'plus', 'pro', 'admin'];
+
             if (user.id === auth.currentUser.uid) {
-                actionButtonHTML = '<span>(You)</span>';
-            } else if (user.role === 'admin') {
-                actionButtonHTML = `<button class="remove-admin-btn text-amber-600 hover:text-amber-800" data-id="${user.id}">Remove Admin</button>`;
+                actionControlHTML = '<span>(You)</span>';
             } else {
-                actionButtonHTML = `<button class="make-admin-btn text-blue-600 hover:text-blue-800" data-id="${user.id}">Make Admin</button>`;
+                const options = roles.map(role => 
+                    `<option value="${role}" ${user.role === role ? 'selected' : ''}>
+                        ${role.charAt(0).toUpperCase() + role.slice(1)}
+                    </option>`
+                ).join('');
+                actionControlHTML = `<select class="role-select border border-gray-300 rounded-md p-1 text-sm focus:ring-blue-500 focus:border-blue-500" data-id="${user.id}">${options}</select>`;
             }
 
             tr.innerHTML = `
                 <td class="px-6 py-4"><div class="text-sm font-medium text-gray-900">${user.displayName}</div><div class="text-sm text-gray-500">${user.email}</div></td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${joinDate}</td>
-                <td class="px-6 py-4 whitespace-nowrap"><span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${roleColors[user.role] || roleColors.user}">${user.role}</span></td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">${actionButtonHTML}</td>`;
+                <td class="px-6 py-4 whitespace-nowrap"><span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${roleColors[user.role] || roleColors.normal}">${user.role}</span></td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">${actionControlHTML}</td>`;
             usersTableBody.appendChild(tr);
         });
     };
@@ -192,7 +228,79 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // ** UPDATED FUNCTION to handle different application types **
+    const loadApplications = async (applicationType = 'plusApplications') => {
+        if (!applicationsTableBody) return;
+        applicationsTableBody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-500">Loading applications...</td></tr>`;
+        
+        try {
+            const snapshot = await db.collection(applicationType).orderBy('submittedAt', 'desc').get();
+            
+            // Fetch total pending count for the badge
+            const [plusPending, proPending] = await Promise.all([
+                db.collection('plusApplications').where('status', '==', 'pending').get(),
+                db.collection('proApplications').where('status', '==', 'pending').get()
+            ]);
+            const totalPendingCount = plusPending.size + proPending.size;
+            if (pendingAppsBadge) pendingAppsBadge.textContent = totalPendingCount;
+
+            applicationsTableBody.innerHTML = '';
+            if (snapshot.empty) {
+                const typeName = applicationType === 'plusApplications' ? 'Plus' : 'Pro';
+                applicationsTableBody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-500">No ${typeName} applications found.</td></tr>`;
+            } else {
+                snapshot.forEach(doc => {
+                    const app = { id: doc.id, ...doc.data() };
+                    const appDate = app.submittedAt ? new Date(app.submittedAt.toDate()).toLocaleDateString() : 'N/A';
+                    const statusColors = {
+                        pending: 'bg-amber-100 text-amber-800',
+                        approved: 'bg-green-100 text-green-800',
+                        rejected: 'bg-red-100 text-red-800'
+                    };
+
+                    let actionButtons = 'No actions available';
+                    if (app.status === 'pending') {
+                        actionButtons = `
+                            <button class="approve-app-btn px-3 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-md hover:bg-green-200" data-app-id="${app.id}" data-user-id="${app.userId}" data-type="${applicationType}">Approve</button>
+                            <button class="reject-app-btn px-3 py-1 text-xs font-medium bg-red-100 text-red-700 rounded-md hover:bg-red-200" data-app-id="${app.id}" data-type="${applicationType}">Reject</button>
+                        `;
+                    }
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900">${app.displayName}</div>
+                            <div class="text-sm text-gray-500">${app.email}</div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600 max-w-sm truncate" title="${app.reason}">${app.reason}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${appDate}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColors[app.status]}">${app.status}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">${actionButtons}</td>
+                    `;
+                    applicationsTableBody.appendChild(tr);
+                });
+            }
+        } catch (error) {
+            console.error(`Error loading applications from ${applicationType}:`, error);
+            applicationsTableBody.innerHTML = `<tr><td colspan="5" class="text-center p-6 text-red-500">Error loading applications.</td></tr>`;
+        }
+    };
+
     // --- UI SETUP & EVENT LISTENERS ---
+    
+    // ** NEW FUNCTION to handle application tab clicks **
+    const setupApplicationFilters = () => {
+        appFilterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                appFilterButtons.forEach(btn => btn.classList.remove('is-active'));
+                button.classList.add('is-active');
+                const applicationType = button.dataset.type;
+                loadApplications(applicationType);
+            });
+        });
+    };
 
     const setupUserFilters = () => {
         if (!userSearchInput) return;
@@ -225,73 +333,106 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const setupActionListeners = () => {
         document.body.addEventListener('click', async (e) => {
-            const id = e.target.dataset.id;
-            if (!id) return; // Exit if no ID is found
-
+            const target = e.target;
+            
             // Post Actions
-            if (e.target.matches('.view-post')) {
-                e.preventDefault();
-                const doc = await db.collection('posts').doc(id).get();
-                if (doc.exists) openPostModal({ id: doc.id, ...doc.data() });
-            }
-            if (e.target.matches('.approve-post-btn, #modal-approve-btn')) {
-                await db.collection('posts').doc(id).update({ status: 'approved' });
-                await initializeApp();
-                if(postModal) {
-                    postModal.classList.remove('flex');
-                    postModal.classList.add('hidden');
-                }
-            }
-            if (e.target.matches('.reject-post-btn, #modal-reject-btn')) {
-                 await db.collection('posts').doc(id).update({ status: 'rejected' });
-                 await initializeApp();
-                 if(postModal) {
-                    postModal.classList.remove('flex');
-                    postModal.classList.add('hidden');
-                 }
-            }
-            if (e.target.matches('.delete-post-btn')) {
-                const isConfirmed = await showConfirmationModal('Delete Post', 'This action is permanent and cannot be undone.');
-                if (isConfirmed) {
-                    await db.collection('posts').doc(id).delete();
-                    await initializeApp();
-                }
-            }
-
-            // User Role Update Logic
-            const updateUserRole = async (userId, newRole) => {
-                await db.collection('users').doc(userId).update({ role: newRole });
-                const userIndex = allUsers.findIndex(u => u.id === userId);
-                if (userIndex > -1) allUsers[userIndex].role = newRole;
+            if (target.matches('.view-post, .approve-post-btn, .reject-post-btn, .delete-post-btn, #modal-approve-btn, #modal-reject-btn')) {
+                const id = target.dataset.id;
+                if (!id) return;
                 
-                // Re-apply current filters to update the view
-                const currentSearchTerm = userSearchInput.value.toLowerCase();
-                const currentActiveFilter = document.querySelector('.user-filter-btn.active').dataset.role;
-                let usersToDisplay = allUsers;
-                if (currentActiveFilter !== 'all') {
-                    usersToDisplay = usersToDisplay.filter(user => user.role === currentActiveFilter);
+                if (target.matches('.view-post')) {
+                    e.preventDefault();
+                    const doc = await db.collection('posts').doc(id).get();
+                    if (doc.exists) openPostModal({ id: doc.id, ...doc.data() });
                 }
-                if (currentSearchTerm) {
-                    usersToDisplay = usersToDisplay.filter(user =>
-                        (user.displayName && user.displayName.toLowerCase().includes(currentSearchTerm)) ||
-                        (user.email && user.email.toLowerCase().includes(currentSearchTerm))
-                    );
+                if (target.matches('.approve-post-btn, #modal-approve-btn')) {
+                    await db.collection('posts').doc(id).update({ status: 'approved' });
+                    initializeApp( (await db.collection('users').doc(auth.currentUser.uid).get()).data().role );
                 }
-                renderUsersTable(usersToDisplay);
-            };
-
-            if (e.target.matches('.make-admin-btn')) {
-                await updateUserRole(id, 'admin');
+                if (target.matches('.reject-post-btn, #modal-reject-btn')) {
+                    await db.collection('posts').doc(id).update({ status: 'rejected' });
+                    initializeApp( (await db.collection('users').doc(auth.currentUser.uid).get()).data().role );
+                }
+                if (target.matches('.delete-post-btn')) {
+                    if (await showConfirmationModal('Delete Post?', 'This action is permanent and cannot be undone.')) {
+                        await db.collection('posts').doc(id).delete();
+                        initializeApp( (await db.collection('users').doc(auth.currentUser.uid).get()).data().role );
+                    }
+                }
             }
-            if (e.target.matches('.remove-admin-btn')) {
-                await updateUserRole(id, 'user');
+
+            // ** UPDATED Application Actions to be dynamic **
+            if (target.matches('.approve-app-btn') || target.matches('.reject-app-btn')) {
+                const appId = target.dataset.appId;
+                const userId = target.dataset.userId;
+                const appType = target.dataset.type;
+
+                if (!appId || !appType) return;
+                
+                const activeTab = document.querySelector('.app-filter-btn.is-active').dataset.type;
+
+                if (target.matches('.approve-app-btn')) {
+                    if (!userId) return;
+                    const newRole = appType === 'proApplications' ? 'pro' : 'plus';
+                    const confirmMessage = `This will change the user's role to "${newRole.charAt(0).toUpperCase() + newRole.slice(1)}".`;
+
+                    if (await showConfirmationModal('Approve Application?', confirmMessage)) {
+                        const userRef = db.collection('users').doc(userId);
+                        const appRef = db.collection(appType).doc(appId);
+                        try {
+                            const batch = db.batch();
+                            batch.update(userRef, { role: newRole });
+                            batch.update(appRef, { status: 'approved' });
+                            await batch.commit();
+                            alert('User approved successfully!');
+                            loadApplications(activeTab); // Refresh current tab
+                            // Refresh all users data
+                            const usersSnapshot = await db.collection('users').orderBy('createdAt', 'desc').get();
+                            allUsers = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                            renderUsersTable(allUsers); // Re-render users table with updated role
+                        } catch (error) {
+                            console.error("Error approving user:", error);
+                            alert('Could not approve the user.');
+                        }
+                    }
+                }
+
+                if (target.matches('.reject-app-btn')) {
+                     if (await showConfirmationModal('Reject Application?', 'This will mark the application as rejected.')) {
+                        try {
+                            await db.collection(appType).doc(appId).update({ status: 'rejected' });
+                            alert('Application rejected.');
+                            loadApplications(activeTab); // Refresh current tab
+                        } catch (error) {
+                            console.error("Error rejecting application:", error);
+                            alert('Could not reject the application.');
+                        }
+                    }
+                }
+            }
+        });
+
+        document.body.addEventListener('change', async (e) => {
+            if (e.target.matches('.role-select')) {
+                const userId = e.target.dataset.id;
+                const newRole = e.target.value;
+                if (userId && newRole) {
+                    try {
+                        await db.collection('users').doc(userId).update({ role: newRole });
+                        const userIndex = allUsers.findIndex(u => u.id === userId);
+                        if(userIndex > -1) allUsers[userIndex].role = newRole;
+                        renderUsersTable(allUsers);
+                    } catch (error) {
+                        console.error("Error updating user role:", error);
+                        alert("Failed to update user role.");
+                    }
+                }
             }
         });
     };
     
-    // ===== NEWSLETTER LOGIC START =====
+    // ===== NEWSLETTER LOGIC =====
     const setupNewsletterForm = () => {
-        // Initialize TinyMCE for the newsletter
         if (typeof tinymce !== 'undefined') {
             tinymce.init({
                 selector: '#newsletter-content',
@@ -302,42 +443,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 placeholder: 'Write your greeting message here...',
             }).catch(err => console.error("TinyMCE Init Error:", err));
         }
-
         const newsletterForm = document.getElementById('newsletter-form');
         if (!newsletterForm) return;
-
         newsletterForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const subjectInput = document.getElementById('newsletter-subject');
             const content = tinymce.get('newsletter-content').getContent();
             const statusEl = document.getElementById('newsletter-status');
             const sendBtn = document.getElementById('send-newsletter-btn');
-
             if (!subjectInput.value.trim() || !content.trim()) {
                 alert('Please fill in both the subject and the message.');
                 return;
             }
-
             sendBtn.disabled = true;
             sendBtn.textContent = 'Scheduling...';
             statusEl.textContent = '';
             statusEl.className = 'text-sm text-gray-600 font-medium';
-
             try {
-                // Create a "task" in Firestore for the Cloud Function to handle.
                 await db.collection('emailCampaigns').add({
                     subject: subjectInput.value,
                     htmlContent: content,
-                    status: 'pending', // The Cloud Function will look for this
+                    status: 'pending',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
-
                 statusEl.textContent = '✅ Campaign scheduled!';
                 statusEl.className = 'text-sm text-green-600 font-medium';
                 newsletterForm.reset();
                 tinymce.get('newsletter-content').setContent('');
-
             } catch (error) {
                 console.error("Error scheduling campaign:", error);
                 statusEl.textContent = '❌ Error! Could not schedule.';
@@ -351,10 +483,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     };
-    // ===== NEWSLETTER LOGIC END =====
-
-    // --- OTHER FUNCTIONS ---
     
+    // --- OTHER FUNCTIONS ---
     const generateActionButtonsHTML = (post) => {
         let buttonsHTML = '';
         const status = post.status;
@@ -438,10 +568,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const targetViewId = link.dataset.view;
                 const targetView = document.getElementById(`${targetViewId}-view`);
                 if (!targetView) return;
-                
                 navLinks.forEach(nl => nl.classList.remove('active-nav'));
                 link.classList.add('active-nav');
-                
                 contentViews.forEach(view => view.classList.add('hidden'));
                 targetView.classList.remove('hidden');
             });

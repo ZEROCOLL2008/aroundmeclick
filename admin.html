@@ -25,6 +25,18 @@
             color: white;
             border-color: #3B82F6;
         }
+        .app-filter-btn.is-active {
+            border-color: #3B82F6; /* blue-500 */
+            color: #2563EB; /* blue-600 */
+        }
+        .app-filter-btn {
+            border-color: transparent;
+            color: #6B7280; /* gray-500 */
+        }
+        .app-filter-btn:hover {
+            border-color: #D1D5DB; /* gray-300 */
+            color: #4B5563; /* gray-700 */
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -52,6 +64,7 @@
                     <li><a href="#" class="nav-link flex items-center px-6 py-3 text-gray-300 hover:bg-blue-600 rounded-md mx-2 transition-colors" data-view="posts">Posts <span id="pending-count-badge" class="ml-auto bg-amber-500 text-white text-xs px-2 py-1 rounded-full">0</span></a></li>
                     <li><a href="#" class="nav-link flex items-center px-6 py-3 text-gray-300 hover:bg-blue-600 rounded-md mx-2 transition-colors" data-view="users">Users</a></li>
                     <li><a href="#" class="nav-link flex items-center px-6 py-3 text-gray-300 hover:bg-blue-600 rounded-md mx-2 transition-colors" data-view="newsletter">Newsletter</a></li>
+                    <li><a href="#" class="nav-link flex items-center px-6 py-3 text-gray-300 hover:bg-blue-600 rounded-md mx-2" data-view="applications">Applications <span id="pending-apps-badge" class="ml-auto bg-green-500 text-white text-xs px-2 py-1 rounded-full">0</span></a></li>
                 </ul>
             </nav>
         </div>
@@ -89,10 +102,13 @@
                         <input type="text" id="user-search-input" placeholder="Search by name or email..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
-                    <div id="user-filter-buttons" class="flex items-center gap-2">
-                        <button class="user-filter-btn active px-4 py-2 text-sm font-medium border rounded-full transition-colors" data-role="all">All</button>
-                        <button class="user-filter-btn px-4 py-2 text-sm font-medium border rounded-full transition-colors" data-role="admin">Admins</button>
-                        <button class="user-filter-btn px-4 py-2 text-sm font-medium border rounded-full transition-colors" data-role="user">Users</button>
+                    <!-- *** UPDATED FILTER BUTTONS *** -->
+                    <div id="user-filter-buttons" class="flex items-center gap-2 flex-wrap justify-center sm:justify-end">
+                        <button class="user-filter-btn active px-3 py-1.5 md:px-4 md:py-2 text-sm font-medium border rounded-full transition-colors" data-role="all">All</button>
+                        <button class="user-filter-btn px-3 py-1.5 md:px-4 md:py-2 text-sm font-medium border rounded-full transition-colors" data-role="admin">Admins</button>
+                        <button class="user-filter-btn px-3 py-1.5 md:px-4 md:py-2 text-sm font-medium border rounded-full transition-colors" data-role="pro">Pro</button>
+                        <button class="user-filter-btn px-3 py-1.5 md:px-4 md:py-2 text-sm font-medium border rounded-full transition-colors" data-role="plus">Plus</button>
+                        <button class="user-filter-btn px-3 py-1.5 md:px-4 md:py-2 text-sm font-medium border rounded-full transition-colors" data-role="normal">Normal</button>
                     </div>
                 </div>
                 <div class="bg-white rounded-lg shadow overflow-hidden">
@@ -125,10 +141,42 @@
                         <div class="flex justify-end items-center gap-4">
                              <p id="newsletter-status" class="text-sm text-green-600 font-medium"></p>
                              <button type="submit" id="send-newsletter-btn" class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300">
-                                Send to All Subscribers
-                            </button>
+                                 Send to All Subscribers
+                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+
+            <div id="applications-view" class="content-view hidden">
+                <div class="mb-4">
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Membership Applications</h1>
+                    <div class="mt-4 border-b border-gray-200">
+                        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                            <button class="app-filter-btn is-active py-4 px-1 border-b-2 font-medium text-sm" data-type="plusApplications">
+                                Plus Applications
+                            </button>
+                            <button class="app-filter-btn py-4 px-1 border-b-2 font-medium text-sm" data-type="proApplications">
+                                Pro Applications
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Applicant</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reason</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="applications-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 

@@ -1,14 +1,15 @@
 // =================================================================
-//     APP.JS - CORE LOGIC (WITH MOBILE HAMBURGER MENU)
+//     APP.JS - FINAL, COMPLETE, AND CORRECTED VERSION
 // =================================================================
 
+// --- FIREBASE INITIALIZATION ---
 const firebaseConfig = {
-  apiKey: "AIzaSyBXGAdDLhSvZSbBclnX9EV2sGVcZovEDW8",
-  authDomain: "blog-f4294.firebaseapp.com",
-  projectId: "blog-f4294",
-  storageBucket: "blog-f4294.appspot.com",
-  messagingSenderId: "270596039723",
-  appId: "1:270596039723:web:8f0667a20236841484766e",
+    apiKey: "AIzaSyBXGAdDLhSvZSbBclnX9EV2sGVcZovEDW8",
+    authDomain: "blog-f4294.firebaseapp.com",
+    projectId: "blog-f4294",
+    storageBucket: "blog-f4294.appspot.com",
+    messagingSenderId: "270596039723",
+    appId: "1:270596039723:web:8f0667a20236841484766e",
 };
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
@@ -19,7 +20,7 @@ const db = firebase.firestore();
 // Global variable for notification listener
 let notificationListener = null;
 
-// Function to listen for real-time notifications
+// --- NOTIFICATION LISTENER FUNCTION ---
 function listenForNotifications(userId) {
     if (notificationListener) {
         notificationListener(); // Unsubscribe from any previous listener
@@ -32,8 +33,6 @@ function listenForNotifications(userId) {
 
     notificationListener = notificationsRef.onSnapshot(snapshot => {
         const notificationBadge = document.getElementById('notification-badge');
-        // This part requires a notification list container in your dropdown, which is not in the provided HTML.
-        // const notificationList = document.getElementById('notification-list-container');
         if (!notificationBadge) return;
 
         let unreadCount = 0;
@@ -45,7 +44,7 @@ function listenForNotifications(userId) {
         });
 
         if (unreadCount > 0) {
-            notificationBadge.textContent = unreadCount;
+            notificationBadge.textContent = unreadCount > 9 ? '9+' : unreadCount;
             notificationBadge.classList.remove('hidden');
         } else {
             notificationBadge.classList.add('hidden');
@@ -56,6 +55,8 @@ function listenForNotifications(userId) {
 }
 
 
+// --- SINGLE, UNIFIED DOMCONTENTLOADED LISTENER ---
+// ** CORRECTED: Merged two separate listeners into one for stability and proper execution order. **
 document.addEventListener('DOMContentLoaded', () => {
     console.log("app.js (Core) Script Loaded!");
 
@@ -80,6 +81,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileLoginBtn = document.getElementById('mobile-login-btn');
     const mobileSignupBtn = document.getElementById('mobile-signup-btn');
     const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+    
+    // Admin Panel Links
+    const adminPanelLink = document.getElementById('admin-panel-link');
+    const mobileAdminPanelLink = document.getElementById('mobile-admin-panel-link');
 
     // --- HAMBURGER MENU TOGGLE ---
     if (hamburgerBtn && mobileMenu) {
@@ -88,17 +93,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- AUTH STATE LISTENER (UPDATED FOR MOBILE) ---
+    // --- AUTH STATE LISTENER (THE CORE OF THE APP) ---
     auth.onAuthStateChanged(async (user) => {
-        const adminPanelLink = document.getElementById('admin-panel-link');
-        const mobileAdminPanelLink = document.getElementById('mobile-admin-panel-link');
-
         if (user) {
-            // User is LOGGED IN
-            // Desktop view
+            // --- USER IS LOGGED IN ---
             if (userAuthLinks) userAuthLinks.classList.add('hidden');
             if (userProfileInfo) userProfileInfo.classList.remove('hidden');
-            // Mobile view
             if (mobileAuthLinks) mobileAuthLinks.classList.add('hidden');
             if (mobileProfileInfo) mobileProfileInfo.classList.remove('hidden');
             
@@ -107,47 +107,65 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const userDoc = await db.collection('users').doc(user.uid).get();
                 let userData = {};
+                let userRole = 'normal'; // Default to 'normal'
+
                 if (userDoc.exists) {
                     userData = userDoc.data();
+                    userRole = userData.role || 'normal';
                 }
 
+                // --- ROLE-BASED UI CONTROL ---
+                // This adds a class to the <body> tag to control UI elements via CSS.
+                document.body.classList.remove('role-normal', 'role-plus', 'role-pro', 'role-admin');
+                document.body.classList.add(`role-${userRole}`);
+                console.log(`User role identified. Body class set to: role-${userRole}`);
+                // --- END OF ROLE CONTROL ---
+
+                // --- UPDATE USER INFO IN UI ---
                 const displayName = userData.displayName || user.displayName || 'User';
                 const userEmail = user.email || '';
                 let userAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=8B5E34&color=fff`;
                 
-                if (userData.photoURL) {
+                // ** IMPROVED: Robust check for photoURL to avoid broken images from empty strings. **
+                if (userData.photoURL && userData.photoURL.trim() !== '') {
                     userAvatar = userData.photoURL;
-                } else if (user.photoURL) {
+                } else if (user.photoURL && user.photoURL.trim() !== '') {
                     userAvatar = user.photoURL;
                 }
 
-                const headerAvatar = document.getElementById('header-user-avatar');
-                const dropdownName = document.getElementById('dropdown-user-name');
-                const dropdownEmail = document.getElementById('dropdown-user-email');
+                const elementsToUpdate = [
+                    { id: 'header-user-avatar', prop: 'src', value: userAvatar },
+                    { id: 'dropdown-user-avatar', prop: 'src', value: userAvatar },
+                    { id: 'dropdown-user-name', prop: 'textContent', value: displayName },
+                    { id: 'dropdown-user-email', prop: 'textContent', value: userEmail },
+                ];
+                elementsToUpdate.forEach(item => {
+                    const el = document.getElementById(item.id);
+                    if (el) el[item.prop] = item.value;
+                });
 
-                if (headerAvatar) headerAvatar.src = userAvatar;
-                if (dropdownName) dropdownName.textContent = displayName;
-                if (dropdownEmail) dropdownEmail.textContent = userEmail;
-
-                if (userData.role === 'admin') {
+                // Control "Admin Panel" link visibility
+                if (userRole === 'admin' || userRole === 'pro') {
                     if (adminPanelLink) adminPanelLink.classList.remove('hidden');
                     if (mobileAdminPanelLink) mobileAdminPanelLink.classList.remove('hidden');
                 } else {
                     if (adminPanelLink) adminPanelLink.classList.add('hidden');
                     if (mobileAdminPanelLink) mobileAdminPanelLink.classList.add('hidden');
                 }
+
             } catch (error) {
-                console.error("Error fetching user data for header:", error);
+                console.error("Error fetching user data:", error);
+                document.body.classList.add('role-normal'); // Safe fallback
             }
 
         } else {
-            // User is LOGGED OUT
-            // Desktop view
+            // --- USER IS LOGGED OUT ---
             if (userAuthLinks) userAuthLinks.classList.remove('hidden');
             if (userProfileInfo) userProfileInfo.classList.add('hidden');
-            // Mobile view
             if (mobileAuthLinks) mobileAuthLinks.classList.remove('hidden');
             if (mobileProfileInfo) mobileProfileInfo.classList.add('hidden');
+
+            document.body.classList.remove('role-normal', 'role-plus', 'role-pro', 'role-admin');
 
             if (notificationListener) {
                 notificationListener(); // Stop listening
@@ -155,31 +173,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- MODAL & FORM LOGIC (REUSING FOR MOBILE BUTTONS) ---
+    // --- MODAL & FORM LOGIC ---
     const showLoginModal = () => loginModal?.classList.remove('hidden');
     const showSignupModal = () => signupModal?.classList.remove('hidden');
 
-    // Desktop buttons
-    if(loginBtn) loginBtn.addEventListener('click', showLoginModal);
-    if(signupBtn) signupBtn.addEventListener('click', showSignupModal);
-    
-    // Mobile buttons
+    if (loginBtn) loginBtn.addEventListener('click', showLoginModal);
+    if (signupBtn) signupBtn.addEventListener('click', showSignupModal);
     if (mobileLoginBtn) mobileLoginBtn.addEventListener('click', showLoginModal);
     if (mobileSignupBtn) mobileSignupBtn.addEventListener('click', showSignupModal);
 
-    // Close modals
     document.querySelectorAll('.close-modal-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            loginModal?.classList.add('hidden');
-            signupModal?.classList.add('hidden');
+            btn.closest('.modal-overlay')?.classList.add('hidden');
         });
     });
 
-    // Switch between modals
     document.getElementById('show-signup-link')?.addEventListener('click', (e) => { e.preventDefault(); loginModal?.classList.add('hidden'); signupModal?.classList.remove('hidden'); });
     document.getElementById('show-login-link')?.addEventListener('click', (e) => { e.preventDefault(); signupModal?.classList.add('hidden'); loginModal?.classList.remove('hidden'); });
 
-    // --- Sign Out Logic (for both buttons) ---
+    // --- Sign Out Logic ---
     const signOutUser = () => auth.signOut();
     if (logoutBtn) logoutBtn.addEventListener('click', signOutUser);
     if (mobileLogoutBtn) mobileLogoutBtn.addEventListener('click', signOutUser);
@@ -191,18 +203,16 @@ document.addEventListener('DOMContentLoaded', () => {
             profileDropdownMenu.classList.toggle('hidden');
         });
     }
-
-    // Hide dropdown if clicking outside
     document.addEventListener('click', (e) => {
         if (profileDropdownMenu && !profileDropdownMenu.classList.contains('hidden')) {
-            const isClickInside = profileDropdownMenu.contains(e.target) || profileDropdownBtn.contains(e.target);
+            const isClickInside = profileDropdownMenu.contains(e.target) || profileDropdownBtn?.contains(e.target);
             if (!isClickInside) {
-                 profileDropdownMenu.classList.add('hidden');
+                profileDropdownMenu.classList.add('hidden');
             }
         }
     });
 
-    // --- Login/Signup Form Submission Logic ---
+    // --- Login Form Submission ---
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
         const loginError = document.getElementById('login-error');
@@ -221,6 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- Signup Form Submission ---
     const signupForm = document.getElementById('signup-form');
     if (signupForm) {
         const signupError = document.getElementById('signup-error');
@@ -235,11 +246,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const user = res.user;
                 await user.updateProfile({ displayName: name });
                 
+                // Create a corresponding user document in Firestore
                 await db.collection('users').doc(user.uid).set({
-                    displayName: name, email: email, role: 'user',
+                    displayName: name,
+                    email: email,
+                    role: 'normal',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    photoURL: '', bio: '', coverPhotoURL: '',
-                    followers: [], following: [], followersCount: 0, followingCount: 0
+                    photoURL: '',
+                    bio: '',
+                    coverPhotoURL: '',
+                    followers: [],
+                    following: [],
+                    followersCount: 0,
+                    followingCount: 0
                 });
                 
                 if (signupModal) signupModal.classList.add('hidden');
@@ -249,45 +268,29 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-});
 
-// =========================================================================
-//     MOBILE CATEGORIES TOGGLE & HIDE ON SCROLL (FINAL SIMPLIFIED VERSION)
-// =========================================================================
-document.addEventListener('DOMContentLoaded', () => {
-    // This check ensures the code only runs if the relevant elements are on the page
-    if (document.getElementById('category-nav-bar')) {
-        
-        const categoryNavBar = document.getElementById('category-nav-bar');
+    // --- MOBILE CATEGORIES TOGGLE & HIDE ON SCROLL ---
+    const categoryNavBar = document.getElementById('category-nav-bar');
+    if (categoryNavBar) {
         const toggleCategoriesBtn = document.getElementById('toggle-categories-btn');
         let lastScrollY = window.scrollY;
 
-        // Scroll listener: Always controls visibility based on scroll direction
         window.addEventListener('scroll', () => {
-            // Only run on mobile screens
-            if (window.innerWidth >= 768) {
-                // On larger screens, ensure the bar is always visible and in position
-                categoryNavBar.classList.remove('-translate-y-full');
+            if (window.innerWidth >= 768) { // Only run on mobile
+                categoryNavBar.style.transform = ''; // Reset any mobile transforms
                 return;
             }
-
             const currentScrollY = window.scrollY;
-
-            // On scroll up, show. On scroll down (past 100px), hide.
             if (currentScrollY > lastScrollY && currentScrollY > 100) {
-                categoryNavBar.classList.add('-translate-y-full'); // Hide
+                categoryNavBar.classList.add('-translate-y-full');
             } else if (currentScrollY < lastScrollY) {
-                categoryNavBar.classList.remove('-translate-y-full'); // Show
+                categoryNavBar.classList.remove('-translate-y-full');
             }
-
-            // Update the last scroll position
             lastScrollY = currentScrollY <= 0 ? 0 : currentScrollY;
         });
 
-        // Button listener: Simply toggles the current state
-        if (toggleCategoriesBtn && categoryNavBar) {
+        if (toggleCategoriesBtn) {
             toggleCategoriesBtn.addEventListener('click', () => {
-                // The button just toggles the same class used by the scroll listener
                 categoryNavBar.classList.toggle('-translate-y-full');
             });
         }

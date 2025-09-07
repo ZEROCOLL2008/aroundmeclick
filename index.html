@@ -61,96 +61,96 @@
             flex-wrap: wrap; 
             line-height: 1.75; 
         }
-        /* This hides scrollbar for the categories container but keeps functionality */
-        #categories-container::-webkit-scrollbar {
-            display: none;
+        #categories-container::-webkit-scrollbar { display: none; }
+        #categories-container { -ms-overflow-style: none; scrollbar-width: none; }
+        .loader {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #A68E7A; /* Classic Taupe */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
         }
-        #categories-container {
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
-</head>
+</head>  
 <body class="bg-off-white font-inter text-ivory-brown">
     
 <header class="sticky top-0 z-50 bg-ivory/80 backdrop-blur-lg shadow-sm">
     <div class="container mx-auto px-4">
         <div class="flex items-center justify-between h-16">
-
             <a href="index.html" class="flex items-center space-x-3 flex-shrink-0">
-    <img src="5.png" alt="Around Me Click Logo" class="h-10 w-10 rounded-full object-cover">
-    <span class="text-2xl font-bold text-ivory-brown">AroundMe.Click</span>
-</a>
+                <img src="5.png" alt="Around Me Click Logo" class="h-10 w-10 rounded-full object-cover">
+                <span class="text-2xl font-bold text-ivory-brown">AroundMe.Click</span>
+            </a>
             <div class="flex items-center space-x-4">
-
-    <div class="hidden md:flex items-center space-x-4">
-        <form id="search-form" class="relative flex items-center">
-            <input type="text" id="search-input" placeholder="Search..." class="w-full pl-4 pr-10 py-2 text-ivory-brown border border-ivory-linen rounded-full outline-none focus:ring-1 focus:ring-classic-taupe bg-white/50">
-            <button type="submit" class="absolute right-2 p-1 text-classic-taupe hover:text-ivory-brown">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            </button>
-        </form>
-
-        <div class="flex items-center flex-shrink-0">
-            <div id="user-auth-links" class="flex items-center space-x-3">
-                <button id="login-btn" class="px-4 py-2 hover:text-classic-taupe font-medium">Sign In</button>
-                <button id="signup-btn" class="px-4 py-2 bg-ivory-brown text-off-white rounded-full hover:bg-classic-taupe font-medium">Get Started</button>
-            </div>
-            <div id="user-profile-info" class="hidden flex items-center space-x-4">
-                <button id="notification-bell-btn" class="relative p-2 text-ivory-brown hover:bg-pastel-ivory rounded-full">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                    <span id="notification-badge" class="hidden absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                </button>
-                <div class="relative">
-                    <button id="profile-dropdown-btn" class="flex items-center">
-                        <img id="header-user-avatar" src="https://via.placeholder.com/40" alt="User" class="w-8 h-8 rounded-full">
-                    </button>
-                    <div id="profile-dropdown-menu" class="hidden absolute right-0 mt-2 w-64 bg-ivory rounded-lg shadow-xl z-20 border border-ivory-linen">
-                        <div class="p-3 border-b border-ivory-linen">
-                            <div class="flex items-center gap-3">
-                                <img id="dropdown-user-avatar" src="https://via.placeholder.com/40" alt="User Avatar" class="w-11 h-11 rounded-full object-cover">
-                                <div>
-                                    <p id="dropdown-user-name" class="font-semibold text-ivory-brown truncate">Loading...</p>
-                                    <p id="dropdown-user-email" class="text-sm text-classic-taupe truncate">loading...</p>
+                <div class="hidden md:flex items-center space-x-4">
+                    <form id="search-form" class="relative flex items-center">
+                        <input type="text" id="search-input" placeholder="Search..." class="w-full pl-4 pr-10 py-2 text-ivory-brown border border-ivory-linen rounded-full outline-none focus:ring-1 focus:ring-classic-taupe bg-white/50">
+                        <button type="submit" class="absolute right-2 p-1 text-classic-taupe hover:text-ivory-brown">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </button>
+                    </form>
+                    <div class="flex items-center flex-shrink-0">
+                        <div id="user-auth-links" class="flex items-center space-x-3">
+                            <button id="login-btn" class="px-4 py-2 hover:text-classic-taupe font-medium">Sign In</button>
+                            <button id="signup-btn" class="px-4 py-2 bg-ivory-brown text-off-white rounded-full hover:bg-classic-taupe font-medium">Get Started</button>
+                        </div>
+                        <div id="user-profile-info" class="hidden flex items-center space-x-4">
+                            <button id="notification-bell-btn" class="relative p-2 text-ivory-brown hover:bg-pastel-ivory rounded-full">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                                <span id="notification-badge" class="hidden absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                            </button>
+                            <div class="relative">
+                                <button id="profile-dropdown-btn" class="flex items-center">
+                                    <img id="header-user-avatar" src="https://via.placeholder.com/40" alt="User" class="w-8 h-8 rounded-full">
+                                </button>
+                                <div id="profile-dropdown-menu" class="hidden absolute right-0 mt-2 w-64 bg-ivory rounded-lg shadow-xl z-20 border border-ivory-linen">
+                                    <div class="p-3 border-b border-ivory-linen">
+                                        <div class="flex items-center gap-3">
+                                            <img id="dropdown-user-avatar" src="https://via.placeholder.com/40" alt="User Avatar" class="w-11 h-11 rounded-full object-cover">
+                                            <div>
+                                                <p id="dropdown-user-name" class="font-semibold text-ivory-brown truncate">Loading...</p>
+                                                <p id="dropdown-user-email" class="text-sm text-classic-taupe truncate">loading...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="py-2">
+                                        <a href="profile.html" class="flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
+                                            <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                            <span>My Profile</span>
+                                        </a>
+                                        <a id="admin-panel-link" href="admin.html" class="hidden flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"></path></svg>
+                                            <span>Admin Panel</span>
+                                        </a>
+                                    </div>
+                                    <div class="border-t border-ivory-linen py-2">
+                                        <button id="logout-btn" class="w-full text-left flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"></path></svg>
+                                            <span>Sign Out</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="py-2">
-                            <a href="profile.html" class="flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
-                                <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                <span>My Profile</span>
-                            </a>
-                            <a id="admin-panel-link" href="admin.html" class="hidden flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"></path></svg>
-                                <span>Admin Panel</span>
-                            </a>
-                        </div>
-                        <div class="border-t border-ivory-linen py-2">
-                            <button id="logout-btn" class="w-full text-left flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"></path></svg>
-                                <span>Sign Out</span>
-                            </button>
-                        </div>
                     </div>
+                </div>
+                <div class="flex items-center md:hidden">
+                    <button id="toggle-categories-btn" class="p-2 rounded-md text-ivory-brown hover:bg-ivory-linen" title="Toggle Categories">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path></svg>
+                    </button>
+                    <button id="hamburger-btn" class="p-2 rounded-md text-ivory-brown hover:bg-ivory-linen">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-
-    <div class="flex items-center md:hidden">
-        <button id="toggle-categories-btn" class="p-2 rounded-md text-ivory-brown hover:bg-ivory-linen" title="Toggle Categories">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path></svg>
-        </button>
-        <button id="hamburger-btn" class="p-2 rounded-md text-ivory-brown hover:bg-ivory-linen">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-        </button>
-    </div>
-
-</div>
-        </div>
-    </div>
 </header>
-
 <div id="mobile-menu" class="hidden md:hidden bg-ivory/95 backdrop-blur-sm shadow-md absolute top-16 left-0 w-full z-40">
     <div id="mobile-auth-links">
         <div class="p-4 flex flex-col space-y-3">
@@ -177,14 +177,12 @@
         </div>
     </div>
 </div>
-
 <section class="relative bg-ivory-linen py-20 lg:py-32 overflow-hidden">
     <div id="hero-background-swiper" class="swiper absolute inset-0 w-full h-full">
         <div class="swiper-wrapper">
             <div class="swiper-slide bg-pastel-ivory animate-pulse"></div>
         </div>
     </div>
-
     <div class="relative z-10 container mx-auto px-4 text-center">
         <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold font-lora text-white drop-shadow-lg mb-6 max-w-4xl mx-auto leading-tight">
             Discover Stories Waiting to be Told
@@ -196,69 +194,64 @@
             <a href="#featured-swiper" class="bg-ivory-brown text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-classic-taupe transition duration-300">
                 Explore Posts
             </a>
-           
         </div>
     </div>
 </section>
-    
-  <nav id="category-nav-bar" class="md:block sticky top-16 z-40 bg-ivory/90 backdrop-blur-sm border-b border-ivory-linen transition-transform duration-300 ease-in-out">
-        <div class="container mx-auto px-4 relative">
-             <button id="scroll-left-btn" class="absolute left-0 top-1/2 -translate-y-1/2 bg-ivory/80 rounded-full p-1 shadow-md hover:bg-pastel-ivory z-10 hidden md:block">
-                 <svg class="w-5 h-5 text-ivory-brown" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-             </button>
-             <div id="categories-container" class="flex flex-wrap justify-center md:flex-nowrap md:justify-start gap-2 py-4 md:px-8 overflow-x-auto">
-                <button class="category-button px-6 py-2 bg-ivory-brown text-off-white rounded-full whitespace-nowrap font-medium" data-category="all">All Stories</button>
-                <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="technology">Technology</button>
-                <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="lifestyle">Lifestyle</button>
-                <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="travel">Travel</button>
-                <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="food">Food</button>
-                <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="health">Health</button>
-                <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="business">Business</button>
-            </div>
-            <button id="scroll-right-btn" class="absolute right-0 top-1/2 -translate-y-1/2 bg-ivory/80 rounded-full p-1 shadow-md hover:bg-pastel-ivory z-10 hidden md:block">
-                <svg class="w-5 h-5 text-ivory-brown" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-            </button>
+<nav id="category-nav-bar" class="md:block sticky top-16 z-40 bg-ivory/90 backdrop-blur-sm border-b border-ivory-linen transition-transform duration-300 ease-in-out">
+    <div class="container mx-auto px-4 relative">
+         <button id="scroll-left-btn" class="absolute left-0 top-1/2 -translate-y-1/2 bg-ivory/80 rounded-full p-1 shadow-md hover:bg-pastel-ivory z-10 hidden md:block">
+             <svg class="w-5 h-5 text-ivory-brown" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+         </button>
+         <div id="categories-container" class="flex flex-wrap justify-center md:flex-nowrap md:justify-start gap-2 py-4 md:px-8 overflow-x-auto">
+            <button class="category-button px-6 py-2 bg-ivory-brown text-off-white rounded-full whitespace-nowrap font-medium" data-category="all">All Stories</button>
+            <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="technology">Technology</button>
+            <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="lifestyle">Lifestyle</button>
+            <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="travel">Travel</button>
+            <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="food">Food</button>
+            <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="health">Health</button>
+            <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="business">Business</button>
         </div>
-    </nav>
-    
-    <main class="container mx-auto px-4 py-8">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <div class="lg:col-span-3">
-
-             <section class="mb-12">
-    <h3 class="text-2xl font-bold text-ivory-brown mb-6">Featured Stories</h3>
-    
-    <div id="featured-swiper" class="swiper relative rounded-2xl shadow-lg">
-        <div id="featured-swiper-wrapper" class="swiper-wrapper">
-            <div class="swiper-slide flex animate-pulse">
-                <div class="w-1/2 h-80 bg-pastel-ivory"></div>
-                <div class="w-1/2 p-8 flex flex-col bg-ivory">
-                    <div class="h-4 bg-pastel-ivory rounded w-1/4 mb-4"></div>
-                    <div class="h-8 bg-pastel-ivory rounded w-full mb-4"></div>
-                    <div class="h-8 bg-pastel-ivory rounded w-3/4 mb-6"></div>
-                    <div class="space-y-2 flex-grow">
-                        <div class="h-4 bg-pastel-ivory rounded w-full"></div>
-                        <div class="h-4 bg-pastel-ivory rounded w-2/3"></div>
-                    </div>
-                    <div class="h-10 bg-pastel-ivory rounded w-full mt-auto"></div>
-                </div>
-            </div>
-        </div>
-        <div class="swiper-pagination"></div>
-        <div class="swiper-button-prev text-white"></div>
-        <div class="swiper-button-next text-white"></div>
+        <button id="scroll-right-btn" class="absolute right-0 top-1/2 -translate-y-1/2 bg-ivory/80 rounded-full p-1 shadow-md hover:bg-pastel-ivory z-10 hidden md:block">
+            <svg class="w-5 h-5 text-ivory-brown" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
     </div>
-</section>
-                <section>
-                    <h3 class="text-2xl font-bold text-ivory-brown mb-6">Latest Stories</h3>
-                    <div id="blog-posts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+</nav>
+<main class="container mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div class="lg:col-span-3">
+         <section class="mb-12">
+            <h3 class="text-2xl font-bold text-ivory-brown mb-6">Featured Stories</h3>
+            <div id="featured-swiper" class="swiper relative rounded-2xl shadow-lg">
+                <div id="featured-swiper-wrapper" class="swiper-wrapper">
+                    <div class="swiper-slide flex animate-pulse">
+                        <div class="w-1/2 h-80 bg-pastel-ivory"></div>
+                        <div class="w-1/2 p-8 flex flex-col bg-ivory">
+                            <div class="h-4 bg-pastel-ivory rounded w-1/4 mb-4"></div>
+                            <div class="h-8 bg-pastel-ivory rounded w-full mb-4"></div>
+                            <div class="h-8 bg-pastel-ivory rounded w-3/4 mb-6"></div>
+                            <div class="space-y-2 flex-grow">
+                                <div class="h-4 bg-pastel-ivory rounded w-full"></div>
+                                <div class="h-4 bg-pastel-ivory rounded w-2/3"></div>
+                            </div>
+                            <div class="h-10 bg-pastel-ivory rounded w-full mt-auto"></div>
                         </div>
-                </section>
-                <div class="text-center mt-12">
-                     <button id="load-more-btn" class="bg-ivory-brown text-white px-6 py-3 rounded-full font-semibold hover:bg-classic-taupe transition-colors hidden">Load More Posts</button>
+                    </div>
                 </div>
+                <div class="swiper-pagination"></div>
+                <div class="swiper-button-prev text-white"></div>
+                <div class="swiper-button-next text-white"></div>
             </div>
-          <aside class="lg:col-span-1">
+        </section>
+            <section>
+                <h3 class="text-2xl font-bold text-ivory-brown mb-6">Latest Stories</h3>
+                <div id="blog-posts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    </div>
+            </section>
+            <div class="text-center mt-12">
+                 <button id="load-more-btn" class="bg-ivory-brown text-white px-6 py-3 rounded-full font-semibold hover:bg-classic-taupe transition-colors hidden">Load More Posts</button>
+            </div>
+        </div>
+      <aside class="lg:col-span-1">
     <div class="bg-ivory p-6 rounded-xl shadow-sm sticky top-24">
         
         <div>
@@ -318,112 +311,142 @@
     </main>
     
 <div id="post-modal" class="fixed inset-0 z-[200] hidden bg-black bg-opacity-70 backdrop-blur-sm p-4">
-    <div id="post-modal-container" class="bg-white rounded-lg shadow-2xl w-full max-w-2xl mx-auto flex flex-col max-h-[90vh] transition-all duration-300">
-        <div class="p-4 border-b flex justify-between items-center flex-shrink-0 gap-4">
-            <div class="flex-1 min-w-0">
-                <h3 id="post-modal-title" class="text-xl font-bold text-slate-800 truncate"></h3>
-            </div>
-            <div class="flex items-center space-x-2 flex-shrink-0">
-                <button id="toggle-fullscreen-btn" class="text-gray-500 hover:text-gray-800" title="Toggle Fullscreen">
-                    <svg class="w-6 h-6 enter-fullscreen-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" /></svg>
-                    <svg class="w-6 h-6 exit-fullscreen-icon hidden" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5M15 15l5.25 5.25" /></svg>
-                </button>
-                <button id="close-post-modal" class="text-3xl text-gray-500 hover:text-gray-800">&times;</button>
-            </div>
+    <div id="post-modal-container" class="relative bg-white rounded-lg shadow-2xl w-full max-w-2xl mx-auto flex flex-col max-h-[90vh] transition-all duration-300">
+        <div id="post-modal-loader" class="absolute inset-0 flex items-center justify-center bg-white/80 z-10 rounded-lg">
+            <div class="loader"></div>
         </div>
-        
-        <div class="p-6 overflow-y-auto">
-            <div id="post-modal-media-container" class="mb-4 aspect-video flex justify-center items-center bg-black rounded-lg"></div>
-            <div id="post-modal-description" class="text-slate-600 font-serif leading-relaxed prose max-w-none"></div>
-
-            <div class="mt-6 pt-4 border-t border-slate-200 flex items-center space-x-6">
-                <button class="like-btn-modal flex items-center space-x-2 text-gray-500 hover:text-red-500 transition-colors" data-like-id="">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>
-                    <span class="like-count-modal font-semibold">0</span>
-                </button>
-                <div class="flex items-center space-x-2 text-gray-500">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 5.523-4.477 10-10 10S1 17.523 1 12 5.477 2 11 2s10 4.477 10 10z"></path></svg>
-                    <span id="comment-count-modal" class="font-semibold">0</span>
+        <div id="post-modal-content-wrapper" class="flex flex-col h-full invisible">
+            <div class="p-4 border-b flex justify-between items-center flex-shrink-0 gap-4">
+                <div class="flex-1 min-w-0">
+                    <h3 id="post-modal-title" class="text-xl font-bold text-slate-800 truncate"></h3>
                 </div>
-                <button class="share-btn flex items-center space-x-2 text-gray-500 hover:text-blue-500 transition-colors" data-post-id="">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 4.186m0-4.186c.54.121 1.07.312 1.566.55m-1.566-.55L11.99 3.937m-3.232 8.523c.54-.121 1.07-.312 1.566-.55m-1.566.55l-3.232-8.523m3.232 8.523l3.232 8.523m0 0l3.232-8.523m-3.232 8.523c-.54.121-1.07.312-1.566.55m1.566-.55l3.232-8.523" /></svg>
-                    <span class="font-semibold">Share</span>
-                </button>
+                <div class="flex items-center space-x-2 flex-shrink-0">
+                    <button id="toggle-fullscreen-btn" class="text-gray-500 hover:text-gray-800" title="Toggle Fullscreen">
+                        <svg class="w-6 h-6 enter-fullscreen-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" /></svg>
+                        <svg class="w-6 h-6 exit-fullscreen-icon hidden" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5M15 15l5.25 5.25" /></svg>
+                    </button>
+                    <button id="close-post-modal" class="text-3xl text-gray-500 hover:text-gray-800">&times;</button>
+                </div>
             </div>
-
-            <div class="mt-6 pt-4 border-t border-slate-200">
-                <h4 class="text-lg font-bold text-slate-800 mb-4">Comments</h4>
-                <div id="comment-form-container" class="hidden">
-                    <form id="comment-form" class="flex items-start space-x-3 mb-6" data-post-id="">
-                        <img id="comment-user-avatar" src="" alt="My Avatar" class="w-10 h-10 rounded-full">
-                        <div class="flex-1">
-                            <textarea id="comment-textarea" rows="2" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Add a comment..."></textarea>
-                            <button type="submit" class="mt-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-full hover:bg-blue-700">Post Comment</button>
-                        </div>
-                    </form>
+            <div class="p-6 overflow-y-auto">
+                <div id="post-modal-media-container" class="mb-4 aspect-video flex justify-center items-center bg-black rounded-lg"></div>
+                <div id="post-modal-description" class="text-slate-600 font-serif leading-relaxed prose max-w-none"></div>
+                <div class="mt-6 pt-4 border-t border-slate-200 flex items-center space-x-6">
+                    <button class="like-btn-modal flex items-center space-x-2 text-gray-500 hover:text-red-500 transition-colors" data-like-id="">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>
+                        <span class="like-count-modal font-semibold">0</span>
+                    </button>
+                    <div class="flex items-center space-x-2 text-gray-500">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 5.523-4.477 10-10 10S1 17.523 1 12 5.477 2 11 2s10 4.477 10 10z"></path></svg>
+                        <span id="comment-count-modal" class="font-semibold">0</span>
+                    </div>
+                    <button class="share-btn flex items-center space-x-2 text-gray-500 hover:text-blue-500 transition-colors" data-post-id="">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 4.186m0-4.186c.54.121 1.07.312 1.566.55m-1.566-.55L11.99 3.937m-3.232 8.523c.54-.121 1.07-.312 1.566-.55m-1.566.55l-3.232-8.523m3.232 8.523l3.232 8.523m0 0l3.232-8.523m-3.232 8.523c-.54.121-1.07.312-1.566.55m1.566-.55l3.232-8.523" /></svg>
+                        <span class="font-semibold">Share</span>
+                    </button>
                 </div>
-                 <div id="comment-login-prompt">
-                    <p class="text-center p-4">Please <button id="login-from-comment-btn" class="font-semibold text-blue-600 hover:underline">sign in</button> to leave a comment.</p>
+                <div class="mt-6 pt-4 border-t border-slate-200">
+                    <h4 class="text-lg font-bold text-slate-800 mb-4">Comments</h4>
+                    <div id="comment-form-container" class="hidden">
+                        <form id="comment-form" class="flex items-start space-x-3 mb-6" data-post-id="">
+                            <img id="comment-user-avatar" src="" alt="My Avatar" class="w-10 h-10 rounded-full">
+                            <div class="flex-1">
+                                <textarea id="comment-textarea" rows="2" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Add a comment..."></textarea>
+                                <button type="submit" class="mt-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-full hover:bg-blue-700">Post Comment</button>
+                            </div>
+                        </form>
+                    </div>
+                     <div id="comment-login-prompt">
+                        <p class="text-center p-4">Please <button id="login-from-comment-btn" class="font-semibold text-blue-600 hover:underline">sign in</button> to leave a comment.</p>
+                    </div>
+                    <div id="comments-list" class="space-y-4"></div>
                 </div>
-                <div id="comments-list" class="space-y-4"></div>
             </div>
         </div>
     </div>
 </div>
-
-    <footer class="bg-pastel-ivory border-t border-ivory-linen mt-16">
-        <div class="max-w-7xl mx-auto px-6 py-12">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div class="md:col-span-2 space-y-4">
-                    <h4 class="font-bold text-xl text-ivory-brown">Around Me Click</h4>
-                    <p class="text-classic-taupe font-lora">Connecting voices from around the world.</p>
-                </div>
-                <div class="space-y-4">
-                    <h5 class="font-bold text-lg text-ivory-brown">Quick Links</h5>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="text-classic-taupe hover:text-ivory-brown">About Us</a></li>
-                        <li><a href="#" class="text-classic-taupe hover:text-ivory-brown">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="space-y-4">
-                    <h5 class="font-bold text-lg text-ivory-brown">Follow Us</h5>
-                    <p class="text-classic-taupe font-lora">Join the conversation on social media.</p>
-                </div>
+<footer class="bg-pastel-ivory border-t border-ivory-linen mt-16">
+    <div class="max-w-7xl mx-auto px-6 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="md:col-span-2 space-y-4">
+                <h4 class="font-bold text-xl text-ivory-brown">Around Me Click</h4>
+                <p class="text-classic-taupe font-lora">Connecting voices from around the world.</p>
             </div>
-            <div class="mt-8 border-t border-ivory-linen pt-6 text-center">
-                <p class="text-sm text-classic-taupe">&copy; 2025 Around Me Click. All Rights Reserved.</p>
+            <div class="space-y-4">
+                <h5 class="font-bold text-lg text-ivory-brown">Quick Links</h5>
+                <ul class="space-y-2">
+                    <li><a href="#" class="text-classic-taupe hover:text-ivory-brown">About Us</a></li>
+                    <li><a href="#" class="text-classic-taupe hover:text-ivory-brown">Contact</a></li>
+                </ul>
+            </div>
+            <div class="space-y-4">
+                <h5 class="font-bold text-lg text-ivory-brown">Follow Us</h5>
+                <p class="text-classic-taupe font-lora">Join the conversation on social media.</p>
             </div>
         </div>
-    </footer>
-
-    <div id="login-modal" class="modal-overlay hidden fixed inset-0 bg-black/60 flex justify-center items-center z-[210] animate-fade-in">
-        <div class="bg-ivory p-8 rounded-lg shadow-xl w-full max-w-md relative animate-slide-up">
-            <button class="close-modal-btn absolute top-2 right-4 text-3xl text-classic-taupe hover:text-ivory-brown">&times;</button>
-            <h2 class="text-2xl font-bold mb-2 text-ivory-brown">Sign In</h2>
-            <form id="login-form" class="mt-6">
-                 <input type="email" id="login-email" placeholder="Email" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
-                 <input type="password" id="login-password" placeholder="Password" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
-                 <button type="submit" class="w-full bg-ivory-brown text-white py-3 rounded-full font-bold hover:bg-classic-taupe">Sign In</button>
-                 <p id="login-error" class="text-red-500 text-sm mt-2 min-h-[20px]"></p>
-            </form>
-            <p class="mt-6 text-sm text-classic-taupe">New here? <a href="#" id="show-signup-link" class="text-ivory-brown font-bold hover:underline">Join now</a></p>
+        <div class="mt-8 border-t border-ivory-linen pt-6 text-center">
+            <p class="text-sm text-classic-taupe">&copy; 2025 Around Me Click. All Rights Reserved.</p>
         </div>
     </div>
+</footer>
+
+<div id="new-password-modal" class="modal-overlay hidden fixed inset-0 bg-black/60 flex justify-center items-center z-[210] animate-fade-in">
+    <div class="bg-ivory p-8 rounded-lg shadow-xl w-full max-w-md relative animate-slide-up">
+        <h2 class="text-2xl font-bold mb-2 text-ivory-brown">Choose a New Password</h2>
+        <p class="text-sm text-classic-taupe mt-2">Please enter your new password below.</p>
+        <form id="new-password-form" class="mt-6">
+            <input type="password" id="new-password-input" placeholder="New Password (6+ characters)" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
+            <input type="password" id="confirm-password-input" placeholder="Confirm New Password" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
+            <button type="submit" class="w-full bg-ivory-brown text-white py-3 rounded-full font-bold hover:bg-classic-taupe">Save New Password</button>
+            <p id="new-password-error" class="text-red-500 text-sm mt-2 min-h-[20px] text-center"></p>
+        </form>
+    </div>
+</div>
+
+<div id="login-modal" class="modal-overlay hidden fixed inset-0 bg-black/60 flex justify-center items-center z-[210] animate-fade-in">
+    <div class="bg-ivory p-8 rounded-lg shadow-xl w-full max-w-md relative animate-slide-up">
+        <button class="close-modal-btn absolute top-2 right-4 text-3xl text-classic-taupe hover:text-ivory-brown">&times;</button>
+        <h2 class="text-2xl font-bold mb-2 text-ivory-brown">Sign In</h2>
+        <form id="login-form" class="mt-6">
+             <input type="email" id="login-email" placeholder="Email" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
+             <input type="password" id="login-password" placeholder="Password" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
+             <div class="text-right mb-4">
+                 <a href="#" id="show-reset-password-link" class="text-sm text-ivory-brown hover:underline">Forgot Password?</a>
+             </div>
+             <button type="submit" class="w-full bg-ivory-brown text-white py-3 rounded-full font-bold hover:bg-classic-taupe">Sign In</button>
+             <p id="login-error" class="text-red-500 text-sm mt-2 min-h-[20px]"></p>
+        </form>
+        <p class="mt-6 text-sm text-classic-taupe">New here? <a href="#" id="show-signup-link" class="text-ivory-brown font-bold hover:underline">Join now</a></p>
+    </div>
+</div>
     
-    <div id="signup-modal" class="modal-overlay hidden fixed inset-0 bg-black/60 flex justify-center items-center z-[210] animate-fade-in">
-        <div class="bg-ivory p-8 rounded-lg shadow-xl w-full max-w-md relative animate-slide-up">
-            <button class="close-modal-btn absolute top-2 right-4 text-3xl text-classic-taupe hover:text-ivory-brown">&times;</button>
-            <h2 class="text-2xl font-bold mb-2 text-ivory-brown">Sign Up</h2>
-            <form id="signup-form" class="mt-6">
-                <input type="text" id="signup-name" placeholder="Your Name" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
-                <input type="email" id="signup-email" placeholder="Email" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
-                <input type="password" id="signup-password" placeholder="Password (6+ characters)" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
-                <button type="submit" class="w-full bg-ivory-brown text-white py-3 rounded-full font-bold hover:bg-classic-taupe">Agree & Join</button>
-                <p id="signup-error" class="text-red-500 text-sm mt-2 min-h-[20px]"></p>
-            </form>
-            <p class="mt-6 text-sm text-classic-taupe">Already a member? <a href="#" id="show-login-link" class="text-ivory-brown font-bold hover:underline">Sign in</a></p>
-        </div>
+<div id="signup-modal" class="modal-overlay hidden fixed inset-0 bg-black/60 flex justify-center items-center z-[210] animate-fade-in">
+    <div class="bg-ivory p-8 rounded-lg shadow-xl w-full max-w-md relative animate-slide-up">
+        <button class="close-modal-btn absolute top-2 right-4 text-3xl text-classic-taupe hover:text-ivory-brown">&times;</button>
+        <h2 class="text-2xl font-bold mb-2 text-ivory-brown">Sign Up</h2>
+        <form id="signup-form" class="mt-6">
+            <input type="text" id="signup-name" placeholder="Your Name" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
+            <input type="email" id="signup-email" placeholder="Email" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
+            <input type="password" id="signup-password" placeholder="Password (6+ characters)" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
+            <button type="submit" class="w-full bg-ivory-brown text-white py-3 rounded-full font-bold hover:bg-classic-taupe">Agree & Join</button>
+            <p id="signup-error" class="text-red-500 text-sm mt-2 min-h-[20px]"></p>
+        </form>
+        <p class="mt-6 text-sm text-classic-taupe">Already a member? <a href="#" id="show-login-link" class="text-ivory-brown font-bold hover:underline">Sign in</a></p>
     </div>
+</div>
+<div id="reset-password-modal" class="modal-overlay hidden fixed inset-0 bg-black/60 flex justify-center items-center z-[210] animate-fade-in">
+    <div class="bg-ivory p-8 rounded-lg shadow-xl w-full max-w-md relative animate-slide-up">
+        <button class="close-modal-btn absolute top-2 right-4 text-3xl text-classic-taupe hover:text-ivory-brown">&times;</button>
+        <h2 class="text-2xl font-bold mb-2 text-ivory-brown">Reset Password</h2>
+        <p class="text-sm text-classic-taupe mt-2">Enter your email and we'll send you a link to reset your password.</p>
+        <form id="reset-password-form" class="mt-6">
+            <input type="email" id="reset-email" placeholder="Your Email Address" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
+            <button type="submit" class="w-full bg-ivory-brown text-white py-3 rounded-full font-bold hover:bg-classic-taupe">Send Reset Link</button>
+            <p id="reset-message" class="text-sm mt-3 min-h-[20px] text-center"></p>
+        </form>
+        <p class="mt-6 text-sm text-classic-taupe">Remembered your password? <a href="#" id="back-to-login-link" class="text-ivory-brown font-bold hover:underline">Sign in</a></p>
+    </div>
+</div>
 <div id="share-modal" class="fixed inset-0 z-[210] hidden flex items-center justify-center bg-black/60 p-4 animate-fade-in">
     <div class="bg-ivory p-8 rounded-lg shadow-xl w-full max-w-md relative animate-slide-up">
         <button class="close-share-modal absolute top-2 right-4 text-3xl text-classic-taupe hover:text-ivory-brown">&times;</button>
