@@ -1,10 +1,6 @@
-// =================================================================
-//     PROFILE.JS - FINAL, COMPLETE, AND CORRECTED SCRIPT
-// =================================================================
 document.addEventListener('DOMContentLoaded', () => {
     let commentsListener = null;
 
-    // 1. FIREBASE CONFIG & INIT
     const firebaseConfig = {
         apiKey: "AIzaSyBXGAdDLhSvZSbBclnX9EV2sGVcZovEDW8",
         authDomain: "blog-f4294.firebaseapp.com",
@@ -23,14 +19,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const IMGBB_API_KEY = '8fb17a65d31f9a5e7b81c80861f9075f';
     console.log("Profile Page Script Initialized with Firebase Config!");
 
-    // 2. ELEMENT SELECTORS
     const userAuthLinks = document.getElementById('user-auth-links');
     const userProfileInfo = document.getElementById('user-profile-info');
     const logoutBtn = document.getElementById('logout-btn');
     const profileDropdownBtn = document.getElementById('profile-dropdown-btn');
     const profileDropdownMenu = document.getElementById('profile-dropdown-menu');
     
-    // Profile Page Content
     const profileBanner = document.getElementById('profile-banner');
     const profileAvatar = document.getElementById('profile-avatar');
     const profileDisplayName = document.getElementById('profile-display-name');
@@ -38,7 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileBio = document.getElementById('profile-bio');
     const myPostsGrid = document.getElementById('my-posts-grid');
     
-    // Edit Profile Modal
     const editProfileModal = document.getElementById('edit-profile-modal');
     const openEditModalBtn = document.getElementById('open-edit-modal-btn');
     const editProfileForm = document.getElementById('edit-profile-form');
@@ -48,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const coverPreview = document.getElementById('cover-preview');
     const avatarPreview = document.getElementById('avatar-preview');
     
-    // Create Post Modal Elements
     const createPostModal = document.getElementById('create-post-modal');
     const createPostForm = document.getElementById('create-post-form');
     const openModalBtns = [
@@ -62,23 +54,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const postImageInput = document.getElementById('post-image-input');
     const imagePreviewContainer = document.getElementById('image-preview-container');
 
-    // Edit Post Modal
     const editPostModal = document.getElementById('edit-post-modal');
     const editPostForm = document.getElementById('edit-post-form');
     const closeEditPostModalBtn = document.getElementById('close-edit-post-modal');
     const updatePostBtn = document.getElementById('update-post-btn');
     
-    // Post View Modal
     const postViewModal = document.getElementById('post-view-modal');
     const closeViewModalBtn = document.getElementById('close-view-modal-btn');
 
-    // Plus Application Modal
     const applyToPlusBtn = document.getElementById('apply-to-plus-btn');
     const plusApplicationModal = document.getElementById('plus-application-modal');
     const closeApplicationModalBtn = document.getElementById('close-application-modal-btn');
     const plusApplicationForm = document.getElementById('plus-application-form');
 
-    // Pro Application Modal
     const applyToProBtn = document.getElementById('apply-to-pro-btn');
     const proApplicationModal = document.getElementById('pro-application-modal');
     const closeProApplicationModalBtn = document.getElementById('close-pro-application-modal-btn');
@@ -88,9 +76,36 @@ document.addEventListener('DOMContentLoaded', () => {
     let newAvatarFile = null;
     let newCoverFile = null;
 
-    // =================================================================
-    // 3. FUNCTION DEFINITIONS
-    // =================================================================
+    function createSnippet(html, length = 100) {
+        if (!html) return '';
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        const text = tempDiv.textContent || tempDiv.innerText || '';
+        if (text.length <= length) return text;
+        return text.substring(0, length) + '...';
+    }
+
+    function calculateReadTime(html) {
+        if (!html) return '1 min read';
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        const text = tempDiv.textContent || tempDiv.innerText || '';
+        const wordsPerMinute = 200;
+        const wordCount = text.trim().split(/\s+/).length;
+        const readTime = Math.ceil(wordCount / wordsPerMinute);
+        if (readTime < 1) return '1 min read';
+        return `${readTime} min read`;
+    }
+
+    function formatDate(timestamp) {
+        if (!timestamp) return 'Just now';
+        const date = timestamp.toDate();
+        return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: '2-digit',
+            year: '2-digit'
+        });
+    }
 
     function getYouTubeVideoId(url) {
         if (!url) return null;
@@ -123,26 +138,49 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             snapshot.forEach(doc => {
                 const post = { id: doc.id, ...doc.data() };
+
                 const mediaHtml = post.youtubeVideoId
                     ? `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${post.youtubeVideoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`
-                    : `<img src="${post.imageUrl || 'https://picsum.photos/400/300'}" alt="Blog post image" class="w-full h-full object-cover transition-transform duration-300 hover:scale-110">`;
+                    : `<img src="${post.imageUrl || 'https://picsum.photos/400/300'}" alt="Blog post image" class="w-full h-full object-cover">`;
+
+                const snippet = createSnippet(post.content, 80);
+                const readTime = calculateReadTime(post.content);
+                const category = post.category ? post.category.charAt(0).toUpperCase() + post.category.slice(1) : 'General';
 
                 const article = document.createElement('article');
-                article.className = "bg-white rounded-lg shadow-md overflow-hidden flex flex-col";
+                article.className = "bg-white rounded-xl shadow-lg overflow-hidden flex flex-col";
                 
-                // *** FIXED POST STRUCTURE FOR CONSISTENT LAYOUT ***
                 article.innerHTML = `
-                <div class="relative overflow-hidden h-48 bg-slate-900 cursor-pointer view-post-trigger" data-post-id="${post.id}">
+                <div class="relative h-48 bg-slate-900 cursor-pointer view-post-trigger" data-post-id="${post.id}">
                     ${mediaHtml}
-                    <span class="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold uppercase ${post.status === 'pending' ? 'bg-amber-500 text-white' : post.status === 'approved' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}">${post.status}</span>
+                    <span class="absolute bottom-3 left-3 px-3 py-1 bg-white/90 text-ivory-brown rounded-full text-xs font-semibold backdrop-blur-sm">${category}</span>
+                    <span class="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-semibold uppercase ${post.status === 'pending' ? 'bg-amber-500 text-white' : post.status === 'approved' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}">${post.status}</span>
                 </div>
-                <div class="p-4 flex flex-col flex-grow">
-                    <h3 class="font-bold text-lg text-slate-800 cursor-pointer view-post-trigger" data-post-id="${post.id}">${post.title}</h3>
-                    <div class="mt-auto pt-3 border-t border-gray-200 flex justify-between items-center">
-                        <div class="flex space-x-4 text-sm text-gray-500">
-                            <span title="Likes">❤️ ${post.likesCount || 0}</span>
-                            <span title="Comments">💬 ${post.commentsCount || 0}</span>
+                
+                <div class="p-5 flex flex-col flex-grow">
+                    <div class="flex items-center space-x-2 text-sm text-classic-taupe mb-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>${readTime}</span>
+                    </div>
+                    
+                    <h3 class="text-lg font-bold text-ivory-brown cursor-pointer view-post-trigger" data-post-id="${post.id}">${post.title}</h3>
+                    
+                    <p class="text-classic-taupe text-sm mt-2 mb-4 flex-grow">
+                        ${snippet}
+                    </p>
+                    
+                    <div class="mt-auto pt-4 border-t border-ivory-linen flex justify-between items-center">
+                        <div class="flex space-x-4 text-sm text-classic-taupe">
+                            <span title="Likes" class="flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>
+                                ${post.likesCount || 0}
+                            </span>
+                            <span title="Comments" class="flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 5.523-4.477 10-10 10S1 17.523 1 12 5.477 2 11 2s10 4.477 10 10z"></path></svg>
+                                ${post.commentsCount || 0}
+                            </span>
                         </div>
+                        
                         <div class="relative">
                             <button class="post-menu-button p-1 rounded-full hover:bg-gray-200">
                                 <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg>
@@ -253,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await postRef.update({ commentsCount: firebase.firestore.FieldValue.increment(1) });
             
             commentTextarea.value = '';
-            loadUserPosts(user.uid); // Reload posts to update comment count on the profile grid
+            loadUserPosts(user.uid);
         } catch (error) {
             console.error("Error submitting comment:", error);
             alert("Failed to post comment. Please try again.");
@@ -298,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if(editPostModal) editPostModal.classList.remove('hidden');
         } catch (error) {
-            console.error("Error fetching post data for edit:", error);
+    console.error("Error fetching post data for edit:", error);
             alert(`Error: ${error.message}`);
         }
     }
@@ -325,11 +363,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // =================================================================
-    // 4. EVENT LISTENERS & FORM HANDLERS
-    // =================================================================
-
-    // --- Post Grid Actions (View, Edit, Delete) ---
     if (myPostsGrid) {
         myPostsGrid.addEventListener('click', async (e) => {
             const viewTrigger = e.target.closest('.view-post-trigger');
@@ -361,11 +394,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Header & Dropdown ---
     if(logoutBtn) logoutBtn.addEventListener('click', () => auth.signOut());
     if(profileDropdownBtn) profileDropdownBtn.addEventListener('click', () => profileDropdownMenu.classList.toggle('hidden'));
     
-    // --- Modal Open/Close Buttons ---
     openModalBtns.forEach(btn => {
         if (btn) btn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -391,13 +422,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if(closeEditPostModalBtn) closeEditPostModalBtn.addEventListener('click', () => { if(editPostModal) editPostModal.classList.add('hidden'); });
     if(closeCreateModalBtn) closeCreateModalBtn.addEventListener('click', () => { if(createPostModal) createPostModal.classList.add('hidden'); });
     
-    // --- Comment Form ---
     const commentForm = document.getElementById('comment-form');
     if (commentForm) {
         commentForm.addEventListener('submit', handleCommentSubmit);
     }
 
-    // --- Edit Profile Form ---
     if (editProfileForm) {
         editProfileForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -417,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const formData = new FormData();
                     formData.append('image', newAvatarFile);
                     const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: formData });
-                    const result = await response.json();
+               const result = await response.json();
                     if (result.success) updatedData.photoURL = result.data.url;
                     else throw new Error('Avatar image upload failed.');
                 }
@@ -430,7 +459,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     else throw new Error('Cover image upload failed.');
                 }
 
-                // ** CORRECTED: Update Firebase Auth Profile as well **
                 const authUpdates = {};
                 if (updatedData.displayName) authUpdates.displayName = updatedData.displayName;
                 if (updatedData.photoURL) authUpdates.photoURL = updatedData.photoURL;
@@ -438,8 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (Object.keys(authUpdates).length > 0) {
                     await user.updateProfile(authUpdates);
                 }
-                
-                // Update Firestore document
+          _EOD_     
                 await db.collection('users').doc(user.uid).update(updatedData);
 
                 alert('Profile updated successfully!');
@@ -455,7 +482,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // --- Create Post Image Handling ---
     if(postImageInput) {
         postImageInput.addEventListener('change', (event) => {
             const files = event.target.files;
@@ -474,7 +500,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // --- Create Post Form ---
     if (createPostForm) {
         createPostForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -484,7 +509,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const user = auth.currentUser;
                 if (!user) throw new Error("You must be logged in.");
 
-                // ** IMPROVED: Fetch user data from Firestore to ensure avatar URL exists **
                 const userDoc = await db.collection('users').doc(user.uid).get();
                 if (!userDoc.exists) throw new Error("User data not found.");
                 const userData = userDoc.data();
@@ -502,7 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                     const uploadResults = await Promise.all(uploadPromises);
                     imageUrls = uploadResults.map(result => result.success ? result.data.url : null).filter(Boolean);
-                }
+              _EOD_ }
 
                 const contentHTML = tinymce.get('post-content').getContent();
                 const tempDiv = document.createElement('div');
@@ -546,7 +570,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Plus Application Logic ---
     if (applyToPlusBtn) {
         applyToPlusBtn.addEventListener('click', () => {
             if (plusApplicationModal) plusApplicationModal.classList.remove('hidden');
@@ -573,7 +596,7 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.disabled = true;
             submitBtn.textContent = 'Submitting...';
             statusMsg.textContent = '';
-            statusMsg.className = 'text-center text-sm mt-4'; // Reset classes
+            statusMsg.className = 'text-center text-sm mt-4';
 
             try {
                 const existingAppQuery = await db.collection('plusApplications').where('userId', '==', user.uid).where('status', '==', 'pending').get();
@@ -584,12 +607,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const applicationData = {
                     userId: user.uid,
                     displayName: user.displayName || 'N/A',
-                    email: user.email,
+                   email: user.email,
                     reason: reason,
                     submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
                     status: 'pending'
                 };
 
+                // *** ME LINE EKA ADUI ***
                 await db.collection('plusApplications').add(applicationData);
                 
                 statusMsg.textContent = '✅ Application submitted successfully! We will review it soon.';
@@ -611,7 +635,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // --- Pro Application Logic ---
     if (applyToProBtn) applyToProBtn.addEventListener('click', () => proApplicationModal?.classList.remove('hidden'));
     if (closeProApplicationModalBtn) closeProApplicationModalBtn.addEventListener('click', () => proApplicationModal?.classList.add('hidden')); 
     
@@ -631,10 +654,9 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.disabled = true;
             submitBtn.textContent = 'Submitting...';
             statusMsg.textContent = '';
-            statusMsg.className = 'text-center text-sm mt-4'; // Reset classes
+            statusMsg.className = 'text-center text-sm mt-4';
 
             try {
-                // Check for existing pending "Pro" applications
                 const existingAppQuery = await db.collection('proApplications').where('userId', '==', user.uid).where('status', '==', 'pending').get();
                 if (!existingAppQuery.empty) {
                     throw new Error("You already have a pending Pro application.");
@@ -649,7 +671,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     status: 'pending'
                 };
 
-                // Add to the "proApplications" collection
                 await db.collection('proApplications').add(applicationData);
                 
                 statusMsg.textContent = '✅ Pro application submitted successfully! We will review it soon.';
@@ -671,9 +692,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // =================================================================
-    // 5. SCRIPT INITIALIZATION
-    // =================================================================
     auth.onAuthStateChanged(async (user) => {
         if (user) {
             if (userAuthLinks) userAuthLinks.classList.add('hidden');
@@ -691,25 +709,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     displayProfileData(userData, user);
                     loadUserPosts(user.uid);
 
-                    // Hide "Plus" apply button if user has already applied
+                    // *** LOGIC EKA HADUWA ***
                     if (applyToPlusBtn) {
-                        const hasApplied = !plusAppSnap.empty;
-                        if (hasApplied) {
+                        const hasPlusApplied = !plusAppSnap.empty;
+                        if (hasPlusApplied) {
                             applyToPlusBtn.classList.add('hidden');
                         }
                     }
-
-                    // Hide "Pro" apply button if user has already applied
+                    
                     if (applyToProBtn) {
-                        const hasApplied = !proAppSnap.empty;
-                        if (hasApplied) {
+                        const hasProApplied = !proAppSnap.empty;
+                        if (hasProApplied) {
                             applyToProBtn.classList.add('hidden');
                         }
                     }
 
                 } else {
                     console.log('User document does not exist. This might be a new user.');
-                }
+            }
             } catch (error) {
                 console.error("Error fetching user data on auth state change:", error);
             }

@@ -4,30 +4,120 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile - Around Me Click</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+      // Inline script to prevent FOUC (Flash of Un-styled Content)
+      // This runs before anything is rendered
+      if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class', // <-- DARK MODE ENABLE KALA
+            theme: {
+                extend: {
+                    colors: {
+                        'off-white': 'var(--color-off-white)',
+                        'ivory': 'var(--color-ivory)',
+                        'ivory-brown': 'var(--color-ivory-brown)',
+                        'classic-taupe': 'var(--color-classic-taupe)',
+                        'ivory-linen': 'var(--color-ivory-linen)',
+                        'pastel-ivory': 'var(--color-pastel-ivory)',
+                    },
+                    fontFamily: { 
+                        'sans': ['Poppins', 'sans-serif'] 
+                    },
+                    animation: { 
+                        'fade-in': 'fadeIn 0.3s ease-in-out', 
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'search-in': 'searchIn 0.2s ease-out'
+                    },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        slideUp: { '0%': { transform: 'translateY(10px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
+                        searchIn: { '0%': { transform: 'translateY(-20px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } }
+                    }
+                }
+            }
+        }
+    </script>
+    
     <script src="https://cdn.tiny.cloud/1/g05mtt7puthyc4poi4et7fmwzo82ouqpbq3sqfwlmbm3qheq/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .font-serif { font-family: 'Lora', serif; }
+        /* === DARK MODE CSS VARIABLES === */
+        :root {
+            /* Light Mode (Original Colors) */
+            --color-off-white: #FAF9F6;
+            --color-ivory: #FFFFF0;
+            --color-pastel-ivory: #F2E7D4;
+            --color-ivory-linen: #EEE1CB;
+            --color-ivory-brown: #8B5E34;
+            --color-classic-taupe: #A68E7A;
+            --color-text-default: #8B5E34; /* For black text in dark mode */
+            --color-button-text: #FAF9F6; /* For white text in dark mode */
+        }
+
+        body.dark {
+            /* Dark Mode (New Colors) */
+            --color-off-white: #111827;     /* Main BG: Gray 900 */
+            --color-ivory: #1f2937;       /* Card BG: Gray 800 */
+            --color-pastel-ivory: #374151; /* Hover BG: Gray 700 */
+            --color-ivory-linen: #4b5563;  /* Borders: Gray 600 */
+            --color-ivory-brown: #F2E7D4;  /* Primary Text: Pastel Ivory */
+            --color-classic-taupe: #9ca3af; /* Secondary Text: Gray 400 */
+            --color-text-default: #F2E7D4;
+            --color-button-text: #111827;
+        }
+
+        /* Dark mode scrollbar */
+        body.dark ::-webkit-scrollbar { background: var(--color-off-white); }
+        body.dark ::-webkit-scrollbar-thumb { background: var(--color-ivory-linen); }
+
+        /* Fix Dark Mode Button Colors */
+        body.dark #signup-btn {
+            background-color: var(--color-pastel-ivory);
+            color: var(--color-button-text);
+        }
+        body.dark #signup-btn:hover {
+            background-color: var(--color-ivory-linen);
+        }
+        body.dark .category-button[data-category="all"] {
+             background-color: var(--color-pastel-ivory);
+             color: var(--color-button-text);
+        }
+        /* === END OF DARK MODE VARIABLES === */
+
+
+        body { font-family: 'Poppins', sans-serif; }
+        .font-serif { font-family: 'Poppins', sans-serif; } /* Changed Lora to Poppins for consistency */
 
         .tox:not(.tox-tinymce-inline) .tox-editor-header:not(:focus-within):not(:focus) + .tox-edit-area {
-            border-top: 1px solid #ccc;
+            border-top: 1px solid #EEE1CB; /* ivory-linen */
         }
         .tox.tox-tinymce-inline .tox-editor-header:not(:focus-within):not(:focus)+.tox-edit-area {
-            border-bottom: 1px solid #ccc;
+            border-bottom: 1px solid #EEE1CB; /* ivory-linen */
         }
         .tox:focus-within {
             outline: none !important;
             box-shadow: none !important;
-            border-color: #ccc !important;
+            border-color: #A68E7A !important; /* classic-taupe */
         }
         
-        /* --- ROLE-BASED UI CONTROL --- */
+        /* --- ROLE-BASED UI CONTROL (from profile.html) --- */
         #create-post-widget,
-        #header-create-post-btn {
+        #header-create-post-btn { /* Note: header-create-post-btn is from index.html header */
             display: none;
         }
         body.role-plus #create-post-widget,
@@ -41,81 +131,174 @@
             display: inline-flex; 
         }
 
-     
+        /* --- Application Button Rules (from profile.html) --- */
+        #apply-to-plus-btn,
+        #apply-to-pro-btn {
+            display: none;
+        }
         body.role-normal #apply-to-plus-btn {
             display: inline-flex;
         }
+        body.role-plus #apply-to-pro-btn {
+            display: inline-flex;
+        }
 
-        /* Add these new rules inside the <style> tag in profile.html */
+        /* --- STYLES FROM INDEX.HTML --- */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--color-off-white); }
+        ::-webkit-scrollbar-thumb { background: var(--color-classic-taupe); border-radius: 4px; }
+        
+        footer {
+            display: none; 
+        }
+        @media (min-width: 768px) {
+            footer {
+                display: block; 
+            }
+        }
 
-/* By default, hide both apply buttons */
-#apply-to-plus-btn,
-#apply-to-pro-btn {
-    display: none;
-}
+        #bottom-nav-bar {
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+        }
 
-/* Show PLUS button ONLY for 'normal' users */
-body.role-normal #apply-to-plus-btn {
-    display: inline-flex;
-}
+        .bottom-nav-creators-only {
+            display: none;
+        }
+        body.role-plus .bottom-nav-creators-only,
+        body.role-pro .bottom-nav-creators-only,
+        body.role-admin .bottom-nav-creators-only {
+            display: flex;
+        }
 
-/* Show PRO button ONLY for 'plus' users */
-body.role-plus #apply-to-pro-btn {
-    display: inline-flex;
-}
+        @keyframes vibrate {
+          0%, 100% { transform: translateX(0); }
+          20%, 60% { transform: translateX(-3px); }
+          40%, 80% { transform: translateX(3px); }
+        }
+        .vibrate-anim {
+          animation: vibrate 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+        }
 
+        /* --- Drawer Styles (from index.html) --- */
+        body.drawer-open #left-drawer {
+            transform: translateX(0);
+        }
+        body.drawer-open #left-drawer-backdrop {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #search-drawer {
+            transition: transform 0.3s ease-in-out;
+        }
+        body.search-drawer-open #search-drawer {
+            transform: translateX(0);
+        }
+        body.search-drawer-open #search-drawer-backdrop {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #search-drawer-input {
+            width: 100%; padding: 1rem; background-color: transparent; color: var(--color-ivory-brown);
+            font-size: 1.125rem; line-height: 1.75rem; border: none; outline: none; box-shadow: none;
+        }
+        #search-drawer-input::placeholder { color: var(--color-classic-taupe); }
+        .search-suggestion-item {
+            display: flex; align-items: center; gap: 1rem; padding: 1rem;
+            color: var(--color-classic-taupe); cursor: pointer;
+        }
+        .search-suggestion-item:hover { background-color: var(--color-pastel-ivory); color: var(--color-ivory-brown); }
+        .search-suggestion-item svg { width: 1.25rem; height: 1.25rem; color: var(--color-classic-taupe); }
+
+        #notification-drawer {
+            transition: transform 0.3s ease-in-out;
+        }
+        body.notification-drawer-open #notification-drawer {
+            transform: translateX(0);
+        }
+        body.notification-drawer-open #notification-drawer-backdrop {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #auth-drawer {
+            transition: transform 0.3s ease-in-out;
+        }
+        body.auth-drawer-open #auth-drawer {
+            transform: translateX(0);
+        }
+        body.auth-drawer-open #auth-drawer-backdrop {
+            opacity: 1;
+            pointer-events: auto;
+        }
     </style>
 </head>
-<body class="bg-slate-100">
+<body class="bg-off-white font-sans text-ivory-brown">
 
-    <header class="sticky top-0 z-50 bg-white border-b border-slate-200">
-        <div class="flex justify-between items-center px-6 py-3 max-w-7xl mx-auto">
-            <div class="text-xl font-bold text-blue-600">
-                <a href="index.html">Around Me Click</a>
-            </div>
-            
-            <div>
-                <div id="user-auth-links" class="flex gap-3">
-                    <a href="index.html" class="bg-slate-200 text-slate-800 px-4 py-2 rounded-full text-sm font-semibold hover:bg-slate-300 transition-colors">
-                        Login
-                    </a>
-                    <a href="index.html" class="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-700 transition-colors">
-                        Sign Up
-                    </a>
-                </div>
+    <header class="sticky top-0 z-50 bg-ivory/80 backdrop-blur-lg shadow-sm">
+        <div class="container mx-auto px-4">
+            <div class="hidden md:flex items-center justify-between h-16">
+                <a href="index.html" class="flex-shrink-0">
+                    <div class="flex items-center space-x-3">
+                        <img src="5.png" alt="Around Me Click Logo" class="h-10 w-10 rounded-lg object-contain">
+                        <span class="text-2xl font-bold text-ivory-brown">AroundMe.Click</span>
+                    </div>
+                    <p class="text-xs text-gray-900 dark:text-classic-taupe -mt-1 ml-14">Partnered with ZIDBIs</p>
+                </a>
+                <div class="flex items-center space-x-4">
+                    
+                    <button class="theme-toggle-button p-2 rounded-full text-classic-taupe hover:text-ivory-brown hover:bg-pastel-ivory" title="Toggle Theme">
+                        <svg class="theme-toggle-light-icon w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-6.364-.386l1.591-1.591M3 12h2.25m.386-6.364l1.591 1.591zM12 9a3 3 0 100 6 3 3 0 000-6z" /></svg>
+                        <svg class="theme-toggle-dark-icon w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 008.25-4.498z" /></svg>
+                    </button>
+                    <button id="desktop-search-btn" class="p-2 rounded-full text-classic-taupe hover:text-ivory-brown hover:bg-pastel-ivory" title="Search">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </button>
 
-                <div id="user-profile-info" class="hidden">
-                    <div class="flex items-center gap-2">
-                        <button id="header-create-post-btn" class="bg-slate-100 p-2 rounded-full text-slate-600 hover:bg-slate-200 hover:text-slate-800" title="Create Post">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                            </svg>
-                        </button>
-                        <button class="relative bg-slate-100 p-2 rounded-full text-slate-600 hover:bg-slate-200 hover:text-slate-800" title="Notifications">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-5-5.917V5a1 1 0 00-2 0v.083A6 6 0 006 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                            <span class="absolute top-0 right-0 flex h-4 w-4"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-white text-xs items-center justify-center">1</span></span>
-                        </button>
-                        <div class="relative">
-                            <button id="profile-dropdown-btn" class="flex items-center"><img id="header-user-avatar" src="https://via.placeholder.com/40" alt="User Avatar" class="w-10 h-10 rounded-full"></button>
-                            
-                            <div id="profile-dropdown-menu" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-xl border z-50">
-                                <div class="p-4 border-b">
-                                    <div class="flex items-center gap-3">
-                                        <img id="dropdown-user-avatar" src="https://via.placeholder.com/40" alt="User Avatar" class="w-12 h-12 rounded-full">
-                                        <div>
-                                            <p id="dropdown-user-name" class="font-bold text-slate-800">Loading...</p>
-                                            <p id="dropdown-user-email" class="text-sm text-slate-500">Loading...</p>
+                    <button id="header-create-post-btn" class="bg-ivory-linen p-2 rounded-full text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown" title="Create Post">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </button>
+
+                    <div class="flex items-center flex-shrink-0">
+                        <div id="user-auth-links" class="flex items-center space-x-3">
+                            <button id="login-btn" class="px-4 py-2 hover:text-classic-taupe font-medium">Sign In</button>
+                            <button id="signup-btn" class="px-4 py-2 bg-ivory-brown text-off-white rounded-full hover:bg-classic-taupe font-medium">Get Started</button>
+                        </div>
+                        <div id="user-profile-info" class="hidden flex items-center space-x-4">
+                            <button id="notification-bell-btn" class="relative p-2 text-ivory-brown hover:bg-pastel-ivory rounded-full">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                                <span id="notification-badge" class="hidden absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                            </button>
+                            <div class="relative">
+                                <button id="profile-dropdown-btn" class="flex items-center">
+                                    <img id="header-user-avatar" src="https://via.placeholder.com/40" alt="User" class="w-8 h-8 rounded-full">
+                                </button>
+                                <div id="profile-dropdown-menu" class="hidden absolute right-0 mt-2 w-64 bg-ivory rounded-lg shadow-xl z-20 border border-ivory-linen">
+                                    <div class="p-3 border-b border-ivory-linen">
+                                        <div class="flex items-center gap-3">
+                                            <img id="dropdown-user-avatar" src="https://via.placeholder.com/40" alt="User Avatar" class="w-11 h-11 rounded-full object-cover">
+                                            <div>
+                                                <p id="dropdown-user-name" class="font-semibold text-ivory-brown truncate">Loading...</p>
+                                                <p id="dropdown-user-email" class="text-sm text-classic-taupe truncate">loading...</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="py-2">
-                                    <a href="profile.html" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">View Profile</a>
-                                    <a href="#" class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">Settings</a>
-                                </div>
-                                <div class="py-2 border-t">
-                                    <button id="logout-btn" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-                                        Sign Out
-                                    </button>
+                                    <div class="py-2">
+                                        <a href="profile.html" class="flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
+                                            <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                            <span>My Profile</span>
+                                        </a>
+                                        <a id="admin-panel-link" href="admin.html" class="hidden flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"></path></svg>
+                                            <span>Admin Panel</span>
+                                        </a>
+                                    </div>
+                                    <div class="border-t border-ivory-linen py-2">
+                                        <button id="logout-btn" class="w-full text-left flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"></path></svg>
+                                            <span>Sign Out</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -123,67 +306,88 @@ body.role-plus #apply-to-pro-btn {
                 </div>
             </div>
         </div>
-    </header>
 
-    <main class="max-w-5xl mx-auto p-4 md:p-6 mt-6">
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="h-48 md:h-64 bg-slate-200">
+        <div class="md:hidden flex items-center justify-between h-16 relative px-4">
+            <button id="mobile-hamburger-btn" class="p-2 rounded-md text-ivory-brown hover:bg-ivory-linen">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            
+            <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                <a href="index.html" class="flex flex-col items-center">
+                    <div class="flex items-center space-x-2">
+                        <img src="5.png" alt="Around Me Click Logo" class="h-8 w-8 rounded-lg object-contain">
+                        <span class="text-xl font-bold text-ivory-brown">AroundMe.Click</span>
+                    </div>
+                    <p class="text-xs text-gray-900 dark:text-classic-taupe -mt-1">Partnered with ZIDBIs</p>
+                </a>
+            </div>
+
+            <div class="flex items-center">
+                <button id="mobile-search-btn" class="p-2 rounded-md text-ivory-brown hover:bg-ivory-linen">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+    <main class="container mx-auto p-4 md:p-6 mt-6">
+        <div class="bg-ivory rounded-xl shadow-sm overflow-hidden">
+            <div class="h-48 md:h-64 bg-pastel-ivory">
                 <img id="profile-banner" src="https://picsum.photos/1200/400" alt="Cover Photo" class="w-full h-full object-cover">
             </div>
 
             <div class="p-6 relative">
                 <div class="absolute -top-16 left-6">
-                    <img id="profile-avatar" src="https://via.placeholder.com/150" alt="User Avatar" class="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-white shadow-lg">
+                    <img id="profile-avatar" src="https://via.placeholder.com/150" alt="User Avatar" class="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-ivory shadow-lg">
                 </div>
 
                 <div class="text-right space-x-2">
-    <button id="apply-to-plus-btn" class="px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-semibold hover:bg-blue-700 transition-colors">
-        Apply for Plus Membership
-    </button>
-    <button id="apply-to-pro-btn" class="px-4 py-2 bg-purple-600 text-white rounded-full text-sm font-semibold hover:bg-purple-700 transition-colors">
-        Apply for Pro Membership
-    </button>
-    <button id="open-edit-modal-btn" class="px-4 py-2 border border-slate-300 rounded-full text-sm font-semibold text-slate-700 hover:bg-slate-100 transition-colors">
-        Edit Profile
-    </button>
-</div>
+                    <button id="apply-to-plus-btn" class="px-4 py-2 bg-ivory-brown text-off-white rounded-full text-sm font-semibold hover:bg-classic-taupe transition-colors">
+                        Apply for Plus Membership
+                    </button>
+                    <button id="apply-to-pro-btn" class="px-4 py-2 bg-classic-taupe text-off-white rounded-full text-sm font-semibold hover:bg-ivory-brown transition-colors">
+                        Apply for Pro Membership
+                    </button>
+                    <button id="open-edit-modal-btn" class="px-4 py-2 border border-ivory-linen rounded-full text-sm font-semibold text-classic-taupe hover:bg-pastel-ivory transition-colors">
+                        Edit Profile
+                    </button>
+                </div>
 
                 <div class="mt-8">
-                    <h1 id="profile-display-name" class="text-3xl font-bold text-slate-900">Loading Name...</h1>
-                    <p id="profile-email" class="text-md text-slate-500">loading.email@example.com</p>
-                    <p id="profile-bio" class="mt-3 text-slate-700 font-serif leading-relaxed">
+                    <h1 id="profile-display-name" class="text-3xl font-bold text-ivory-brown">Loading Name...</h1>
+                    <p id="profile-email" class="text-md text-classic-taupe">loading.email@example.com</p>
+                    <p id="profile-bio" class="mt-3 text-ivory-brown font-sans leading-relaxed">
                         Loading bio...
                     </p>
                     <div class="mt-4 flex items-center space-x-6 text-sm">
-                        <div class="text-slate-600">
-                            <span id="followers-count" class="font-bold text-slate-800">0</span> Followers
+                        <div class="text-classic-taupe">
+                            <span id="followers-count" class="font-bold text-ivory-brown">0</span> Followers
                         </div>
-                        <div class="text-slate-600">
-                            <span id="following-count" class="font-bold text-slate-800">0</span> Following
+                        <div class="text-classic-taupe">
+                            <span id="following-count" class="font-bold text-ivory-brown">0</span> Following
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div id="create-post-widget" class="bg-white rounded-lg shadow-md p-4 mt-8">
+        <div id="create-post-widget" class="bg-ivory rounded-xl shadow-sm p-4 mt-8">
             <div class="flex items-center gap-3">
                 <img id="widget-user-avatar" src="https://via.placeholder.com/40" alt="User Avatar" class="w-10 h-10 rounded-full">
-                <button id="open-create-modal-main-btn" class="w-full bg-slate-100 rounded-full py-2 px-4 text-left text-slate-500 hover:bg-slate-200 transition-colors">
+                <button id="open-create-modal-main-btn" class="w-full bg-pastel-ivory rounded-full py-2 px-4 text-left text-classic-taupe hover:bg-ivory-linen transition-colors">
                     What's on your mind?
                 </button>
             </div>
-            <hr class="my-4 border-slate-200">
+            <hr class="my-4 border-ivory-linen">
             <div class="flex justify-around">
-                <button id="open-create-modal-article-btn" class="flex items-center gap-2 text-slate-600 font-semibold hover:bg-slate-100 p-2 rounded-lg transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                <button id="open-create-modal-article-btn" class="flex items-center gap-2 text-classic-taupe font-semibold hover:bg-pastel-ivory p-2 rounded-lg transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-ivory-brown" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
                         <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
                     </svg>
                     <span>Write Article</span>
                 </button>
-                <button id="open-create-modal-media-btn" class="flex items-center gap-2 text-slate-600 font-semibold hover:bg-slate-100 p-2 rounded-lg transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                <button id="open-create-modal-media-btn" class="flex items-center gap-2 text-classic-taupe font-semibold hover:bg-pastel-ivory p-2 rounded-lg transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-classic-taupe" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
                     </svg>
                     <span>Add Media</span>
@@ -192,18 +396,18 @@ body.role-plus #apply-to-pro-btn {
         </div>
 
         <div class="mt-8">
-            <h2 class="text-2xl font-bold text-slate-800 mb-4">My Posts</h2>
+            <h2 class="text-2xl font-bold text-ivory-brown mb-4">My Posts</h2>
             <div id="my-posts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <p class="text-slate-500 col-span-full">Loading posts...</p>
-            </div>
+                <p class="text-classic-taupe col-span-full">Loading posts...</p>
+                </div>
         </div>
     </main>
 
-    <div id="edit-post-modal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div id="edit-post-modal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-ivory rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold">Edit Post</h2>
-                <button id="close-edit-post-modal" class="text-gray-500 hover:text-gray-700">
+                <h2 class="text-2xl font-bold text-ivory-brown">Edit Post</h2>
+                <button id="close-edit-post-modal" class="text-classic-taupe hover:text-ivory-brown">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -212,12 +416,12 @@ body.role-plus #apply-to-pro-btn {
             <form id="edit-post-form">
                 <input type="hidden" id="edit-post-id" name="postId">
                 <div class="mb-4">
-                    <label for="edit-post-title" class="block text-sm font-medium text-gray-700">Post Title</label>
-                    <input type="text" id="edit-post-title" name="title" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <label for="edit-post-title" class="block text-sm font-medium text-classic-taupe">Post Title</label>
+                    <input type="text" id="edit-post-title" name="title" class="mt-1 block w-full rounded-md border-ivory-linen shadow-sm focus:border-classic-taupe focus:ring focus:ring-classic-taupe focus:ring-opacity-50 bg-off-white">
                 </div>
                 <div class="mb-4">
-                    <label for="edit-post-category" class="block text-sm font-medium text-gray-700">Category</label>
-                    <select id="edit-post-category" name="category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <label for="edit-post-category" class="block text-sm font-medium text-classic-taupe">Category</label>
+                    <select id="edit-post-category" name="category" class="mt-1 block w-full rounded-md border-ivory-linen shadow-sm focus:border-classic-taupe focus:ring focus:ring-classic-taupe focus:ring-opacity-50 bg-off-white">
                         <option value="technology">Technology</option>
                         <option value="travel">Travel</option>
                         <option value="food">Food</option>
@@ -226,11 +430,11 @@ body.role-plus #apply-to-pro-btn {
                     </select>
                 </div>
                 <div class="mb-4">
-                    <label for="edit-post-content" class="block text-sm font-medium text-gray-700">Post Content</label>
-                    <textarea id="edit-post-content" name="content" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"></textarea>
+                    <label for="edit-post-content" class="block text-sm font-medium text-classic-taupe">Post Content</label>
+                    <textarea id="edit-post-content" name="content" class="mt-1 block w-full rounded-md border-ivory-linen shadow-sm focus:border-classic-taupe focus:ring focus:ring-classic-taupe focus:ring-opacity-50 bg-off-white"></textarea>
                 </div>
                 <div class="flex justify-end mt-6">
-                    <button type="submit" id="update-post-btn" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <button type="submit" id="update-post-btn" class="px-4 py-2 bg-ivory-brown text-off-white rounded-md hover:bg-classic-taupe focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ivory-brown">
                         Update Post
                     </button>
                 </div>
@@ -238,22 +442,22 @@ body.role-plus #apply-to-pro-btn {
         </div>
     </div>
     
-    <div id="post-view-modal" class="fixed inset-0 z-[200] hidden items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm p-4">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl mx-auto flex flex-col max-h-[90vh]">
-            <div class="p-4 border-b flex justify-between items-center">
-                <h3 id="view-modal-title" class="text-xl font-bold text-slate-800"></h3>
-                <button id="close-view-modal-btn" class="text-3xl text-gray-500 hover:text-gray-800">&times;</button>
+    <div id="post-view-modal" class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+        <div class="bg-ivory rounded-lg shadow-2xl w-full max-w-2xl mx-auto flex flex-col max-h-[90vh]">
+            <div class="p-4 border-b border-ivory-linen flex justify-between items-center">
+                <h3 id="view-modal-title" class="text-xl font-bold text-ivory-brown"></h3>
+                <button id="close-view-modal-btn" class="text-3xl text-classic-taupe hover:text-ivory-brown">&times;</button>
             </div>
             <div class="p-6 overflow-y-auto">
-                <div id="view-modal-media-container" class="mb-4 aspect-video hidden"></div>
-                <div id="view-modal-description" class="text-slate-600 font-serif leading-relaxed prose max-w-none"></div>
-                <div class="mt-6 pt-4 border-t border-slate-200">
-                    <h4 class="text-lg font-bold text-slate-800 mb-4">Comments</h4>
+                <div id="view-modal-media-container" class="mb-4 aspect-video hidden rounded-lg overflow-hidden bg-black"></div>
+                <div id="view-modal-description" class="text-ivory-brown font-sans leading-relaxed prose max-w-none"></div>
+                <div class="mt-6 pt-4 border-t border-ivory-linen">
+                    <h4 class="text-lg font-bold text-ivory-brown mb-4">Comments</h4>
                     <form id="comment-form" class="flex items-start space-x-3 mb-6" data-post-id="">
                         <img id="comment-user-avatar" src="https://via.placeholder.com/40" alt="My Avatar" class="w-10 h-10 rounded-full">
                         <div class="flex-1">
-                            <textarea id="comment-textarea" rows="2" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Add a comment..."></textarea>
-                            <button type="submit" class="mt-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-full hover:bg-blue-700">Post Comment</button>
+                            <textarea id="comment-textarea" rows="2" class="w-full border border-ivory-linen rounded-md p-2 focus:ring-ivory-brown focus:border-ivory-brown bg-off-white" placeholder="Add a comment..."></textarea>
+                            <button type="submit" class="mt-2 px-4 py-2 bg-ivory-brown text-off-white text-sm font-semibold rounded-full hover:bg-classic-taupe">Post Comment</button>
                         </div>
                     </form>
                     <div id="comments-list" class="space-y-4"></div>
@@ -262,20 +466,20 @@ body.role-plus #apply-to-pro-btn {
         </div>
     </div>
     
-    <div id="edit-profile-modal" class="hidden fixed inset-0 bg-black/60 flex justify-center items-center z-50 overflow-y-auto p-4">
-        <div class="bg-white p-6 md:p-8 rounded-lg shadow-xl w-full max-w-2xl relative">
-            <div class="relative text-center border-b pb-3 mb-4">
-                <h2 class="text-xl font-bold">Edit Your Profile</h2>
-                <button id="close-edit-modal-btn" class="absolute top-0 right-0 text-3xl text-gray-500 hover:text-gray-800">&times;</button>
+    <div id="edit-profile-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 overflow-y-auto p-4">
+        <div class="bg-ivory p-6 md:p-8 rounded-lg shadow-xl w-full max-w-2xl relative">
+            <div class="relative text-center border-b border-ivory-linen pb-3 mb-4">
+                <h2 class="text-xl font-bold text-ivory-brown">Edit Your Profile</h2>
+                <button id="close-edit-modal-btn" class="absolute top-0 right-0 text-3xl text-classic-taupe hover:text-ivory-brown">&times;</button>
             </div>
             <form id="edit-profile-form">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Cover Photo</label>
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                    <label class="block text-sm font-medium text-classic-taupe mb-1">Cover Photo</label>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-ivory-linen border-dashed rounded-md">
                         <div class="space-y-1 text-center">
                             <img id="cover-preview" src="https://via.placeholder.com/400x150" alt="Cover preview" class="mx-auto h-24 object-cover rounded mb-2">
-                            <div class="flex text-sm text-gray-600">
-                                <label for="cover-photo-input" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                            <div class="flex text-sm text-classic-taupe">
+                                <label for="cover-photo-input" class="relative cursor-pointer bg-ivory rounded-md font-medium text-ivory-brown hover:text-classic-taupe focus-within:outline-none">
                                     <span>Upload a new cover</span>
                                     <input id="cover-photo-input" name="cover-photo" type="file" class="sr-only" accept="image/*">
                                 </label>
@@ -284,28 +488,28 @@ body.role-plus #apply-to-pro-btn {
                     </div>
                 </div>
                 <div class="mt-4">
-                    <label class="block text-sm font-medium text-gray-700">Profile Picture</label>
+                    <label class="block text-sm font-medium text-classic-taupe">Profile Picture</label>
                     <div class="mt-1 flex items-center gap-4">
                         <img id="avatar-preview" class="h-16 w-16 rounded-full object-cover" src="https://via.placeholder.com/150" alt="Avatar preview">
-                        <label for="avatar-photo-input" class="cursor-pointer bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none">
+                        <label for="avatar-photo-input" class="cursor-pointer bg-ivory py-2 px-3 border border-ivory-linen rounded-md shadow-sm text-sm leading-4 font-medium text-classic-taupe hover:bg-pastel-ivory focus:outline-none">
                             <span>Change picture</span>
                             <input type="file" id="avatar-photo-input" name="avatar-photo" class="sr-only" accept="image/*">
                         </label>
                     </div>
                 </div>
                 <div class="mt-4">
-                    <label for="display-name-input" class="block text-sm font-medium text-gray-700">Display Name</label>
-                    <input type="text" id="display-name-input" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    <label for="display-name-input" class="block text-sm font-medium text-classic-taupe">Display Name</label>
+                    <input type="text" id="display-name-input" class="mt-1 block w-full border border-ivory-linen rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-ivory-brown focus:border-ivory-brown bg-off-white">
                 </div>
                 <div class="mt-4">
-                    <label for="bio-input" class="block text-sm font-medium text-gray-700">Bio</label>
-                    <textarea id="bio-input" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Tell us a little about yourself..."></textarea>
+                    <label for="bio-input" class="block text-sm font-medium text-classic-taupe">Bio</label>
+                    <textarea id="bio-input" rows="3" class="mt-1 block w-full border border-ivory-linen rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-ivory-brown focus:border-ivory-brown bg-off-white" placeholder="Tell us a little about yourself..."></textarea>
                 </div>
                 <div class="mt-6 flex justify-end gap-3">
-                    <button type="button" id="cancel-edit-btn" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    <button type="button" id="cancel-edit-btn" class="bg-ivory py-2 px-4 border border-ivory-linen rounded-md shadow-sm text-sm font-medium text-classic-taupe hover:bg-pastel-ivory">
                         Cancel
                     </button>
-                    <button type="submit" id="save-profile-btn" class="bg-blue-600 text-white py-2 px-4 rounded-md shadow-sm text-sm font-medium hover:bg-blue-700">
+                    <button type="submit" id="save-profile-btn" class="bg-ivory-brown text-off-white py-2 px-4 rounded-md shadow-sm text-sm font-medium hover:bg-classic-taupe">
                         Save Changes
                     </button>
                 </div>
@@ -313,36 +517,36 @@ body.role-plus #apply-to-pro-btn {
         </div>
     </div>
     
-    <div id="create-post-modal" class="hidden fixed inset-0 bg-black/60 flex justify-center items-start z-50 overflow-y-auto p-4 pt-10">
-        <div class="bg-white p-6 md:p-8 rounded-lg shadow-xl w-full max-w-2xl relative">
-            <div class="relative text-center border-b pb-3 mb-4">
-                <h2 class="text-xl font-bold">Create a Blog Post</h2>
-                <button id="close-create-modal-btn" class="absolute top-0 right-0 text-3xl text-gray-500 hover:text-gray-800">&times;</button>
+    <div id="create-post-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-start z-50 overflow-y-auto p-4 pt-10">
+        <div class="bg-ivory p-6 md:p-8 rounded-lg shadow-xl w-full max-w-2xl relative">
+            <div class="relative text-center border-b border-ivory-linen pb-3 mb-4">
+                <h2 class="text-xl font-bold text-ivory-brown">Create a Blog Post</h2>
+                <button id="close-create-modal-btn" class="absolute top-0 right-0 text-3xl text-classic-taupe hover:text-ivory-brown">&times;</button>
             </div>
             <div class="flex items-center gap-3 mb-4">
                 <img id="modal-user-avatar" src="https://via.placeholder.com/40" alt="User Avatar" class="w-10 h-10 rounded-full">
                 <div>
-                    <p id="modal-user-name" class="font-semibold">User Name</p>
+                    <p id="modal-user-name" class="font-semibold text-ivory-brown">User Name</p>
                 </div>
             </div>
             <form id="create-post-form">
                 <textarea id="post-content" name="content"></textarea>
                 <div class="mt-4">
-                    <label for="post-image-input" class="block text-sm font-medium text-gray-700 mb-2">Add Photos</label>
+                    <label for="post-image-input" class="block text-sm font-medium text-classic-taupe mb-2">Add Photos</label>
                     <input type="file" id="post-image-input" class="hidden" accept="image/*" multiple>
                     <div id="image-preview-container" class="mt-2 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 min-h-[80px]">
-                        <label for="post-image-input" class="cursor-pointer border-2 border-dashed rounded-lg flex flex-col items-center justify-center text-gray-400 hover:bg-gray-50">
+                        <label for="post-image-input" class="cursor-pointer border-2 border-ivory-linen border-dashed rounded-lg flex flex-col items-center justify-center text-classic-taupe hover:bg-pastel-ivory">
                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                             <span class="text-xs mt-1">Add More</span>
                         </label>
                     </div>
                 </div>
-                <div class="my-4 text-center text-sm text-slate-500 font-semibold">OR</div>
+                <div class="my-4 text-center text-sm text-classic-taupe font-semibold">OR</div>
                 <div>
-                    <label for="post-youtube-link" class="block text-sm font-medium text-gray-700 mb-1">Paste a YouTube Video Link</label>
-                    <input type="url" id="post-youtube-link" name="youtube_link" placeholder="e.g., https://www.youtube.com/watch?v=..." class="mt-1 w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <label for="post-youtube-link" class="block text-sm font-medium text-classic-taupe mb-1">Paste a YouTube Video Link</label>
+                    <input type="url" id="post-youtube-link" name="youtube_link" placeholder="e.g., https://www.youtube.com/watch?v=..." class="mt-1 w-full rounded-lg border-ivory-linen shadow-sm focus:border-ivory-brown focus:ring-ivory-brown bg-off-white">
                 </div>
-                <select id="post-category" name="category" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 my-4" required>
+                <select id="post-category" name="category" class="w-full rounded-lg border-ivory-linen focus:border-ivory-brown focus:ring-ivory-brown my-4 bg-off-white text-classic-taupe" required>
                     <option value="" disabled selected>Select a category</option>
                     <option value="Technology">Technology</option>
                     <option value="Travel">Travel</option>
@@ -351,27 +555,27 @@ body.role-plus #apply-to-pro-btn {
                     <option value="Health">Health</option>
                     <option value="Business">Business</option>
                 </select>
-                <button type="submit" id="publish-post-btn" class="w-full bg-blue-600 text-white py-3 rounded-full font-bold hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed" disabled>
+                <button type="submit" id="publish-post-btn" class="w-full bg-ivory-brown text-off-white py-3 rounded-full font-bold hover:bg-classic-taupe transition-colors disabled:bg-classic-taupe/50 disabled:cursor-not-allowed" disabled>
                     Publish
                 </button>
             </form>
         </div>
     </div>
     
-    <div id="plus-application-modal" class="hidden fixed inset-0 bg-black/60 flex justify-center items-center z-[100] p-4">
-        <div class="bg-white p-6 md:p-8 rounded-lg shadow-xl w-full max-w-lg relative">
-            <div class="relative text-center border-b pb-3 mb-4">
-                <h2 class="text-xl font-bold">Apply for Plus Membership</h2>
-                <p class="text-sm text-slate-500 mt-1">Tell us why you want to become a content creator.</p>
-                <button id="close-application-modal-btn" class="absolute top-0 right-0 text-3xl text-gray-500 hover:text-gray-800">&times;</button>
+    <div id="plus-application-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
+        <div class="bg-ivory p-6 md:p-8 rounded-lg shadow-xl w-full max-w-lg relative">
+            <div class="relative text-center border-b border-ivory-linen pb-3 mb-4">
+                <h2 class="text-xl font-bold text-ivory-brown">Apply for Plus Membership</h2>
+                <p class="text-sm text-classic-taupe mt-1">Tell us why you want to become a content creator.</p>
+                <button id="close-application-modal-btn" class="absolute top-0 right-0 text-3xl text-classic-taupe hover:text-ivory-brown">&times;</button>
             </div>
             <form id="plus-application-form">
                 <div class="mt-4">
-                    <label for="application-reason" class="block text-sm font-medium text-gray-700">Why do you want to join?</label>
-                    <textarea id="application-reason" rows="5" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Explain why you would be a great Plus member, what kind of content you plan to create, etc." required></textarea>
+                    <label for="application-reason" class="block text-sm font-medium text-classic-taupe">Why do you want to join?</label>
+                    <textarea id="application-reason" rows="5" class="mt-1 block w-full border border-ivory-linen rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-ivory-brown focus:border-ivory-brown bg-off-white" placeholder="Explain why you would be a great Plus member, what kind of content you plan to create, etc." required></textarea>
                 </div>
                 <div class="mt-6 flex justify-end">
-                    <button type="submit" id="submit-application-btn" class="bg-blue-600 text-white py-2 px-6 rounded-md shadow-sm text-sm font-medium hover:bg-blue-700 disabled:bg-blue-300">
+                    <button type="submit" id="submit-application-btn" class="bg-ivory-brown text-off-white py-2 px-6 rounded-md shadow-sm text-sm font-medium hover:bg-classic-taupe disabled:bg-classic-taupe/50">
                         Submit Application
                     </button>
                 </div>
@@ -380,40 +584,543 @@ body.role-plus #apply-to-pro-btn {
         </div>
     </div>
 
-    <div id="pro-application-modal" class="hidden fixed inset-0 bg-black/60 flex justify-center items-center z-[100] p-4">
-    <div class="bg-white p-6 md:p-8 rounded-lg shadow-xl w-full max-w-lg relative">
-        <div class="relative text-center border-b pb-3 mb-4">
-            <h2 class="text-xl font-bold">Apply for Pro Membership</h2>
-            <p class="text-sm text-slate-500 mt-1">Tell us about your experience to become a Pro member.</p>
-            <button id="close-pro-application-modal-btn" class="absolute top-0 right-0 text-3xl text-gray-500 hover:text-gray-800">&times;</button>
+    <div id="pro-application-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
+        <div class="bg-ivory p-6 md:p-8 rounded-lg shadow-xl w-full max-w-lg relative">
+            <div class="relative text-center border-b border-ivory-linen pb-3 mb-4">
+                <h2 class="text-xl font-bold text-ivory-brown">Apply for Pro Membership</h2>
+                <p class="text-sm text-classic-taupe mt-1">Tell us about your experience to become a Pro member.</p>
+                <button id="close-pro-application-modal-btn" class="absolute top-0 right-0 text-3xl text-classic-taupe hover:text-ivory-brown">&times;</button>
+            </div>
+            <form id="pro-application-form">
+                <div class="mt-4">
+                    <label for="pro-application-reason" class="block text-sm font-medium text-classic-taupe">Why should you be a Pro?</label>
+                    <textarea id="pro-application-reason" rows="5" class="mt-1 block w-full border border-ivory-linen rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-ivory-brown focus:border-ivory-brown bg-off-white" placeholder="Explain your content creation experience, why you need Pro features, etc." required></textarea>
+                </div>
+                <div class="mt-6 flex justify-end">
+                    <button type="submit" id="submit-pro-application-btn" class="bg-ivory-brown text-off-white py-2 px-6 rounded-md shadow-sm text-sm font-medium hover:bg-classic-taupe disabled:bg-classic-taupe/50">
+                        Submit Pro Application
+                    </button>
+                </div>
+                 <p id="pro-application-status-message" class="text-center text-sm mt-4"></p> </form>
         </div>
-        <form id="pro-application-form">
-            <div class="mt-4">
-                <label for="pro-application-reason" class="block text-sm font-medium text-gray-700">Why should you be a Pro?</label>
-                <textarea id="pro-application-reason" rows="5" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500" placeholder="Explain your content creation experience, why you need Pro features, etc." required></textarea>
-            </div>
-            <div class="mt-6 flex justify-end">
-                <button type="submit" id="submit-pro-application-btn" class="bg-purple-600 text-white py-2 px-6 rounded-md shadow-sm text-sm font-medium hover:bg-purple-700 disabled:bg-purple-300">
-                    Submit Pro Application
-                </button>
-            </div>
-        </form>
     </div>
-</div>
-
-    <footer class="bg-slate-100 border-t border-slate-200 mt-16">
+    <footer class="bg-pastel-ivory border-t border-ivory-linen mt-16">
         <div class="max-w-7xl mx-auto px-6 py-12">
-            <div class="text-center">
-                <p class="text-sm text-slate-600">&copy; 2025 Around Me Click. All Rights Reserved.</p>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="md:col-span-2 space-y-4">
+                    <h4 class="font-bold text-xl text-ivory-brown">Around Me Click</h4>
+                    <p class="text-classic-taupe">Connecting voices from around the world.</p> </div>
+                <div class="space-y-4">
+                    <h5 class="font-bold text-lg text-ivory-brown">Quick Links</h5>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-classic-taupe hover:text-ivory-brown">About Us</a></li>
+                        <li><a href="#" class="text-classic-taupe hover:text-ivory-brown">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="space-y-4">
+                    <h5 class="font-bold text-lg text-ivory-brown">Follow Us</h5>
+                    <p class="text-classic-taupe">Join the conversation on social media.</p> <div class="flex items-center space-x-4">
+                        <a href="YOUR_FACEBOOK_LINK_HERE" target="_blank" rel="noopener noreferrer" class="text-classic-taupe hover:text-ivory-brown transition-colors">
+                            <span class="sr-only">Facebook</span>
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33V21.878A10.003 10.003 0 0022 12z" clip-rule="evenodd" /></svg>
+                        </a>
+                        <a href="YOUR_INSTAGRAM_LINK_HERE" target="_blank" rel="noopener noreferrer" class="text-classic-taupe hover:text-ivory-brown transition-colors">
+                            <span class="sr-only">Instagram</span>
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C9.283 2 9.044.01 7.878.06c-1.065.05-1.79.2-2.428.465a4.902 4.902 0 00-1.77 1.153A4.902 4.902 0 003.11 6.19c-.265.638-.415 1.363-.465 2.428C2.6 9.664 2.59 9.983 2.59 12s.01 2.336.06 3.4c.05 1.065.2 1.79.465 2.428a4.902 4.902 0 001.153 1.77 4.902 4.902 0 001.77 1.153c.638.265 1.363.415 2.428.465 1.066.05 1.405.06 4.122.06 2.717 0 3.056-.01 4.122-.06 1.065-.05 1.79-.2 2.428-.465a4.902 4.902 0 001.77-1.153 4.902 4.902 0 001.153-1.77c.265-.638.415-1.363.465-2.428.05-1.066.06-1.405.06-4.122s-.01-2.336-.06-3.4c-.05-1.065-.2-1.79-.465-2.428a4.902 4.902 0 00-1.153-1.77A4.902 4.902 0 0018.81 3.11c-.638-.265-1.363-.415-2.428-.465C15.336 2.6 15.017 2.59 12 2.59c-2.717 0-3.056.01-4.122.06zM12 4.865a7.135 7.135 0 110 14.27 7.135 7.135 0 010-14.27zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 10-2.88 0 1.44 1.44 0 002.88 0z" clip-rule="evenodd" /></svg>
+                        </a>
+                        <a href="YOUR_WHATSAPP_LINK_HERE" target="_blank" rel="noopener noreferrer" class="text-classic-taupe hover:text-ivory-brown transition-colors">
+                            <span class="sr-only">WhatsApp</span>
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.79.46 3.49 1.32 4.95L2 22l5.25-1.38c1.41.79 3.05 1.22 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zM9.53 8.5c.24-.12.55-.2 1.76.45 1.22.65 2.06 2.18 2.18 2.32.12.14.2.32.04.54-.16.22-.57.65-1.1.8-1.07.3-1.07.3-3.23-.52s-2.93-3-3.05-3.14c-.12-.14-.3-.14-.42-.14H4.75c-.14,0-.3,0-.42.14-.12.14-.53.57-.53 1.41,0 .84.55 1.64.63 1.76.08.12 1.07 1.73 2.63 2.4.47.2.85.32 1.14.41.47.14.87.12 1.2.08.38-.04 1.16-.48 1.32-0.94s.16-.86.12-.94c-.04-.08-.16-.12-.34-.2s-1.16-.57-1.34-.63c-.18-.06-.38-.06-.55.06-.18.12-.63.8-.77.94-.14.14-.28.16-.42.04-.14-.12-1.2-1.1-1.2-1.1C6.1 12.42 5.2 11.23 5.06 11c-.14-.24-.02-.38.1-.5s.28-.3.42-.42c.14-.12.2-.2.3-.34s.08-.22,0-.34c-.08-.12-1.05-1.2-1.05-1.2s-.3-.26-.6-.4c-.3-.14-.6-.14-.84-.02z" /></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 border-t border-ivory-linen pt-6 text-center">
+                <p class="text-sm text-classic-taupe">&copy; 2025 Around Me Click. All Rights Reserved.</p>
             </div>
         </div>
     </footer>
+    <nav id="bottom-nav-bar" class="md:hidden fixed bottom-0 left-0 w-full bg-ivory/95 backdrop-blur-lg border-t border-ivory-linen z-40">
+        <div class="flex justify-around items-center h-16">
+            <a href="index.html" class="flex flex-col items-center justify-center text-classic-taupe hover:text-ivory-brown">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"></path></svg>
+                <span class="text-xs font-medium">Home</span>
+            </a>
+    
+            <button id="open-create-modal-bottom-nav" class="bottom-nav-creators-only flex flex-col items-center justify-center text-classic-taupe hover:text-ivory-brown">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span class="text-xs font-medium">Create</span>
+            </button>
+    
+            <button id="bottom-nav-login-btn" class="flex flex-col items-center justify-center text-classic-taupe hover:text-ivory-brown">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"></path></svg>
+                <span class="text-xs font-medium">Profile</span>
+            </button>
+            <a id="bottom-nav-profile-link" href="profile.html" class="hidden flex-col items-center justify-center text-ivory-brown"> <img id="bottom-nav-avatar" src="https://via.placeholder.com/40" alt="User" class="w-7 h-7 rounded-full border-2 border-ivory-brown">
+                <span class="text-xs font-medium">Profile</span>
+            </a>
+        </div>
+    </nav>
 
+    <div id="left-drawer-backdrop" class="md:hidden fixed inset-0 bg-black/60 z-[60] opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out"></div>
+    <div id="left-drawer" class="md:hidden fixed top-0 left-0 h-full w-80 max-w-[80vw] bg-ivory shadow-lg z-[70] transform -translate-x-full transition-transform duration-300 ease-in-out">
+        <div class="flex flex-col h-full">
+            <div class="flex border-b border-ivory-linen relative">
+                <button id="drawer-tab-menu" class="flex-1 text-center py-4 font-semibold text-ivory-brown border-b-2 border-yellow-400">MENU</button>
+                <button id="drawer-tab-categories" class="flex-1 text-center py-4 font-semibold text-classic-taupe border-b-2 border-transparent">CATEGORIES</button>
+                <button id="close-drawer-btn" class="absolute top-1 right-1 p-2 text-classic-taupe hover:text-ivory-brown">
+                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+    
+            <div class="flex-1 overflow-y-auto">
+                <div id="drawer-menu-content" class="">
+                    <nav class="flex flex-col text-sm font-medium text-gray-700">
+                        <a href="index.html" class="px-6 py-4 border-b border-ivory-linen text-classic-taupe font-bold">HOME</a>
+                        <a href="profile.html" class="px-6 py-4 border-b border-ivory-linen text-yellow-500 font-bold">MY PROFILE</a>
+                        <a href="#" class="px-6 py-4 border-b border-ivory-linen text-classic-taupe">SHOP</a>
+                        <a href="#" class="px-6 py-4 border-b border-ivory-linen text-classic-taupe">ABOUT US</a>
+                        <a href="#" class="px-6 py-4 border-b border-ivory-linen text-classic-taupe">CONTACT US</a>
+                        
+                        <button class="theme-toggle-button flex items-center justify-between w-full px-6 py-4 border-b border-ivory-linen text-classic-taupe">
+                            <span class="flex items-center gap-4">
+                                <svg class="theme-toggle-light-icon w-5 h-5 text-classic-taupe" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-6.364-.386l1.591-1.591M3 12h2.25m.386-6.364l1.591 1.591zM12 9a3 3 0 100 6 3 3 0 000-6z" /></svg>
+                                <svg class="theme-toggle-dark-icon w-5 h-5 text-classic-taupe hidden" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 008.25-4.498z" /></svg>
+                                <span>Toggle Theme</span>
+                            </span>
+                        </button>
+                    </nav>
+                </div>
+    
+                <div id="drawer-categories-content" class="hidden p-4">
+                     <div class="flex flex-col space-y-1">
+                        <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-classic-taupe hover:bg-pastel-ivory" data-category="all">
+                            <img src="https://i.ibb.co/P4S83fV/all-stories-icon.png" alt="All" class="w-6 h-6 rounded-full object-cover">
+                            <span>All Stories</span>
+                        </button>
+                        </div>
+                </div>
+            </div>
+    
+            <div class="p-4 border-t border-ivory-linen bg-ivory">
+                <div id="drawer-profile-info" class="hidden">
+                    <button id="drawer-logout-btn" class="w-full text-left flex items-center gap-3 px-4 py-2 text-base text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"></path></svg>
+                        <span>Sign Out</span>
+                    </button>
+                </div>
+                <div id="drawer-auth-links">
+                    <button id="drawer-login-btn" class="w-full text-left flex items-center gap-3 px-4 py-2 text-base font-medium text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"></path></svg>
+                        <span>Sign In / Sign Up</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="search-drawer-backdrop" class="fixed inset-0 bg-black/60 z-[100] opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out"></div>
+    <div id="search-drawer" class="fixed top-0 right-0 h-full w-96 max-w-[90vw] bg-ivory shadow-lg z-[110] transform translate-x-full transition-transform duration-300 ease-in-out">
+        <div class="flex flex-col h-full w-full">
+            <div class="flex items-center w-full bg-ivory border-b border-ivory-linen">
+                <form id="mobile-search-form" class="flex-1">
+                    <input type="text" id="search-drawer-input" name="q" placeholder="Search blogs..." autocomplete="off" autofocus>
+                </form>
+                <button id="close-search-drawer-btn" class="p-4 text-classic-taupe hover:text-ivory-brown">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="search-suggestions-container" class="flex-1 overflow-y-auto">
+                </div>
+        </div>
+    </div>
+    
+    <div id="notification-drawer-backdrop" class="fixed inset-0 bg-black/60 z-[100] opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out"></div>
+    <div id="notification-drawer" class="fixed top-0 right-0 h-full w-96 max-w-[90vw] bg-ivory shadow-lg z-[110] transform translate-x-full transition-transform duration-300 ease-in-out">
+        <div class="flex flex-col h-full w-full">
+            <div class="flex items-center justify-between w-full bg-ivory border-b border-ivory-linen p-4">
+                <h3 class="text-lg font-semibold text-ivory-brown">Notifications</h3>
+                <button id="close-notification-drawer-btn" class="p-2 text-classic-taupe hover:text-ivory-brown">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="notification-list-container" class="flex-1 overflow-y-auto p-4">
+                <p class="text-classic-taupe text-center">No new notifications.</p>
+                </div>
+        </div>
+    </div>
+
+    <div id="auth-drawer-backdrop" class="fixed inset-0 bg-black/60 z-[100] opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out"></div>
+    <div id="auth-drawer" class="fixed top-0 right-0 h-full w-96 max-w-[90vw] bg-ivory shadow-lg z-[110] transform translate-x-full transition-transform duration-300 ease-in-out">
+        <div class="flex flex-col h-full w-full">
+            <div class="flex items-center justify-end w-full bg-ivory border-b border-ivory-linen p-2">
+                <button id="close-auth-drawer-btn" class="p-2 text-classic-taupe hover:text-ivory-brown">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-8">
+                
+                <div id="auth-drawer-login-view">
+                    <h2 class="text-2xl font-bold mb-2 text-ivory-brown">Sign In</h2>
+                    <form id="login-form-drawer" class="mt-6">
+                         <input type="email" name="login-email" placeholder="Email" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
+                         <input type="password" name="login-password" placeholder="Password" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
+                         <div class="text-right mb-4">
+                             <a href="#" id="auth-show-reset-link" class="text-sm text-ivory-brown hover:underline">Forgot Password?</a>
+                         </div>
+                         <button type="submit" class="w-full bg-ivory-brown text-off-white py-3 rounded-full font-bold hover:bg-classic-taupe">Sign In</button>
+                         <p id="login-error-drawer" class="text-red-500 text-sm mt-2 min-h-[20px]"></p>
+                    </form>
+                    <p class="mt-6 text-sm text-classic-taupe">New here? <a href="#" id="auth-show-signup-link" class="text-ivory-brown font-bold hover:underline">Join now</a></p>
+                </div>
+
+                <div id="auth-drawer-signup-view" class="hidden">
+                    <h2 class="text-2xl font-bold mb-2 text-ivory-brown">Sign Up</h2>
+                    <form id="signup-form-drawer" class="mt-6">
+                        <input type="text" name="signup-name" placeholder="Your Name" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
+                        <input type="email" name="signup-email" placeholder="Email" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
+                        <input type="password" name="signup-password" placeholder="Password (6+ characters)" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
+                        <button type="submit" class="w-full bg-ivory-brown text-off-white py-3 rounded-full font-bold hover:bg-classic-taupe">Agree & Join</button>
+                        <p id="signup-error-drawer" class="text-red-500 text-sm mt-2. min-h-[20px]"></p>
+                    </form>
+                    <p class="mt-6 text-sm text-classic-taupe">Already a member? <a href="#" id="auth-show-login-link" class="text-ivory-brown font-bold hover:underline">Sign in</a></p>
+                </div>
+
+                <div id="auth-drawer-reset-view" class="hidden">
+                    <h2 class="text-2xl font-bold mb-2 text-ivory-brown">Reset Password</h2>
+                    <p class="text-sm text-classic-taupe mt-2">Enter your email and we'll send you a link to reset your password.</p>
+                    <form id="reset-password-form-drawer" class="mt-6">
+                        <input type="email" name="reset-email" placeholder="Your Email Address" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
+                        <button type="submit" class="w-full bg-ivory-brown text-off-white py-3 rounded-full font-bold hover:bg-classic-taupe">Send Reset Link</button>
+                        <p id="reset-message-drawer" class="text-sm mt-3 min-h-[20px] text-center"></p>
+                    </form>
+                    <p class="mt-6 text-sm text-classic-taupe">Remembered your password? <a href="#" id="auth-back-to-login-link" class="text-ivory-brown font-bold hover:underline">Sign in</a></p>
+                </div>
+
+            </div>
+        </div>
+    </div>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
-    <script src="profile.js"></script>
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    
     <script src="app.js"></script>
+    <script src="profile.js"></script> <script>
+        let blogTitleSuggestions = []; 
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const hamburgerBtn = document.getElementById('mobile-hamburger-btn');
+            const leftDrawerBackdrop = document.getElementById('left-drawer-backdrop');
+            const leftDrawer = document.getElementById('left-drawer');
+            const closeLeftDrawerBtn = document.getElementById('close-drawer-btn');
+
+            const mobileSearchBtn = document.getElementById('mobile-search-btn');
+            const desktopSearchBtn = document.getElementById('desktop-search-btn');
+            const searchDrawer = document.getElementById('search-drawer');
+            const searchDrawerBackdrop = document.getElementById('search-drawer-backdrop');
+            const closeSearchDrawerBtn = document.getElementById('close-search-drawer-btn');
+            const searchDrawerInput = document.getElementById('search-drawer-input');
+            const searchSuggestionsContainer = document.getElementById('search-suggestions-container');
+            const mobileSearchForm = document.getElementById('mobile-search-form');
+            
+            const bottomNavLoginBtn = document.getElementById('bottom-nav-login-btn');
+            const bottomNavProfileLink = document.getElementById('bottom-nav-profile-link');
+            const bottomNavAvatar = document.getElementById('bottom-nav-avatar');
+
+            const drawerLoginBtn = document.getElementById('drawer-login-btn');
+            const drawerLogoutBtn = document.getElementById('drawer-logout-btn');
+            const drawerProfileInfo = document.getElementById('drawer-profile-info');
+            const drawerAuthLinks = document.getElementById('drawer-auth-links');
+
+            const notificationBellBtn = document.getElementById('notification-bell-btn');
+            const notificationDrawer = document.getElementById('notification-drawer');
+            const notificationDrawerBackdrop = document.getElementById('notification-drawer-backdrop');
+            const closeNotificationDrawerBtn = document.getElementById('close-notification-drawer-btn');
+            
+            const authDrawer = document.getElementById('auth-drawer');
+            const authDrawerBackdrop = document.getElementById('auth-drawer-backdrop');
+            const closeAuthDrawerBtn = document.getElementById('close-auth-drawer-btn');
+            const loginBtn = document.getElementById('login-btn');
+            const signupBtn = document.getElementById('signup-btn');
+            
+            const authLoginView = document.getElementById('auth-drawer-login-view');
+            const authSignupView = document.getElementById('auth-drawer-signup-view');
+            const authResetView = document.getElementById('auth-drawer-reset-view');
+            
+            const authShowSignupLinks = document.querySelectorAll('#auth-show-signup-link');
+            const authShowLoginLinks = document.querySelectorAll('#auth-show-login-link');
+            const authShowResetLinks = document.querySelectorAll('#auth-show-reset-link');
+            const authBackToLoginLinks = document.querySelectorAll('#auth-back-to-login-link');
+            
+            // --- Logic for Create Button on Bottom Nav ---
+            const openCreateModalBottomNav = document.getElementById('open-create-modal-bottom-nav');
+            const createPostModal = document.getElementById('create-post-modal');
+            if (openCreateModalBottomNav && createPostModal) {
+                openCreateModalBottomNav.addEventListener('click', () => {
+                    createPostModal.classList.remove('hidden');
+                });
+            }
+            // --- End of new logic ---
+
+            if (hamburgerBtn) {
+                hamburgerBtn.addEventListener('click', () => {
+                    document.body.classList.add('drawer-open');
+                });
+            }
+
+            const closeLeftDrawer = () => {
+                if (leftDrawer) {
+                    leftDrawer.classList.add('vibrate-anim');
+                    setTimeout(() => {
+                        document.body.classList.remove('drawer-open');
+                        leftDrawer.classList.remove('vibrate-anim');
+                    }, 300);
+                }
+            };
+
+            if (leftDrawerBackdrop) leftDrawerBackdrop.addEventListener('click', closeLeftDrawer);
+            if (closeLeftDrawerBtn) closeLeftDrawerBtn.addEventListener('click', closeLeftDrawer);
+            
+            const tabMenu = document.getElementById('drawer-tab-menu');
+            const tabCategories = document.getElementById('drawer-tab-categories');
+            const contentMenu = document.getElementById('drawer-menu-content');
+            const contentCategories = document.getElementById('drawer-categories-content');
+
+            if (tabMenu && tabCategories && contentMenu && contentCategories) {
+                tabMenu.addEventListener('click', () => {
+                    contentMenu.classList.remove('hidden');
+                    contentCategories.classList.add('hidden');
+                    tabMenu.classList.add('text-ivory-brown', 'border-yellow-400');
+                    tabMenu.classList.remove('text-classic-taupe', 'border-transparent');
+                    tabCategories.classList.add('text-classic-taupe', 'border-transparent');
+                    tabCategories.classList.remove('text-ivory-brown', 'border-yellow-400');
+                });
+
+                tabCategories.addEventListener('click', () => {
+                    contentMenu.classList.add('hidden');
+                    contentCategories.classList.remove('hidden');
+                    tabCategories.classList.add('text-ivory-brown', 'border-yellow-400');
+                    tabCategories.classList.remove('text-classic-taupe', 'border-transparent');
+                    tabMenu.classList.add('text-classic-taupe', 'border-transparent');
+                    tabMenu.classList.remove('text-ivory-brown', 'border-yellow-400');
+                });
+            }
+
+            if (leftDrawer) {
+                leftDrawer.querySelectorAll('.category-button, nav a, .theme-toggle-button').forEach(link => {
+                    link.addEventListener('click', () => {
+                        // Don't close drawer if it's a tab or theme toggle
+                        if (link.id === 'drawer-tab-menu' || link.id === 'drawer-tab-categories' || link.classList.contains('theme-toggle-button')) {
+                           return;
+                        }
+                        closeLeftDrawer();
+                    });
+                });
+            }
+
+            const openSearchDrawer = (e) => {
+                if(e) e.preventDefault();
+                document.body.classList.add('search-drawer-open');
+                setTimeout(() => {
+                    if(searchDrawerInput) searchDrawerInput.focus();
+                }, 300);
+            };
+
+            const closeSearchDrawer = () => {
+                document.body.classList.remove('search-drawer-open');
+            };
+
+            if (mobileSearchBtn) mobileSearchBtn.addEventListener('click', openSearchDrawer);
+            if (desktopSearchBtn) desktopSearchBtn.addEventListener('click', openSearchDrawer);
+            if (searchDrawerBackdrop) searchDrawerBackdrop.addEventListener('click', closeSearchDrawer);
+            if (closeSearchDrawerBtn) closeSearchDrawerBtn.addEventListener('click', closeSearchDrawer);
+
+            if (searchDrawerInput && searchSuggestionsContainer) {
+                searchDrawerInput.addEventListener('input', () => {
+                    const query = searchDrawerInput.value.toLowerCase().trim();
+                    if (query.length === 0) {
+                        searchSuggestionsContainer.innerHTML = '';
+                        return;
+                    }
+                    // This page doesn't have blogTitleSuggestions, so we'll just show a basic message
+                    searchSuggestionsContainer.innerHTML = `<p class="p-4 text-classic-taupe text-center">Searching for "${query}"...</p>`;
+                });
+            }
+            
+            if (mobileSearchForm) {
+                mobileSearchForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const query = searchDrawerInput.value;
+                    alert(`Searching for: ${query}`);
+                    closeSearchDrawer();
+                    searchDrawerInput.value = '';
+                    searchSuggestionsContainer.innerHTML = '';
+                });
+            }
+
+            const openNotificationDrawer = () => {
+                document.body.classList.add('notification-drawer-open');
+            };
+            const closeNotificationDrawer = () => {
+                document.body.classList.remove('notification-drawer-open');
+            };
+            
+            if (notificationBellBtn) notificationBellBtn.addEventListener('click', openNotificationDrawer);
+            if (notificationDrawerBackdrop) notificationDrawerBackdrop.addEventListener('click', closeNotificationDrawer);
+            if (closeNotificationDrawerBtn) closeNotificationDrawerBtn.addEventListener('click', closeNotificationDrawer);
+
+            const openAuthDrawer = (view = 'login') => {
+                if (!authLoginView || !authSignupView || !authResetView) return;
+                
+                authLoginView.classList.add('hidden');
+                authSignupView.classList.add('hidden');
+                authResetView.classList.add('hidden');
+                
+                if (view === 'signup') {
+                    authSignupView.classList.remove('hidden');
+                } else if (view === 'reset') {
+                    authResetView.classList.remove('hidden');
+                } else {
+                    authLoginView.classList.remove('hidden');
+                }
+                
+                document.body.classList.add('auth-drawer-open');
+                closeLeftDrawer();
+            };
+            
+            const closeAuthDrawer = () => {
+                document.body.classList.remove('auth-drawer-open');
+            };
+
+            if (loginBtn) loginBtn.addEventListener('click', () => openAuthDrawer('login'));
+            if (signupBtn) signupBtn.addEventListener('click', () => openAuthDrawer('signup'));
+            if (bottomNavLoginBtn) bottomNavLoginBtn.addEventListener('click', () => openAuthDrawer('login'));
+            if (drawerLoginBtn) drawerLoginBtn.addEventListener('click', () => openAuthDrawer('login'));
+            
+            authShowSignupLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); openAuthDrawer('signup'); }));
+            authShowLoginLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); openAuthDrawer('login'); }));
+            authShowResetLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); openAuthDrawer('reset'); }));
+            authBackToLoginLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); openAuthDrawer('login'); }));
+
+            if (authDrawerBackdrop) authDrawerBackdrop.addEventListener('click', closeAuthDrawer);
+            if (closeAuthDrawerBtn) closeAuthDrawerBtn.addEventListener('click', closeAuthDrawer);
+
+            // This syncUI function is now crucial for the mobile nav bar
+            const syncUI = (user) => {
+                if (user) {
+                    const avatarSrc = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'U')}&background=8B5E34&color=fff`;
+                    
+                    if (bottomNavLoginBtn) bottomNavLoginBtn.style.display = 'none';
+                    if (bottomNavProfileLink) bottomNavProfileLink.style.display = 'flex'; // Use 'flex' for flex-col
+                    if (bottomNavAvatar) bottomNavAvatar.src = avatarSrc;
+                    
+                    if (drawerAuthLinks) drawerAuthLinks.style.display = 'none';
+                    if (drawerProfileInfo) drawerProfileInfo.style.display = 'block';
+                    
+                    closeAuthDrawer();
+                } else {
+                    if (bottomNavLoginBtn) bottomNavLoginBtn.style.display = 'flex';
+                    if (bottomNavProfileLink) bottomNavProfileLink.style.display = 'none';
+                    
+                    if (drawerAuthLinks) drawerAuthLinks.style.display = 'block';
+                    if (drawerProfileInfo) drawerProfileInfo.style.display = 'none';
+                }
+            };
+            
+            if (typeof firebase !== 'undefined') {
+                firebase.auth().onAuthStateChanged(async (user) => {
+                    syncUI(user);
+                    
+                    // Handle auth drawer forms (This logic is from index.html's script.js)
+                    const loginFormDrawer = document.getElementById('login-form-drawer');
+                    const signupFormDrawer = document.getElementById('signup-form-drawer');
+                    const resetPasswordFormDrawer = document.getElementById('reset-password-form-drawer');
+
+                    if(loginFormDrawer){
+                        loginFormDrawer.addEventListener('submit', (e) => {
+                            e.preventDefault();
+                            const email = loginFormDrawer['login-email'].value;
+                            const password = loginFormDrawer['login-password'].value;
+                            const errorEl = document.getElementById('login-error-drawer');
+                            firebase.auth().signInWithEmailAndPassword(email, password)
+                                .then((userCredential) => {
+                                    closeAuthDrawer();
+                                    loginFormDrawer.reset();
+                                })
+                                .catch((error) => {
+                                    errorEl.textContent = error.message;
+                                });
+                        });
+                    }
+
+                    if(signupFormDrawer){
+                        signupFormDrawer.addEventListener('submit', (e) => {
+                            e.preventDefault();
+                            const name = signupFormDrawer['signup-name'].value;
+                            const email = signupFormDrawer['signup-email'].value;
+                            const password = signupFormDrawer['signup-password'].value;
+                            const errorEl = document.getElementById('signup-error-drawer');
+                            
+                            firebase.auth().createUserWithEmailAndPassword(email, password)
+                                .then((userCredential) => {
+                                    const user = userCredential.user;
+                                    return user.updateProfile({
+                                        displayName: name
+                                    }).then(() => {
+                                        return firebase.firestore().collection('users').doc(user.uid).set({
+                                            displayName: name,
+                                            email: email,
+                                            role: 'normal',
+                                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                                            photoURL: '', bio: '', coverPhotoURL: '',
+                                            followers: [], following: [],
+                                            followersCount: 0, followingCount: 0
+                                        });
+                                    }).then(() => {
+                                        closeAuthDrawer();
+                                        signupFormDrawer.reset();
+                                    });
+                                })
+                                .catch((error) => {
+                                    errorEl.textContent = error.message;
+                                });
+                        });
+                    }
+
+                    if(resetPasswordFormDrawer) {
+                        resetPasswordFormDrawer.addEventListener('submit', (e) => {
+                            e.preventDefault();
+                            const email = resetPasswordFormDrawer['reset-email'].value;
+                            const messageEl = document.getElementById('reset-message-drawer');
+                            firebase.auth().sendPasswordResetEmail(email)
+                                .then(() => {
+                                    messageEl.textContent = "Check your email for a reset link!";
+                                    messageEl.style.color = "green";
+                                })
+                                .catch((error) => {
+                                    messageEl.textContent = error.message;
+                                    messageEl.style.color = "red";
+                                });
+                        });
+                    }
+                });
+            }
+
+            if (drawerLogoutBtn) {
+                drawerLogoutBtn.addEventListener('click', () => {
+                    const mainLogoutBtn = document.getElementById('logout-btn');
+                    if (mainLogoutBtn) {
+                        mainLogoutBtn.click();
+                    } else if (typeof firebase !== 'undefined') {
+                        firebase.auth().signOut();
+                    }
+                });
+            }
+
+        });
+    </script>
+    <script src="script.js"></script>
+
 </body>
 </html>

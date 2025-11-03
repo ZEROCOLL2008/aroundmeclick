@@ -1,10 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Index Page Script (script.js) Loaded!");
 
-    // --- 1. GLOBAL VARIABLES & SELECTORS ---
     let commentsListener = null;
     let lastVisiblePost = null;
-    let actionCode = null; // To store the password reset code
+    let actionCode = null; 
+
+    // --- HELPER FUNCTIONS (profile.js වලින් ගත්ත) ---
+    function createSnippet(html, length = 100) {
+        if (!html) return '';
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        const text = tempDiv.textContent || tempDiv.innerText || '';
+        if (text.length <= length) return text;
+        return text.substring(0, length) + '...';
+    }
+
+    function calculateReadTime(html) {
+        if (!html) return '1 min read';
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        const text = tempDiv.textContent || tempDiv.innerText || '';
+        const wordsPerMinute = 200;
+        const wordCount = text.trim().split(/\s+/).length;
+        const readTime = Math.ceil(wordCount / wordsPerMinute);
+        if (readTime < 1) return '1 min read';
+        return `${readTime} min read`;
+    }
+    // --- END HELPER FUNCTIONS ---
 
     const blogPostsGrid = document.getElementById('blog-posts-grid');
     const searchInput = document.getElementById('search-input');
@@ -17,19 +39,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const scrollRightBtn = document.getElementById('scroll-right-btn');
     const loadMoreBtn = document.getElementById('load-more-btn');
     
-    // Auth Modal Selectors
     const loginModal = document.getElementById('login-modal');
-    const signupModal = document.getElementById('signup-modal'); // Added for close button logic
+    const signupModal = document.getElementById('signup-modal'); 
     const resetPasswordModal = document.getElementById('reset-password-modal');
     const resetPasswordForm = document.getElementById('reset-password-form');
     const showResetPasswordLink = document.getElementById('show-reset-password-link');
     const backToLoginLink = document.getElementById('back-to-login-link');
     
-    // New Password Modal Selectors
     const newPasswordModal = document.getElementById('new-password-modal');
     const newPasswordForm = document.getElementById('new-password-form');
 
-    // FIX: Add a listener for all modal close buttons
     const allCloseButtons = document.querySelectorAll('.close-modal-btn');
     allCloseButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -40,20 +59,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-
-    // --- Categories Horizontal Scrolling Logic ---
     if (categoriesContainer && scrollLeftBtn && scrollRightBtn) {
         const scrollAmount = 300;
         scrollLeftBtn.addEventListener('click', () => categoriesContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' }));
         scrollRightBtn.addEventListener('click', () => categoriesContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' }));
     }
 
-    // --- 2. HELPER & CORE FUNCTIONS ---
-
-    // ===== NEWSLETTER SUBSCRIPTION LOGIC START =====
     const setupSubscriptionForm = () => {
         const subscribeForm = document.getElementById('subscribe-form');
-        // FIX: Check if the element exists before adding a listener
         if (subscribeForm) {
             subscribeForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -93,10 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     };
-    // ===== NEWSLETTER SUBSCRIPTION LOGIC END =====
     
-    // ===== PASSWORD RESET LOGIC START (UPDATED) =====
-   // ### UPDATED FUNCTION with Better Error Logging ###
     const handlePasswordReset = () => {
         if (resetPasswordForm) {
             const actionCodeSettings = {
@@ -124,7 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     messageEl.textContent = 'Success! Please check your email for a reset link.';
                     messageEl.className = 'text-sm mt-3 text-green-600 text-center';
                 }).catch(error => {
-                    // This part is updated to show the real error
                     console.error("Password Reset Error:", error.code, error.message); 
                     
                     if (error.code === 'auth/user-not-found') {
@@ -140,10 +149,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     };
-    // ===== PASSWORD RESET LOGIC END =====
 
     const handleNewPasswordSubmit = () => {
-        // FIX: Check if the element exists before adding a listener
         if (newPasswordForm) {
             newPasswordForm.addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -194,7 +201,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
- // ### DEBUGGING FUNCTION ###
     const handleActionFromURL = () => {
         console.log("1. handleActionFromURL function CALLED.");
 
@@ -673,7 +679,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             
-            // Note: Client-side search is not ideal for large datasets.
             const filteredPosts = searchTerm ? posts.filter(post =>
                 (post.title && post.title.toLowerCase().includes(searchTerm)) ||
                 (post.tags && post.tags.some(tag => tag.toLowerCase().includes(searchTerm))) ||
@@ -686,22 +691,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
             filteredPosts.forEach(post => {
                 const postCard = document.createElement('article');
-                postCard.className = 'post-card flex flex-col rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-ivory cursor-pointer open-modal-trigger';
+                // *** CARD CLASS EKA HADUWA ***
+                postCard.className = 'post-card flex flex-col rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-ivory cursor-pointer open-modal-trigger';
                 postCard.dataset.postId = post.id;
 
-                const mediaHtml = post.youtubeVideoId ?
-                    `<div class="aspect-video bg-black"><iframe class="w-full h-full pointer-events-none" src="https://www.youtube.com/embed/${post.youtubeVideoId}" title="YouTube video player" frameborder="0"></iframe></div>` :
-                    `<div class="relative overflow-hidden w-full h-56"><img src="${post.imageUrl || 'https://picsum.photos/400/300'}" alt="${post.title}" class="w-full h-full object-cover transition duration-300 ease-in-out hover:scale-110"></div>`;
-                
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = post.content || '';
-                const excerpt = (tempDiv.textContent || '').substring(0, 80) + '...';
+                // *** HELPER FUNCTIONS USE KALA ***
+                const snippet = createSnippet(post.content, 80);
+                const readTime = calculateReadTime(post.content);
+                const category = post.category ? post.category.charAt(0).toUpperCase() + post.category.slice(1) : 'General';
 
+                // *** MEDIA (IMAGE/VIDEO) HTML EKA HADUWA (h-56 -> aspect-video) ***
+                const mediaHtml = post.youtubeVideoId ?
+                    `<div class="aspect-video bg-black relative">
+                        <iframe class="w-full h-full pointer-events-none" src="https://www.youtube.com/embed/${post.youtubeVideoId}" title="YouTube video player" frameborder="0"></iframe>
+                        <span class="absolute bottom-3 left-3 px-3 py-1 bg-white/90 text-ivory-brown rounded-full text-xs font-semibold backdrop-blur-sm">${category}</span>
+                    </div>` :
+                    `<div class="relative overflow-hidden w-full aspect-video">
+                        <img src="${post.imageUrl || 'https://picsum.photos/400/300'}" alt="${post.title}" class="w-full h-full object-cover transition duration-300 ease-in-out hover:scale-110">
+                        <span class="absolute bottom-3 left-3 px-3 py-1 bg-white/90 text-ivory-brown rounded-full text-xs font-semibold backdrop-blur-sm">${category}</span>
+                    </div>`;
+                
+                // *** SAMPURNA CARD HTML EKA HADUWA (Read Time eka add karala) ***
                 postCard.innerHTML = `
                     ${mediaHtml}
                     <div class="p-5 flex flex-col flex-grow">
+                        <div class="flex items-center space-x-2 text-sm text-classic-taupe mb-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span>${readTime}</span>
+                        </div>
                         <h2 class="font-bold font-lora text-lg mb-2 text-ivory-brown">${post.title}</h2>
-                        <p class="text-classic-taupe text-sm mb-4 leading-relaxed flex-grow">${excerpt}</p>
+                        <p class="text-classic-taupe text-sm mb-4 leading-relaxed flex-grow">${snippet}</p>
                         <div class="mt-auto pt-4 border-t border-ivory-linen">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center">
@@ -721,7 +740,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                         <span class="font-medium text-sm">${post.commentsCount || 0}</span>
                                     </div>
                                     <button class="share-btn flex items-center justify-center w-8 h-8 rounded-full text-classic-taupe hover:bg-pastel-ivory hover:text-blue-500 transition-colors z-10 relative" data-post-id="${post.id}">
-                                        <span class="text-xl font-bold transform rotate-90 inline-block pointer-events-none">&#10144;</span>
+                                        <svg class="w-5 h-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 4.186m0-4.186c.54.121 1.07.312 1.566.55m-1.566-.55L11.99 3.937m-3.232 8.523c.54-.121 1.07-.312 1.566-.55m-1.566.55l-3.232-8.523m3.232 8.523l3.232 8.523m0 0l3.232-8.523m-3.232 8.523c-.54.121-1.07.312-1.566.55m1.566-.55l3.232-8.523" /></svg>
                                     </button>
                                 </div>
                             </div>
@@ -887,8 +906,63 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const newHamburgerBtn = document.getElementById('new-hamburger-btn');
+    const sideDrawer = document.getElementById('side-drawer');
+    const drawerOverlay = document.getElementById('drawer-overlay');
 
-    // --- 4. INITIAL PAGE LOAD ---
+    if (newHamburgerBtn && sideDrawer && drawerOverlay) {
+        newHamburgerBtn.addEventListener('click', () => {
+            sideDrawer.classList.add('open');
+            drawerOverlay.classList.remove('hidden');
+        });
+
+        drawerOverlay.addEventListener('click', () => {
+            sideDrawer.classList.remove('open');
+            drawerOverlay.classList.add('hidden');
+        });
+    }
+    
+    const drawerCategoriesLink = document.getElementById('drawer-categories-link');
+    if (drawerCategoriesLink) {
+        drawerCategoriesLink.addEventListener('click', () => {
+             sideDrawer.classList.remove('open');
+             drawerOverlay.classList.add('hidden');
+        });
+    }
+    
+    const socialContainer = document.getElementById('floating-social-container');
+    const extraButtons = document.querySelectorAll('.floating-btn-extra');
+    let floatButtonLastScrollY = window.scrollY; 
+
+    if (socialContainer) {
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY;
+            if (currentScrollY > floatButtonLastScrollY && currentScrollY > 200) {
+                extraButtons.forEach(btn => btn.classList.add('collapsed'));
+            } else if (currentScrollY < floatButtonLastScrollY) {
+                extraButtons.forEach(btn => btn.classList.remove('collapsed'));
+            }
+            floatButtonLastScrollY = currentScrollY <= 0 ? 0 : currentScrollY;
+        });
+    }
+
+    const mobileSearchForm = document.getElementById('mobile-search-form');
+    if (mobileSearchForm) {
+        mobileSearchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const query = document.getElementById('mobile-search-input').value;
+            console.log("Mobile Search Query:", query);
+            
+            const desktopSearchInput = document.getElementById('search-input');
+            if(desktopSearchInput) {
+                desktopSearchInput.value = query;
+                const activeCategory = document.querySelector('.category-button.bg-ivory-brown')?.dataset.category || 'all';
+                // *** BUG EKA FIX KALA ("S" akura ain kala) ***
+                fetchAndDisplayPosts(query.toLowerCase(), activeCategory);
+            }
+        });
+    }
+
     setupSubscriptionForm();
     handlePasswordReset();
     handleNewPasswordSubmit();
@@ -901,7 +975,6 @@ document.addEventListener('DOMContentLoaded', () => {
     checkUrlForPostId();
 });
 
-// Helper functions (unchanged)
 async function displayTopAuthorsByLikes() {
     const container = document.getElementById('popular-authors-container');
     if (!container) return;
@@ -991,8 +1064,8 @@ async function setupHeroBackgroundSlider() {
     if (!heroSwiperWrapper) return;
 
     const backgroundImages = [
-        'https://images.unsplash.com/photo-175542 shinobi.com/photo-1755429562521-cb944ea054ab?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-        'https://plus.unsplash.com/premium_photo-1755895180436-1acb3275ab96?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        'https://images.unsplash.com/photo-1755429562521-cb944ea054ab?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%D%D',
+        'https://plus.unsplash.com/premium_photo-1755895180436-1acb3275ab96?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%D%D',
     ];
 
     heroSwiperWrapper.innerHTML = '';
@@ -1000,10 +1073,10 @@ async function setupHeroBackgroundSlider() {
     backgroundImages.forEach(imageUrl => {
         const slideDiv = document.createElement('div');
         slideDiv.className = 'swiper-slide';
-        slideDiv.style.backgroundImage = `url('${imageUrl}')`;
-        slideDiv.style.backgroundSize = 'cover';
-        slideDiv.style.backgroundPosition = 'center';
-        slideDiv.style.filter = 'brightness(0.6)';
+        slideDiv.innerHTML = `
+            <img src="${imageUrl}" class="absolute inset-0 w-full h-full object-cover" alt="Hero Background">
+            <div class="absolute inset-0 bg-black/40"></div>
+        `;
         heroSwiperWrapper.appendChild(slideDiv);
     });
 
@@ -1043,7 +1116,7 @@ async function setupFeaturedPostsSlider() {
             const post = { id: doc.id, ...doc.data() };
             
             slidesHTML += `
-               <div class="swiper-slide flex flex-col md:flex-row bg-ivory cursor-pointer open-modal-trigger md:h-80" data-post-id="${post.id}">
+                <div class="swiper-slide flex flex-col md:flex-row bg-ivory cursor-pointer open-modal-trigger md:h-80" data-post-id="${post.id}">
                     <div class="md:w-1/2 h-64 md:h-full">
                         <img src="${post.imageUrl || 'https://picsum.photos/800/600'}" alt="${post.title}" class="w-full h-full object-cover">
                     </div>
@@ -1063,7 +1136,7 @@ async function setupFeaturedPostsSlider() {
                                 <span>${post.likesCount || 0}</span>
                             </div>
                         </div>
-                    </div>
+                   </div>
                 </div>
             `;
         });

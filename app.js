@@ -1,5 +1,5 @@
 // =================================================================
-//     APP.JS - FINAL, COMPLETE, AND CORRECTED VERSION
+//     APP.JS - FINAL + DARK MODE TOGGLE LOGIC (FIXED)
 // =================================================================
 
 // --- FIREBASE INITIALIZATION ---
@@ -56,7 +56,6 @@ function listenForNotifications(userId) {
 
 
 // --- SINGLE, UNIFIED DOMCONTENTLOADED LISTENER ---
-// ** CORRECTED: Merged two separate listeners into one for stability and proper execution order. **
 document.addEventListener('DOMContentLoaded', () => {
     console.log("app.js (Core) Script Loaded!");
 
@@ -85,6 +84,57 @@ document.addEventListener('DOMContentLoaded', () => {
     // Admin Panel Links
     const adminPanelLink = document.getElementById('admin-panel-link');
     const mobileAdminPanelLink = document.getElementById('mobile-admin-panel-link');
+
+    // =================================================
+    // === DARK MODE TOGGLE LOGIC (FIXED) ===
+    // =================================================
+    
+    // Desktop/Mobile buttons දෙකම class එකෙන් select කරගන්නවා
+    const themeToggleBtns = document.querySelectorAll('.theme-toggle-button'); 
+    const lightIcons = document.querySelectorAll('.theme-toggle-light-icon');
+    const darkIcons = document.querySelectorAll('.theme-toggle-dark-icon');
+    // 'theme-toggle-text' ID eka HTML eke tibbe nathi nisa mama eka ain kara
+
+    // Function to set the theme
+    function setTheme(isDark) {
+        if (isDark) {
+            document.body.classList.add('dark');
+            // Buttons දෙකේම icons update කරනවා
+            lightIcons.forEach(icon => icon.classList.add('hidden'));
+            darkIcons.forEach(icon => icon.classList.remove('hidden'));
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.body.classList.remove('dark');
+            // Buttons දෙකේම icons update කරනවා
+            lightIcons.forEach(icon => icon.classList.remove('hidden'));
+            darkIcons.forEach(icon => icon.classList.add('hidden'));
+            localStorage.setItem('theme', 'light');
+        }
+    }
+
+    // Add click listener - හම්බවෙන හැම button එකටම දානවා
+    if (themeToggleBtns.length > 0) {
+        themeToggleBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Dropdown eka close wenna nathuwa inna
+                const isCurrentlyDark = document.body.classList.contains('dark');
+                setTheme(!isCurrentlyDark);
+            });
+        });
+    }
+
+    // Page load weddi save karapu theme eka check karanna
+    const savedTheme = localStorage.getItem('theme');
+    
+    // ***** DEFAULT LIGHT MODE FIX *****
+    // System eke dark mode on da kiyala balanne nathuwa, 
+    // save karala thibboth vitharak dark mode danawa.
+    if (savedTheme === 'dark') {
+        setTheme(true); // Save වෙලා තියෙන්නේ 'dark' නම් විතරක් dark දාන්න
+    } else {
+        setTheme(false); // නැත්නම් හැම වෙලේම light (normal) දාන්න
+    }
+    // === END OF DARK MODE LOGIC ===
 
     // --- HAMBURGER MENU TOGGLE ---
     if (hamburgerBtn && mobileMenu) {
@@ -115,7 +165,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // --- ROLE-BASED UI CONTROL ---
-                // This adds a class to the <body> tag to control UI elements via CSS.
                 document.body.classList.remove('role-normal', 'role-plus', 'role-pro', 'role-admin');
                 document.body.classList.add(`role-${userRole}`);
                 console.log(`User role identified. Body class set to: role-${userRole}`);
@@ -126,7 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const userEmail = user.email || '';
                 let userAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=8B5E34&color=fff`;
                 
-                // ** IMPROVED: Robust check for photoURL to avoid broken images from empty strings. **
                 if (userData.photoURL && userData.photoURL.trim() !== '') {
                     userAvatar = userData.photoURL;
                 } else if (user.photoURL && user.photoURL.trim() !== '') {

@@ -5,30 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AroundMe.Click - Discover Stories Waiting to be Told</title>
     <link rel="icon" href="https://i.ibb.co/HTV3PDD3/Whats-App-Image-2025-09-03-at-18-08-17-eb407f7a-removebg-preview.png">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
     
     <script>
         tailwind.config = {
+            darkMode: 'class', // <-- DARK MODE ENABLE KALA
             theme: {
                 extend: {
                     colors: {
-                        'off-white': '#FAF9F6',
-                        'ivory': '#FFFFF0',
-                        'ivory-brown': '#8B5E34',
-                        'classic-taupe': '#A68E7A',
-                        'ivory-linen': '#EEE1CB',
-                        'pastel-ivory': '#F2E7D4',
+                        // === ME TIKA SAMPURNENMA WENAS KALA ===
+                        'off-white': 'var(--color-off-white)',
+                        'ivory': 'var(--color-ivory)',
+                        'ivory-brown': 'var(--color-ivory-brown)',
+                        'classic-taupe': 'var(--color-classic-taupe)',
+                        'ivory-linen': 'var(--color-ivory-linen)',
+                        'pastel-ivory': 'var(--color-pastel-ivory)',
                     },
-                    fontFamily: { 'inter': ['Inter', 'sans-serif'], 'lora': ['Lora', 'serif'] },
-                    animation: { 'fade-in': 'fadeIn 0.3s ease-in-out', 'slide-up': 'slideUp 0.3s ease-out' },
+                    fontFamily: { 
+                        'sans': ['Poppins', 'sans-serif'] 
+                    },
+                    animation: { 
+                        'fade-in': 'fadeIn 0.3s ease-in-out', 
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'search-in': 'searchIn 0.2s ease-out'
+                    },
                     keyframes: {
                         fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
-                        slideUp: { '0%': { transform: 'translateY(10px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } }
+                        slideUp: { '0%': { transform: 'translateY(10px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
+                        searchIn: { '0%': { transform: 'translateY(-20px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } }
                     }
                 }
             }
@@ -36,12 +46,55 @@
     </script>
     
     <style>
+        /* === DARK MODE CSS VARIABLES === */
+        :root {
+            /* Light Mode (Original Colors) */
+            --color-off-white: #FAF9F6;
+            --color-ivory: #FFFFF0;
+            --color-pastel-ivory: #F2E7D4;
+            --color-ivory-linen: #EEE1CB;
+            --color-ivory-brown: #8B5E34;
+            --color-classic-taupe: #A68E7A;
+            --color-text-default: #8B5E34; /* For black text in dark mode */
+            --color-button-text: #FAF9F6; /* For white text in dark mode */
+        }
+
+        body.dark {
+            /* Dark Mode (New Colors) */
+            --color-off-white: #111827;     /* Main BG: Gray 900 */
+            --color-ivory: #1f2937;       /* Card BG: Gray 800 */
+            --color-pastel-ivory: #374151; /* Hover BG: Gray 700 */
+            --color-ivory-linen: #4b5563;  /* Borders: Gray 600 */
+            --color-ivory-brown: #F2E7D4;  /* Primary Text: Pastel Ivory */
+            --color-classic-taupe: #9ca3af; /* Secondary Text: Gray 400 */
+            --color-text-default: #F2E7D4;
+            --color-button-text: #111827;
+        }
+
+        /* Dark mode scrollbar */
+        body.dark ::-webkit-scrollbar { background: var(--color-off-white); }
+        body.dark ::-webkit-scrollbar-thumb { background: var(--color-ivory-linen); }
+
+        /* Fix Dark Mode Button Colors */
+        body.dark #signup-btn {
+            background-color: var(--color-pastel-ivory);
+            color: var(--color-button-text);
+        }
+        body.dark #signup-btn:hover {
+            background-color: var(--color-ivory-linen);
+        }
+        body.dark .category-button[data-category="all"] {
+             background-color: var(--color-pastel-ivory);
+             color: var(--color-button-text);
+        }
+        
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #FAF9F6; }
-        ::-webkit-scrollbar-thumb { background: #A68E7A; border-radius: 4px; }
+        ::-webkit-scrollbar-track { background: var(--color-off-white); }
+        ::-webkit-scrollbar-thumb { background: var(--color-classic-taupe); border-radius: 4px; }
         .hover-zoom img { transition: transform 0.3s ease; }
         .hover-zoom:hover img { transform: scale(1.05); }
         .prose { max-width: 65ch; }
+        
         #post-modal .fullscreen-modal {
             max-width: 100vw;
             width: 100vw;
@@ -49,12 +102,7 @@
             height: 100vh;
             border-radius: 0;
         }
-        #post-modal-container {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
+       
        #post-modal-description > * {
             display: flex;
             align-items: center;
@@ -64,8 +112,8 @@
         #categories-container::-webkit-scrollbar { display: none; }
         #categories-container { -ms-overflow-style: none; scrollbar-width: none; }
         .loader {
-            border: 4px solid #f3f3f3; /* Light grey */
-            border-top: 4px solid #A68E7A; /* Classic Taupe */
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--color-classic-taupe);
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -75,187 +123,320 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        footer { display: none; }
+        @media (min-width: 768px) { footer { display: block; } }
+
+        #bottom-nav-bar { box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05); }
+        .bottom-nav-creators-only { display: none; }
+        body.role-plus .bottom-nav-creators-only,
+        body.role-pro .bottom-nav-creators-only,
+        body.role-admin .bottom-nav-creators-only { display: flex; }
+
+        @keyframes vibrate {
+          0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-3px); } 40%, 80% { transform: translateX(3px); }
+        }
+        .vibrate-anim { animation: vibrate 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+
+        body.drawer-open #left-drawer { transform: translateX(0); }
+        body.drawer-open #left-drawer-backdrop { opacity: 1; pointer-events: auto; }
+        #search-drawer { transition: transform 0.3s ease-in-out; }
+        body.search-drawer-open #search-drawer { transform: translateX(0); }
+        body.search-drawer-open #search-drawer-backdrop { opacity: 1; pointer-events: auto; }
+        #search-drawer-input {
+            width: 100%; padding: 1rem; background-color: transparent; color: var(--color-ivory-brown);
+            font-size: 1.125rem; line-height: 1.75rem; border: none; outline: none; box-shadow: none;
+        }
+        #search-drawer-input::placeholder { color: var(--color-classic-taupe); }
+        .search-suggestion-item {
+            display: flex; align-items: center; gap: 1rem; padding: 1rem; color: var(--color-classic-taupe); cursor: pointer;
+        }
+        .search-suggestion-item:hover { background-color: var(--color-pastel-ivory); color: var(--color-ivory-brown); }
+        .search-suggestion-item svg { width: 1.25rem; height: 1.25rem; color: var(--color-classic-taupe); }
+        #notification-drawer { transition: transform 0.3s ease-in-out; }
+        body.notification-drawer-open #notification-drawer { transform: translateX(0); }
+        body.notification-drawer-open #notification-drawer-backdrop { opacity: 1; pointer-events: auto; }
+        #auth-drawer { transition: transform 0.3s ease-in-out; }
+        body.auth-drawer-open #auth-drawer { transform: translateX(0); }
+        body.auth-drawer-open #auth-drawer-backdrop { opacity: 1; pointer-events: auto; }
+
+        
+        /* ================================== */
+        /* ========= MODAL FIXES V2 ========= */
+        /* ================================== */
+
+        /* 1. Content Truncation (Default View) */
+        #post-modal-content-scroller .truncate-wrapper {
+            max-height: 200px; /* Text eka cut wena place eka */
+            overflow: hidden;
+            position: relative;
+            /* Fade out effect eka */
+            -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+        }
+        #post-modal-content-scroller #read-more-btn {
+            display: block; /* Default pennanawa */
+        }
+
+        /* 2. Fullscreen View (Truncation Remove) */
+        #post-modal-container.fullscreen-modal #post-modal-content-scroller .truncate-wrapper {
+            max-height: none;
+            overflow: visible;
+            -webkit-mask-image: none;
+            mask-image: none;
+        }
+        #post-modal-container.fullscreen-modal #post-modal-content-scroller #read-more-btn {
+            display: none; /* Fullscreen wala "Read More" button eka hide karanawa */
+        }
+
+
+        /* 3. Default (Mobile-first) View: Scoll eka */
+        #post-modal-body-splitter {
+            flex-direction: column;
+        }
+        #post-modal-media-wrapper {
+            padding: 1.5rem; 
+            padding-bottom: 0;
+            background-color: var(--color-ivory); /* CHANGED */
+            flex-shrink: 0;
+        }
+        #post-modal-content-scroller {
+             padding-top: 1.5rem;
+        }
+
+        /* 4. Fullscreen View (MOBILE): Yatin scroll wenna */
+        @media (max-width: 767px) {
+            #post-modal-container.fullscreen-modal #post-modal-body-splitter {
+                flex-direction: column;
+                overflow-y: auto; /* *** MOBILE FIX: Fullscreen waladi full modal eka scroll wenawa *** */
+            }
+            #post-modal-container.fullscreen-modal #post-modal-media-wrapper {
+                padding: 0;
+                background-color: black;
+            }
+            #post-modal-container.fullscreen-modal #post-modal-content-scroller {
+                overflow-y: visible; /* Content eka scroll wenna ba, body-splitter eka scroll wena nisa */
+            }
+        }
+        
+        /* 5. Fullscreen View (DESKTOP): Side-by-side scroll */
+        @media (min-width: 768px) {
+            #post-modal-container.fullscreen-modal #post-modal-body-splitter {
+                flex-direction: row;
+                overflow: hidden; /* Body eka scroll wenna ba */
+            }
+            #post-modal-container.fullscreen-modal #post-modal-media-wrapper {
+                flex-basis: 60%;
+                height: 100%;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background-color: black;
+            }
+            #post-modal-container.fullscreen-modal #post-modal-media-container {
+                width: 100%; height: 100%; max-height: 100%; aspect-ratio: auto; margin-bottom: 0;
+            }
+            #post-modal-container.fullscreen-modal #post-modal-content-scroller {
+                flex-basis: 40%;
+                height: 100%;
+                overflow-y: auto; /* *** DESKTOP FIX: Content eka witharak scroll wenawa *** */
+                padding-top: 1.5rem;
+            }
+        }
+        /* --- END OF MODAL FIXES --- */
+
     </style>
 </head>  
-<body class="bg-off-white font-inter text-ivory-brown">
+<body class="bg-off-white font-sans text-ivory-brown">
     
 <header class="sticky top-0 z-50 bg-ivory/80 backdrop-blur-lg shadow-sm">
     <div class="container mx-auto px-4">
-        <div class="flex items-center justify-between h-16">
-            <a href="index.html" class="flex items-center space-x-3 flex-shrink-0">
-                <img src="5.png" alt="Around Me Click Logo" class="h-10 w-10 rounded-full object-cover">
-                <span class="text-2xl font-bold text-ivory-brown">AroundMe.Click</span>
+        <div class="hidden md:flex items-center justify-between h-16">
+            <a href="index.html" class="flex-shrink-0">
+                <div class="flex items-center space-x-3">
+                    <img src="5.png" alt="Around Me Click Logo" class="h-10 w-10 rounded-lg object-contain">
+                    <span class="text-2xl font-bold text-ivory-brown">AroundMe.Click</span>
+                </div>
+                <p class="text-xs text-gray-900 dark:text-classic-taupe -mt-1 ml-14">Partnered with ZIDBIs</p>
             </a>
             <div class="flex items-center space-x-4">
-                <div class="hidden md:flex items-center space-x-4">
-                    <form id="search-form" class="relative flex items-center">
-                        <input type="text" id="search-input" placeholder="Search..." class="w-full pl-4 pr-10 py-2 text-ivory-brown border border-ivory-linen rounded-full outline-none focus:ring-1 focus:ring-classic-taupe bg-white/50">
-                        <button type="submit" class="absolute right-2 p-1 text-classic-taupe hover:text-ivory-brown">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                
+                <button class="theme-toggle-button p-2 rounded-full text-classic-taupe hover:text-ivory-brown hover:bg-pastel-ivory" title="Toggle Theme">
+                    <svg class="theme-toggle-light-icon w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-6.364-.386l1.591-1.591M3 12h2.25m.386-6.364l1.591 1.591zM12 9a3 3 0 100 6 3 3 0 000-6z" /></svg>
+                    <svg class="theme-toggle-dark-icon w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 008.25-4.498z" /></svg>
+                </button>
+                <button id="desktop-search-btn" class="p-2 rounded-full text-classic-taupe hover:text-ivory-brown hover:bg-pastel-ivory" title="Search">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </button>
+
+                <div class="flex items-center flex-shrink-0">
+                    <div id="user-auth-links" class="flex items-center space-x-3">
+                        <button id="login-btn" class="px-4 py-2 hover:text-classic-taupe font-medium">Sign In</button>
+                        <button id="signup-btn" class="px-4 py-2 bg-ivory-brown text-off-white rounded-full hover:bg-classic-taupe font-medium">Get Started</button>
+                    </div>
+                    <div id="user-profile-info" class="hidden flex items-center space-x-4">
+                        <button id="notification-bell-btn" class="relative p-2 text-ivory-brown hover:bg-pastel-ivory rounded-full">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                            <span id="notification-badge" class="hidden absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                         </button>
-                    </form>
-                    <div class="flex items-center flex-shrink-0">
-                        <div id="user-auth-links" class="flex items-center space-x-3">
-                            <button id="login-btn" class="px-4 py-2 hover:text-classic-taupe font-medium">Sign In</button>
-                            <button id="signup-btn" class="px-4 py-2 bg-ivory-brown text-off-white rounded-full hover:bg-classic-taupe font-medium">Get Started</button>
-                        </div>
-                        <div id="user-profile-info" class="hidden flex items-center space-x-4">
-                            <button id="notification-bell-btn" class="relative p-2 text-ivory-brown hover:bg-pastel-ivory rounded-full">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                                <span id="notification-badge" class="hidden absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                        <div class="relative">
+                            <button id="profile-dropdown-btn" class="flex items-center">
+                                <img id="header-user-avatar" src="https://via.placeholder.com/40" alt="User" class="w-8 h-8 rounded-full">
                             </button>
-                            <div class="relative">
-                                <button id="profile-dropdown-btn" class="flex items-center">
-                                    <img id="header-user-avatar" src="https://via.placeholder.com/40" alt="User" class="w-8 h-8 rounded-full">
-                                </button>
-                                <div id="profile-dropdown-menu" class="hidden absolute right-0 mt-2 w-64 bg-ivory rounded-lg shadow-xl z-20 border border-ivory-linen">
-                                    <div class="p-3 border-b border-ivory-linen">
-                                        <div class="flex items-center gap-3">
-                                            <img id="dropdown-user-avatar" src="https://via.placeholder.com/40" alt="User Avatar" class="w-11 h-11 rounded-full object-cover">
-                                            <div>
-                                                <p id="dropdown-user-name" class="font-semibold text-ivory-brown truncate">Loading...</p>
-                                                <p id="dropdown-user-email" class="text-sm text-classic-taupe truncate">loading...</p>
-                                            </div>
+                            <div id="profile-dropdown-menu" class="hidden absolute right-0 mt-2 w-64 bg-ivory rounded-lg shadow-xl z-20 border border-ivory-linen">
+                                <div class="p-3 border-b border-ivory-linen">
+                                    <div class="flex items-center gap-3">
+                                        <img id="dropdown-user-avatar" src="https://via.placeholder.com/40" alt="User Avatar" class="w-11 h-11 rounded-full object-cover">
+                                        <div>
+                                            <p id="dropdown-user-name" class="font-semibold text-ivory-brown truncate">Loading...</p>
+                                            <p id="dropdown-user-email" class="text-sm text-classic-taupe truncate">loading...</p>
                                         </div>
                                     </div>
-                                    <div class="py-2">
-                                        <a href="profile.html" class="flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
-                                            <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                            <span>My Profile</span>
-                                        </a>
-                                        <a id="admin-panel-link" href="admin.html" class="hidden flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"></path></svg>
-                                            <span>Admin Panel</span>
-                                        </a>
-                                    </div>
-                                    <div class="border-t border-ivory-linen py-2">
-                                        <button id="logout-btn" class="w-full text-left flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"></path></svg>
-                                            <span>Sign Out</span>
-                                        </button>
-                                    </div>
+                                </div>
+                                <div class="py-2">
+                                    <a href="profile.html" class="flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
+                                        <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                        <span>My Profile</span>
+                                    </a>
+                                    
+                                    <a id="admin-panel-link" href="admin.html" class="hidden flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"></path></svg>
+                                        <span>Admin Panel</span>
+                                    </a>
+                                </div>
+                                <div class="border-t border-ivory-linen py-2">
+                                    <button id="logout-btn" class="w-full text-left flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"></path></svg>
+                                        <span>Sign Out</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="flex items-center md:hidden">
-                    <button id="toggle-categories-btn" class="p-2 rounded-md text-ivory-brown hover:bg-ivory-linen" title="Toggle Categories">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path></svg>
-                    </button>
-                    <button id="hamburger-btn" class="p-2 rounded-md text-ivory-brown hover:bg-ivory-linen">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                    </button>
-                </div>
+            </div>
+        </div>
+
+        <div class="md:hidden flex items-center justify-between h-16 relative">
+            <button id="mobile-hamburger-btn" class="p-2 rounded-md text-ivory-brown hover:bg-ivory-linen">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            
+            <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                <a href="index.html" class="flex flex-col items-center">
+                    <div class="flex items-center space-x-2">
+                        <img src="5.png" alt="Around Me Click Logo" class="h-8 w-8 rounded-lg object-contain">
+                        <span class="text-xl font-bold text-ivory-brown">AroundMe.Click</span>
+                    </div>
+                    <p class="text-xs text-gray-900 dark:text-classic-taupe -mt-1">Partnered with ZIDBIs</p>
+                </a>
+            </div>
+
+            <div class="flex items-center">
+                <button id="mobile-search-btn" class="p-2 rounded-md text-ivory-brown hover:bg-ivory-linen">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </button>
             </div>
         </div>
     </div>
 </header>
-<div id="mobile-menu" class="hidden md:hidden bg-ivory/95 backdrop-blur-sm shadow-md absolute top-16 left-0 w-full z-40">
-    <div id="mobile-auth-links">
-        <div class="p-4 flex flex-col space-y-3">
-            <button id="mobile-login-btn" class="w-full text-left px-4 py-2 hover:bg-pastel-ivory rounded-md font-medium">Sign In</button>
-            <button id="mobile-signup-btn" class="w-full px-4 py-2 bg-ivory-brown text-off-white rounded-md hover:bg-classic-taupe font-medium">Get Started</button>
-        </div>
-    </div>
-    <div id="mobile-profile-info" class="hidden">
-        <div class="p-4 space-y-1">
-            <a href="profile.html" class="flex items-center gap-3 px-3 py-2 text-base text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md">
-                <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
-                <span>View Profile</span>
-            </a>
-            <a id="mobile-admin-panel-link" href="admin.html" class="hidden flex items-center gap-3 px-3 py-2 text-base text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md">
-                 <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 8a1 1 0 000 2h10a1 1 0 100-2H5zM3 13a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" /></svg>
-                <span>Admin Panel</span>
-            </a>
-        </div>
-        <div class="border-t border-ivory-linen p-4">
-            <button id="mobile-logout-btn" class="w-full text-left flex items-center gap-3 px-3 py-2 text-base text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md">
-                <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" /></svg>
-                <span>Sign Out</span>
-            </button>
-        </div>
-    </div>
-</div>
-<section class="relative bg-ivory-linen py-20 lg:py-32 overflow-hidden">
-    <div id="hero-background-swiper" class="swiper absolute inset-0 w-full h-full">
-        <div class="swiper-wrapper">
-            <div class="swiper-slide bg-pastel-ivory animate-pulse"></div>
-        </div>
-    </div>
-    <div class="relative z-10 container mx-auto px-4 text-center">
-        <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold font-lora text-white drop-shadow-lg mb-6 max-w-4xl mx-auto leading-tight">
-            Discover Stories Waiting to be Told
-        </h1>
-        <p class="text-base md:text-lg text-white drop-shadow-md mb-10 max-w-2xl mx-auto">
-            Explore articles, experiences, and perspectives from your community and around the world.
-        </p>
-        <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <a href="#featured-swiper" class="bg-ivory-brown text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-classic-taupe transition duration-300">
-                Explore Posts
-            </a>
-        </div>
+
+<section class="container mx-auto px-4 py-8 md:py-12">
+    <div class="w-full bg-pastel-ivory rounded-2xl shadow-lg overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80" 
+             alt="Hero Banner" 
+             class="w-full h-64 md:h-96 object-cover">
     </div>
 </section>
-<nav id="category-nav-bar" class="md:block sticky top-16 z-40 bg-ivory/90 backdrop-blur-sm border-b border-ivory-linen transition-transform duration-300 ease-in-out">
+
+<nav id="category-nav-bar" class="sticky top-16 z-40 bg-ivory/90 backdrop-blur-sm border-b border-ivory-linen transition-transform duration-300 ease-in-out">
     <div class="container mx-auto px-4 relative">
-         <button id="scroll-left-btn" class="absolute left-0 top-1/2 -translate-y-1/2 bg-ivory/80 rounded-full p-1 shadow-md hover:bg-pastel-ivory z-10 hidden md:block">
+         <button id="scroll-left-btn" class="absolute left-0 top-1/2 -translate-y-1/2 bg-ivory/80 rounded-full p-1 shadow-md hover:bg-pastel-ivory z-10 hidden">
              <svg class="w-5 h-5 text-ivory-brown" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
          </button>
-         <div id="categories-container" class="flex flex-wrap justify-center md:flex-nowrap md:justify-start gap-2 py-4 md:px-8 overflow-x-auto">
-            <button class="category-button px-6 py-2 bg-ivory-brown text-off-white rounded-full whitespace-nowrap font-medium" data-category="all">All Stories</button>
-            <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="technology">Technology</button>
-            <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="lifestyle">Lifestyle</button>
-            <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="travel">Travel</button>
-            <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="food">Food</button>
-            <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="health">Health</button>
-            <button class="category-button px-6 py-2 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="business">Business</button>
-        </div>
-        <button id="scroll-right-btn" class="absolute right-0 top-1/2 -translate-y-1/2 bg-ivory/80 rounded-full p-1 shadow-md hover:bg-pastel-ivory z-10 hidden md:block">
+         <div id="categories-container" class="flex flex-wrap justify-center md:flex-nowrap md:justify-center gap-2 py-4 md:px-8 overflow-x-auto">
+             
+            <button class="category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-ivory-brown text-off-white rounded-full whitespace-nowrap font-medium" data-category="all">
+                <img src="https://i.ibb.co/P4S83fV/all-stories-icon.png" alt="All" class="w-6 h-6 rounded-full object-cover">
+                <span>All Stories</span>
+            </button>
+            <button class="category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="technology">
+                <img src="https://i.ibb.co/b3WbQxS/tech-icon.png" alt="Tech" class="w-6 h-6 rounded-full object-cover">
+                <span>Technology</span>
+            </button>
+            <button class="category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="lifestyle">
+                <img src="httpsimg src="https://i.ibb.co/dKqV9zP/lifestyle-icon.png" alt="Lifestyle" class="w-6 h-6 rounded-full object-cover">
+                <span>Lifestyle</span>
+            </button>
+            <button class="category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="travel">
+                <img src="https://i.ibb.co/QnN9QhS/travel-icon.png" alt="Travel" class="w-6 h-6 rounded-full object-cover">
+                <span>Travel</span>
+            </button>
+            <button class="category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="food">
+                <img src="https://i.ibb.co/yYwJk2Y/food-icon.png" alt="Food" class="w-6 h-6 rounded-full object-cover">
+                <span>Food</span>
+            </button>
+            <button class="category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="health">
+                <img src="httpsimg src="https://i.ibb.co/dG7bBfW/health-icon.png" alt="Health" class="w-6 h-6 rounded-full object-cover">
+                <span>Health</span>
+            </button>
+            <button class="category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="business">
+                <img src="https://i.ibb.co/HCbT1Yg/business-icon.png" alt="Business" class="w-6 h-6 rounded-full object-cover">
+                <span>Business</span>
+            </button>
+
+         </div>
+        <button id="scroll-right-btn" class="absolute right-0 top-1/2 -translate-y-1/2 bg-ivory/80 rounded-full p-1 shadow-md hover:bg-pastel-ivory z-10 hidden">
             <svg class="w-5 h-5 text-ivory-brown" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
         </button>
     </div>
 </nav>
+
 <main class="container mx-auto px-4 py-8">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <div class="lg:col-span-3">
          <section class="mb-12">
-            <h3 class="text-2xl font-bold text-ivory-brown mb-6">Featured Stories</h3>
-            <div id="featured-swiper" class="swiper relative rounded-2xl shadow-lg">
-                <div id="featured-swiper-wrapper" class="swiper-wrapper">
-                    <div class="swiper-slide flex animate-pulse">
-                        <div class="w-1/2 h-80 bg-pastel-ivory"></div>
-                        <div class="w-1/2 p-8 flex flex-col bg-ivory">
-                            <div class="h-4 bg-pastel-ivory rounded w-1/4 mb-4"></div>
-                            <div class="h-8 bg-pastel-ivory rounded w-full mb-4"></div>
-                            <div class="h-8 bg-pastel-ivory rounded w-3/4 mb-6"></div>
-                            <div class="space-y-2 flex-grow">
-                                <div class="h-4 bg-pastel-ivory rounded w-full"></div>
-                                <div class="h-4 bg-pastel-ivory rounded w-2/3"></div>
-                            </div>
-                            <div class="h-10 bg-pastel-ivory rounded w-full mt-auto"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="swiper-pagination"></div>
-                <div class="swiper-button-prev text-white"></div>
-                <div class="swiper-button-next text-white"></div>
-            </div>
-        </section>
+             <h3 class="text-2xl font-bold text-ivory-brown mb-6">Featured Stories</h3>
+             <div id="featured-swiper" class="swiper relative rounded-2xl shadow-lg">
+                 <div id="featured-swiper-wrapper" class="swiper-wrapper">
+                     <div class="swiper-slide flex animate-pulse">
+                         <div class="w-1/2 h-80 bg-pastel-ivory"></div>
+                         <div class="w-1/2 p-8 flex flex-col bg-ivory">
+                             <div class="h-4 bg-pastel-ivory rounded w-1/4 mb-4"></div>
+                             <div class="h-8 bg-pastel-ivory rounded w-full mb-4"></div>
+                             <div class="h-8 bg-pastel-ivory rounded w-3/4 mb-6"></div>
+                             <div class="space-y-2 flex-grow">
+                                 <div class="h-4 bg-pastel-ivory rounded w-full"></div>
+                                 <div class="h-4 bg-pastel-ivory rounded w-2/3"></div>
+                             </div>
+                             <div class="h-10 bg-pastel-ivory rounded w-full mt-auto"></div>
+                         </div>
+                     </div>
+                 </div>
+                 <div class="swiper-pagination"></div>
+             </div>
+         </section>
             <section>
                 <h3 class="text-2xl font-bold text-ivory-brown mb-6">Latest Stories</h3>
+                
                 <div id="blog-posts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                    <div class="loader mx-auto col-span-1 md:col-span-2 lg:col-span-3" 
+                         style="height: 50px; width: 50px; border-width: 5px; border-top-color: #8B5E34;">
                     </div>
+
+                </div>
             </section>
             <div class="text-center mt-12">
-                 <button id="load-more-btn" class="bg-ivory-brown text-white px-6 py-3 rounded-full font-semibold hover:bg-classic-taupe transition-colors hidden">Load More Posts</button>
+                 <button id="load-more-btn" class="bg-ivory-brown text-off-white px-6 py-3 rounded-full font-semibold hover:bg-classic-taupe transition-colors hidden">Load More Posts</button>
             </div>
         </div>
       <aside class="lg:col-span-1">
     <div class="bg-ivory p-6 rounded-xl shadow-sm sticky top-24">
         
-        <div>
-            <h3 class="font-bold text-lg mb-4 text-ivory-brown">Popular Tags</h3>
+        <div class="hidden lg:block">
+            <h3 class="font-bold text-lg mb-4 text-ivory-brown">Popular Categories</h3>
             <div class="flex flex-wrap gap-2">
                 <button class="tag-button text-sm bg-pastel-ivory text-ivory-brown px-3 py-1 rounded-full hover:bg-classic-taupe hover:text-off-white">#technology</button>
                 <button class="tag-button text-sm bg-pastel-ivory text-ivory-brown px-3 py-1 rounded-full hover:bg-classic-taupe hover:text-off-white">#travel</button>
@@ -263,103 +444,121 @@
             </div>
         </div>
 
-        <hr class="my-6 border-ivory-linen">
+        <hr class="hidden lg:block my-6 border-ivory-linen">
 
         <div>
-            <h3 class="font-bold text-lg mb-4 text-ivory-brown">Popular Author</h3>
+            <h3 class="font-bold text-lg mb-4 text-ivory-brown">Top Writers</h3>
            <div id="popular-authors-container">
-    <div class="space-y-4 animate-pulse">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-pastel-ivory"></div>
-            <div class="flex-1">
-                <div class="h-4 bg-pastel-ivory rounded w-3/4"></div>
-                <div class="h-3 bg-pastel-ivory rounded w-1/2 mt-2"></div>
+            <div class="space-y-4 animate-pulse">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-pastel-ivory"></div>
+                    <div class="flex-1">
+                        <div class="h-4 bg-pastel-ivory rounded w-3/4"></div>
+                        <div class="h-3 bg-pastel-ivory rounded w-1/2 mt-2"></div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-pastel-ivory"></div>
+                    <div class="flex-1">
+                        <div class="h-4 bg-pastel-ivory rounded w-3/4"></div>
+                        <div class="h-3 bg-pastel-ivory rounded w-1/2 mt-2"></div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-pastel-ivory"></div>
+                    <div class="flex-1">
+                        <div class="h-4 bg-pastel-ivory rounded w-3/4"></div>
+                        <div class="h-3 bg-pastel-ivory rounded w-1/2 mt-2"></div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-pastel-ivory"></div>
-            <div class="flex-1">
-                <div class="h-4 bg-pastel-ivory rounded w-3/4"></div>
-                <div class="h-3 bg-pastel-ivory rounded w-1/2 mt-2"></div>
-            </div>
-        </div>
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-pastel-ivory"></div>
-            <div class="flex-1">
-                <div class="h-4 bg-pastel-ivory rounded w-3/4"></div>
-                <div class="h-3 bg-pastel-ivory rounded w-1/2 mt-2"></div>
-            </div>
-        </div>
-    </div>
-</div>
         </div>
         
         <hr class="my-6 border-ivory-linen">
         
        <div>
-    <h3 class="font-bold text-lg mb-4 text-ivory-brown">Subscribe Aroundme.click</h3>
-    <form id="subscribe-form" class="flex flex-col gap-2">
-        <input type="email" id="subscribe-email" placeholder="Your email" class="w-full px-4 py-2 text-sm border bg-off-white border-ivory-linen rounded-full focus:outline-none focus:ring-2 focus:ring-classic-taupe" required>
-        <button type="submit" id="subscribe-btn" class="w-full px-4 py-2 bg-ivory-brown text-white rounded-full text-sm font-semibold hover:bg-classic-taupe">Subscribe</button>
-    </form>
-    <p id="subscribe-message" class="text-sm text-center mt-3 min-h-[20px]"></p>
-</div>
+            <h3 class="font-bold text-lg mb-4 text-ivory-brown">Subscribe Aroundme.click</h3>
+            <form id="subscribe-form" class="flex flex-col gap-2">
+                <input type="email" id="subscribe-email" placeholder="Your email" class="w-full px-4 py-2 text-sm border bg-off-white border-ivory-linen rounded-full focus:outline-none focus:ring-2 focus:ring-classic-taupe" required>
+                <button type="submit" id="subscribe-btn" class="w-full px-4 py-2 bg-ivory-brown text-off-white rounded-full text-sm font-semibold hover:bg-classic-taupe">Subscribe</button>
+            </form>
+            <p id="subscribe-message" class="text-sm text-center mt-3 min-h-[20px]"></p>
+        </div>
 
     </div>
 </aside>
         </div>
     </main>
     
-<div id="post-modal" class="fixed inset-0 z-[200] hidden bg-black bg-opacity-70 backdrop-blur-sm p-4">
-    <div id="post-modal-container" class="relative bg-white rounded-lg shadow-2xl w-full max-w-2xl mx-auto flex flex-col max-h-[90vh] transition-all duration-300">
-        <div id="post-modal-loader" class="absolute inset-0 flex items-center justify-center bg-white/80 z-10 rounded-lg">
+<div id="post-modal" class="fixed inset-0 z-[200] hidden bg-black bg-opacity-70 backdrop-blur-sm p-4 md:p-0 flex items-center justify-center">
+    <div id="post-modal-container" class="relative bg-ivory rounded-lg shadow-2xl w-full max-w-2xl mx-auto flex flex-col max-h-[90vh] md:max-h-screen transition-all duration-300">
+        
+        <div id="post-modal-loader" class="absolute inset-0 flex items-center justify-center bg-ivory/80 z-10 rounded-lg">
             <div class="loader"></div>
         </div>
+        
         <div id="post-modal-content-wrapper" class="flex flex-col h-full invisible">
-            <div class="p-4 border-b flex justify-between items-center flex-shrink-0 gap-4">
+            
+            <div class="p-4 border-b border-ivory-linen flex justify-between items-center flex-shrink-0 gap-4">
                 <div class="flex-1 min-w-0">
-                    <h3 id="post-modal-title" class="text-xl font-bold text-slate-800 truncate"></h3>
+                    <h3 id="post-modal-title" class="text-xl font-bold text-ivory-brown truncate"></h3>
                 </div>
                 <div class="flex items-center space-x-2 flex-shrink-0">
-                    <button id="toggle-fullscreen-btn" class="text-gray-500 hover:text-gray-800" title="Toggle Fullscreen">
+                    <button id="toggle-fullscreen-btn" class="text-classic-taupe hover:text-ivory-brown" title="Toggle Fullscreen">
                         <svg class="w-6 h-6 enter-fullscreen-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" /></svg>
                         <svg class="w-6 h-6 exit-fullscreen-icon hidden" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5M15 15l5.25 5.25" /></svg>
                     </button>
-                    <button id="close-post-modal" class="text-3xl text-gray-500 hover:text-gray-800">&times;</button>
+                    <button id="close-post-modal" class="text-3xl text-classic-taupe hover:text-ivory-brown">&times;</button>
                 </div>
             </div>
-            <div class="p-6 overflow-y-auto">
-                <div id="post-modal-media-container" class="mb-4 aspect-video flex justify-center items-center bg-black rounded-lg"></div>
-                <div id="post-modal-description" class="text-slate-600 font-serif leading-relaxed prose max-w-none"></div>
-                <div class="mt-6 pt-4 border-t border-slate-200 flex items-center space-x-6">
-                    <button class="like-btn-modal flex items-center space-x-2 text-gray-500 hover:text-red-500 transition-colors" data-like-id="">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>
-                        <span class="like-count-modal font-semibold">0</span>
-                    </button>
-                    <div class="flex items-center space-x-2 text-gray-500">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 5.523-4.477 10-10 10S1 17.523 1 12 5.477 2 11 2s10 4.477 10 10z"></path></svg>
-                        <span id="comment-count-modal" class="font-semibold">0</span>
-                    </div>
-                    <button class="share-btn flex items-center space-x-2 text-gray-500 hover:text-blue-500 transition-colors" data-post-id="">
-                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 4.186m0-4.186c.54.121 1.07.312 1.566.55m-1.566-.55L11.99 3.937m-3.232 8.523c.54-.121 1.07-.312 1.566-.55m-1.566.55l-3.232-8.523m3.232 8.523l3.232 8.523m0 0l3.232-8.523m-3.232 8.523c-.54.121-1.07.312-1.566.55m1.566-.55l3.232-8.523" /></svg>
-                        <span class="font-semibold">Share</span>
-                    </button>
+
+           <div id="post-modal-body-splitter" class="flex-1 flex flex-col overflow-hidden">
+                
+                <div id="post-modal-media-wrapper">
+                    <div id="post-modal-media-container" class="aspect-video flex justify-center items-center bg-black md:rounded-lg overflow-hidden">
+                        </div>
                 </div>
-                <div class="mt-6 pt-4 border-t border-slate-200">
-                    <h4 class="text-lg font-bold text-slate-800 mb-4">Comments</h4>
-                    <div id="comment-form-container" class="hidden">
-                        <form id="comment-form" class="flex items-start space-x-3 mb-6" data-post-id="">
-                            <img id="comment-user-avatar" src="" alt="My Avatar" class="w-10 h-10 rounded-full">
-                            <div class="flex-1">
-                                <textarea id="comment-textarea" rows="2" class="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Add a comment..."></textarea>
-                                <button type="submit" class="mt-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-full hover:bg-blue-700">Post Comment</button>
-                            </div>
-                        </form>
+                
+           <div id="post-modal-content-scroller" class="flex-1 p-6 overflow-y-auto">
+                    
+                    <div class="truncate-wrapper">
+                        <div id="post-modal-description" class="text-ivory-brown leading-relaxed prose max-w-none"></div>
                     </div>
-                     <div id="comment-login-prompt">
-                        <p class="text-center p-4">Please <button id="login-from-comment-btn" class="font-semibold text-blue-600 hover:underline">sign in</button> to leave a comment.</p>
+                    <button id="read-more-btn" class="mt-2 font-semibold text-ivory-brown hover:underline">
+                        Read More...
+                    </button>
+                    <div class="mt-6 pt-4 border-t border-ivory-linen flex items-center space-x-6">
+                        <button class="like-btn-modal flex items-center space-x-2 text-classic-taupe hover:text-red-500 transition-colors" data-like-id="">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>
+                            <span class="like-count-modal font-semibold">0</span>
+                        </button>
+                        <div class="flex items-center space-x-2 text-classic-taupe">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 5.523-4.477 10-10 10S1 17.523 1 12 5.477 2 11 2s10 4.477 10 10z"></path></svg>
+                            <span id="comment-count-modal" class="font-semibold">0</span>
+                        </div>
+                        <button class="share-btn flex items-center space-x-2 text-classic-taupe hover:text-ivory-brown transition-colors" data-post-id="">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 4.186m0-4.186c.54.121 1.07.312 1.566.55m-1.566-.55L11.99 3.937m-3.232 8.523c.54-.121 1.07-.312 1.566-.55m-1.566.55l-3.232-8.523m3.232 8.523l3.232 8.523m0 0l3.232-8.523m-3.232 8.523c-.54.121-1.07.312-1.566.55m1.566-.55l3.232-8.523" /></svg>
+                            <span class="font-semibold">Share</span>
+                        </button>
                     </div>
-                    <div id="comments-list" class="space-y-4"></div>
+                    
+                    <div class="mt-6 pt-4 border-t border-ivory-linen">
+                        <h4 class="text-lg font-bold text-ivory-brown mb-4">Comments</h4>
+                        <div id="comment-form-container" class="hidden">
+                            <form id="comment-form" class="flex items-start space-x-3 mb-6" data-post-id="">
+                                <img id="comment-user-avatar" src="" alt="My Avatar" class="w-10 h-10 rounded-full">
+                                <div class="flex-1">
+                                    <textarea id="comment-textarea" rows="2" class="w-full border border-ivory-linen rounded-md p-2 focus:ring-ivory-brown focus:border-ivory-brown bg-off-white" placeholder="Add a comment..."></textarea>
+                                    <button type="submit" class="mt-2 px-4 py-2 bg-ivory-brown text-off-white text-sm font-semibold rounded-full hover:bg-classic-taupe">Post Comment</button>
+                                </div>
+                            </form>
+                        </div>
+                         <div id="comment-login-prompt">
+                             <p class="text-center p-4 text-classic-taupe">Please <button id="login-from-comment-btn" class="font-semibold text-ivory-brown hover:underline">sign in</button> to leave a comment.</p>
+                        </div>
+                        <div id="comments-list" class="space-y-4"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -370,8 +569,7 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div class="md:col-span-2 space-y-4">
                 <h4 class="font-bold text-xl text-ivory-brown">Around Me Click</h4>
-                <p class="text-classic-taupe font-lora">Connecting voices from around the world.</p>
-            </div>
+                <p class="text-classic-taupe">Connecting voices from around the world.</p> </div>
             <div class="space-y-4">
                 <h5 class="font-bold text-lg text-ivory-brown">Quick Links</h5>
                 <ul class="space-y-2">
@@ -381,7 +579,20 @@
             </div>
             <div class="space-y-4">
                 <h5 class="font-bold text-lg text-ivory-brown">Follow Us</h5>
-                <p class="text-classic-taupe font-lora">Join the conversation on social media.</p>
+                <p class="text-classic-taupe">Join the conversation on social media.</p> <div class="flex items-center space-x-4">
+                    <a href="YOUR_FACEBOOK_LINK_HERE" target="_blank" rel="noopener noreferrer" class="text-classic-taupe hover:text-ivory-brown transition-colors">
+                        <span class="sr-only">Facebook</span>
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33V21.878A10.003 10.003 0 0022 12z" clip-rule="evenodd" /></svg>
+                    </a>
+                    <a href="YOUR_INSTAGRAM_LINK_HERE" target="_blank" rel="noopener noreferrer" class="text-classic-taupe hover:text-ivory-brown transition-colors">
+                        <span class="sr-only">Instagram</span>
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C9.283 2 9.044.01 7.878.06c-1.065.05-1.79.2-2.428.465a4.902 4.902 0 00-1.77 1.153A4.902 4.902 0 003.11 6.19c-.265.638-.415 1.363-.465 2.428C2.6 9.664 2.59 9.983 2.59 12s.01 2.336.06 3.4c.05 1.065.2 1.79.465 2.428a4.902 4.902 0 001.153 1.77 4.902 4.902 0 001.77 1.153c.638.265 1.363.415 2.428.465 1.066.05 1.405.06 4.122.06 2.717 0 3.056-.01 4.122-.06 1.065-.05 1.79-.2 2.428-.465a4.902 4.902 0 001.77-1.153 4.902 4.902 0 001.153-1.77c.265-.638.415-1.363.465-2.428.05-1.066.06-1.405.06-4.122s-.01-2.336-.06-3.4c-.05-1.065-.2-1.79-.465-2.428a4.902 4.902 0 00-1.153-1.77A4.902 4.902 0 0018.81 3.11c-.638-.265-1.363-.415-2.428-.465C15.336 2.6 15.017 2.59 12 2.59c-2.717 0-3.056.01-4.122.06zM12 4.865a7.135 7.135 0 110 14.27 7.135 7.135 0 010-14.27zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 10-2.88 0 1.44 1.44 0 002.88 0z" clip-rule="evenodd" /></svg>
+                    </a>
+                    <a href="YOUR_WHATSAPP_LINK_HERE" target="_blank" rel="noopener noreferrer" class="text-classic-taupe hover:text-ivory-brown transition-colors">
+                        <span class="sr-only">WhatsApp</span>
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.79.46 3.49 1.32 4.95L2 22l5.25-1.38c1.41.79 3.05 1.22 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zM9.53 8.5c.24-.12.55-.2 1.76.45 1.22.65 2.06 2.18 2.18 2.32.12.14.2.32.04.54-.16.22-.57.65-1.1.8-1.07.3-1.07.3-3.23-.52s-2.93-3-3.05-3.14c-.12-.14-.3-.14-.42-.14H4.75c-.14,0-.3,0-.42.14-.12.14-.53.57-.53 1.41,0 .84.55 1.64.63 1.76.08.12 1.07 1.73 2.63 2.4.47.2.85.32 1.14.41.47.14.87.12 1.2.08.38-.04 1.16-.48 1.32-0.94s.16-.86.12-.94c-.04-.08-.16-.12-.34-.2s-1.16-.57-1.34-.63c-.18-.06-.38-.06-.55.06-.18.12-.63.8-.77.94-.14.14-.28.16-.42.04-.14-.12-1.2-1.1-1.2-1.1C6.1 12.42 5.2 11.23 5.06 11c-.14-.24-.02-.38.1-.5s.28-.3.42-.42c.14-.12.2-.2.3-.34s.08-.22,0-.34c-.08-.12-1.05-1.2-1.05-1.2s-.3-.26-.6-.4c-.3-.14-.6-.14-.84-.02z" /></svg>
+                    </a>
+                </div>
             </div>
         </div>
         <div class="mt-8 border-t border-ivory-linen pt-6 text-center">
@@ -397,56 +608,12 @@
         <form id="new-password-form" class="mt-6">
             <input type="password" id="new-password-input" placeholder="New Password (6+ characters)" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
             <input type="password" id="confirm-password-input" placeholder="Confirm New Password" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
-            <button type="submit" class="w-full bg-ivory-brown text-white py-3 rounded-full font-bold hover:bg-classic-taupe">Save New Password</button>
+            <button type="submit" class="w-full bg-ivory-brown text-off-white py-3 rounded-full font-bold hover:bg-classic-taupe">Save New Password</button>
             <p id="new-password-error" class="text-red-500 text-sm mt-2 min-h-[20px] text-center"></p>
         </form>
     </div>
 </div>
 
-<div id="login-modal" class="modal-overlay hidden fixed inset-0 bg-black/60 flex justify-center items-center z-[210] animate-fade-in">
-    <div class="bg-ivory p-8 rounded-lg shadow-xl w-full max-w-md relative animate-slide-up">
-        <button class="close-modal-btn absolute top-2 right-4 text-3xl text-classic-taupe hover:text-ivory-brown">&times;</button>
-        <h2 class="text-2xl font-bold mb-2 text-ivory-brown">Sign In</h2>
-        <form id="login-form" class="mt-6">
-             <input type="email" id="login-email" placeholder="Email" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
-             <input type="password" id="login-password" placeholder="Password" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
-             <div class="text-right mb-4">
-                 <a href="#" id="show-reset-password-link" class="text-sm text-ivory-brown hover:underline">Forgot Password?</a>
-             </div>
-             <button type="submit" class="w-full bg-ivory-brown text-white py-3 rounded-full font-bold hover:bg-classic-taupe">Sign In</button>
-             <p id="login-error" class="text-red-500 text-sm mt-2 min-h-[20px]"></p>
-        </form>
-        <p class="mt-6 text-sm text-classic-taupe">New here? <a href="#" id="show-signup-link" class="text-ivory-brown font-bold hover:underline">Join now</a></p>
-    </div>
-</div>
-    
-<div id="signup-modal" class="modal-overlay hidden fixed inset-0 bg-black/60 flex justify-center items-center z-[210] animate-fade-in">
-    <div class="bg-ivory p-8 rounded-lg shadow-xl w-full max-w-md relative animate-slide-up">
-        <button class="close-modal-btn absolute top-2 right-4 text-3xl text-classic-taupe hover:text-ivory-brown">&times;</button>
-        <h2 class="text-2xl font-bold mb-2 text-ivory-brown">Sign Up</h2>
-        <form id="signup-form" class="mt-6">
-            <input type="text" id="signup-name" placeholder="Your Name" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
-            <input type="email" id="signup-email" placeholder="Email" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
-            <input type="password" id="signup-password" placeholder="Password (6+ characters)" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
-            <button type="submit" class="w-full bg-ivory-brown text-white py-3 rounded-full font-bold hover:bg-classic-taupe">Agree & Join</button>
-            <p id="signup-error" class="text-red-500 text-sm mt-2 min-h-[20px]"></p>
-        </form>
-        <p class="mt-6 text-sm text-classic-taupe">Already a member? <a href="#" id="show-login-link" class="text-ivory-brown font-bold hover:underline">Sign in</a></p>
-    </div>
-</div>
-<div id="reset-password-modal" class="modal-overlay hidden fixed inset-0 bg-black/60 flex justify-center items-center z-[210] animate-fade-in">
-    <div class="bg-ivory p-8 rounded-lg shadow-xl w-full max-w-md relative animate-slide-up">
-        <button class="close-modal-btn absolute top-2 right-4 text-3xl text-classic-taupe hover:text-ivory-brown">&times;</button>
-        <h2 class="text-2xl font-bold mb-2 text-ivory-brown">Reset Password</h2>
-        <p class="text-sm text-classic-taupe mt-2">Enter your email and we'll send you a link to reset your password.</p>
-        <form id="reset-password-form" class="mt-6">
-            <input type="email" id="reset-email" placeholder="Your Email Address" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
-            <button type="submit" class="w-full bg-ivory-brown text-white py-3 rounded-full font-bold hover:bg-classic-taupe">Send Reset Link</button>
-            <p id="reset-message" class="text-sm mt-3 min-h-[20px] text-center"></p>
-        </form>
-        <p class="mt-6 text-sm text-classic-taupe">Remembered your password? <a href="#" id="back-to-login-link" class="text-ivory-brown font-bold hover:underline">Sign in</a></p>
-    </div>
-</div>
 <div id="share-modal" class="fixed inset-0 z-[210] hidden flex items-center justify-center bg-black/60 p-4 animate-fade-in">
     <div class="bg-ivory p-8 rounded-lg shadow-xl w-full max-w-md relative animate-slide-up">
         <button class="close-share-modal absolute top-2 right-4 text-3xl text-classic-taupe hover:text-ivory-brown">&times;</button>
@@ -455,7 +622,7 @@
 
         <div class="flex items-center space-x-2">
             <input type="text" id="share-link-input" readonly class="w-full p-2 border border-ivory-linen rounded-lg bg-off-white text-classic-taupe">
-            <button id="copy-link-btn" class="px-4 py-2 bg-ivory-brown text-white rounded-lg font-semibold hover:bg-classic-taupe">Copy</button>
+            <button id="copy-link-btn" class="px-4 py-2 bg-ivory-brown text-off-white rounded-lg font-semibold hover:bg-classic-taupe">Copy</button>
         </div>
 
         <div class="mt-4 pt-4 border-t border-ivory-linen flex items-center justify-center space-x-4">
@@ -473,54 +640,498 @@
     </div>
 </div>
 
-<div class="fixed bottom-6 right-6 z-[99] flex flex-col items-center space-y-4">
+    <nav id="bottom-nav-bar" class="md:hidden fixed bottom-0 left-0 w-full bg-ivory/95 backdrop-blur-lg border-t border-ivory-linen z-40">
+        <div class="flex justify-around items-center h-16">
+            <a href="index.html" class="flex flex-col items-center justify-center text-classic-taupe hover:text-ivory-brown">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"></path></svg>
+                <span class="text-xs font-medium">Home</span>
+            </a>
     
-    <a href="YOUR_FACEBOOK_LINK_HERE" target="_blank" rel="noopener noreferrer" class="transition-transform duration-300 hover:scale-110">
-        <img src="https://i.ibb.co/kVgndQJC/Whats-App-Image-2025-09-03-at-17-39-42-b6b2b9ea.jpg" alt="Facebook" class="w-14 h-14 rounded-full shadow-lg object-cover border-2 border-white">
-    </a>
-
-    <a href="YOUR_INSTAGRAM_LINK_HERE" target="_blank" rel="noopener noreferrer" class="transition-transform duration-300 hover:scale-110">
-        <img src="https://i.ibb.co/4gV1KW4z/Whats-App-Image-2025-09-03-at-17-39-41-d465846d.jpg" alt="Instagram" class="w-14 h-14 rounded-full shadow-lg object-cover border-2 border-white">
-    </a>
-
-    <a href="YOUR_WHATSAPP_LINK_HERE" target="_blank" rel="noopener noreferrer" class="transition-transform duration-300 hover:scale-110">
-        <img src="https://i.ibb.co/4wqxQCz2/Whats-App-Image-2025-09-03-at-17-39-42-5fac6af8.jpg" alt="WhatsApp" class="w-14 h-14 rounded-full shadow-lg object-cover border-2 border-white">
-    </a>
-
-     <a href="YOUR_WHATSAPP_LINK_HERE" target="_blank" rel="noopener noreferrer" class="transition-transform duration-300 hover:scale-110">
-        <img src="https://i.ibb.co/LXHNk3tK/Whats-App-Image-2025-09-03-at-17-39-41-54bbd281.jpg" alt="WhatsApp" class="w-14 h-14 rounded-full shadow-lg object-cover border-2 border-white">
-    </a>
-
-     <a href="YOUR_WHATSAPP_LINK_HERE" target="_blank" rel="noopener noreferrer" class="transition-transform duration-300 hover:scale-110">
-        <img src="https://i.ibb.co/SwQLvch9/Whats-App-Image-2025-09-03-at-17-39-40-11efe25e.jpg" alt="WhatsApp" class="w-14 h-14 rounded-full shadow-lg object-cover border-2 border-white">
-    </a>
-
-     <a href="YOUR_WHATSAPP_LINK_HERE" target="_blank" rel="noopener noreferrer" class="transition-transform duration-300 hover:scale-110">
-        <img src="https://i.ibb.co/PztGhzQL/Whats-App-Image-2025-09-03-at-17-39-39-c88b1041.jpg" alt="WhatsApp" class="w-14 h-14 rounded-full shadow-lg object-cover border-2 border-white">
-    </a>
-
+            <a href="profile.html" id="bottom-nav-create-post-link" class="bottom-nav-creators-only flex-col items-center justify-center text-classic-taupe hover:text-ivory-brown">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span class="text-xs font-medium">Create</span>
+            </a>
     
-     <a href="YOUR_WHATSAPP_LINK_HERE" target="_blank" rel="noopener noreferrer" class="transition-transform duration-300 hover:scale-110">
-        <img src="https://i.ibb.co/35fMGZ3m/Whats-App-Image-2025-09-03-at-17-56-06-b0f8419b.jpg" alt="WhatsApp" class="w-14 h-14 rounded-full shadow-lg object-cover border-2 border-white">
-    </a>
+            <button id="bottom-nav-login-btn" class="flex flex-col items-center justify-center text-classic-taupe hover:text-ivory-brown">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"></path></svg>
+                <span class="text-xs font-medium">Profile</span>
+            </button>
+            <a id="bottom-nav-profile-link" href="profile.html" class="hidden flex-col items-center justify-center text-classic-taupe hover:text-ivory-brown">
+                <img id="bottom-nav-avatar" src="https://via.placeholder.com/40" alt="User" class="w-7 h-7 rounded-full">
+                <span class="text-xs font-medium">Profile</span>
+            </a>
+        </div>
+    </nav>
+    <div id="left-drawer-backdrop" class="md:hidden fixed inset-0 bg-black/60 z-[60] opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out"></div>
+    
+    <div id="left-drawer" class="md:hidden fixed top-0 left-0 h-full w-80 max-w-[80vw] bg-ivory shadow-lg z-[70] transform -translate-x-full transition-transform duration-300 ease-in-out">
+        <div class="flex flex-col h-full">
+            <div class="flex border-b border-ivory-linen relative">
+                <button id="drawer-tab-menu" class="flex-1 text-center py-4 font-semibold text-ivory-brown border-b-2 border-yellow-400">MENU</button>
+                <button id="drawer-tab-categories" class="flex-1 text-center py-4 font-semibold text-classic-taupe border-b-2 border-transparent">CATEGORIES</button>
+                <button id="close-drawer-btn" class="absolute top-1 right-1 p-2 text-classic-taupe hover:text-ivory-brown">
+                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+    
+            <div class="flex-1 overflow-y-auto">
+                <div id="drawer-menu-content" class="">
+                    <nav class="flex flex-col text-sm font-medium text-classic-taupe">
+                        <a href="index.html" class="px-6 py-4 border-b border-ivory-linen text-yellow-500 font-bold">HOME</a>
+                        <a href="#" class="px-6 py-4 border-b border-ivory-linen">SHOP</a>
+                        <a href="#" class="px-6 py-4 border-b border-ivory-linen">BLOG</a>
+                        <a href="#" class="px-6 py-4 border-b border-ivory-linen">ABOUT US</a>
+                        <a href="#" class="px-6 py-4 border-b border-ivory-linen">CONTACT US</a>
+                        
+                        <button class="theme-toggle-button flex items-center justify-between w-full px-6 py-4 border-b border-ivory-linen text-classic-taupe">
+                            <span class="flex items-center gap-4">
+                                <svg class="theme-toggle-light-icon w-5 h-5 text-classic-taupe" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-6.364-.386l1.591-1.591M3 12h2.25m.386-6.364l1.591 1.591zM12 9a3 3 0 100 6 3 3 0 000-6z" /></svg>
+                                <svg class="theme-toggle-dark-icon w-5 h-5 text-classic-taupe hidden" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 008.25-4.498z" /></svg>
+                                <span>Toggle Theme</span>
+                            </span>
+                        </button>
+                        </nav>
+    
+                    <div class="bg-pastel-ivory py-4 px-6 mt-0.5">
+                        <h3 class="font-bold text-ivory-brown uppercase">MY ACCOUNT</h3>
+                    </div>
+    
+                    <nav class="flex flex-col text-sm font-medium text-classic-taupe">
+                        <a href="#" class="flex items-center gap-4 px-6 py-4 border-b border-ivory-linen">
+                            <svg class="w-5 h-5 text-classic-taupe" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
+                            <span>WISHLIST</span>
+                        </a>
+                        <a href="#" class="flex items-center gap-4 px-6 py-4 border-b border-ivory-linen">
+                            <svg class="w-5 h-5 text-classic-taupe" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h18M16.5 3L21 7.5m0 0L16.5 12M21 7.5H3" /></svg>
+                            <span>COMPARE</span>
+                        </a>
+                        <a href="#" class="flex items-center gap-4 px-6 py-4 border-b border-ivory-linen">
+                            <svg class="w-5 h-5 text-classic-taupe" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                            <span>MY ACCOUNT</span>
+                        </a>
+                    </nav>
+                </div>
+    
+                <div id="drawer-categories-content" class="hidden p-4">
+                     <div class="flex flex-col space-y-1">
+                        <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-classic-taupe hover:bg-pastel-ivory" data-category="all">
+                            <img src="https://i.ibb.co/P4S83fV/all-stories-icon.png" alt="All" class="w-6 h-6 rounded-full object-cover">
+                            <span>All Stories</span>
+                        </button>
+                        <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-classic-taupe hover:bg-pastel-ivory" data-category="technology">
+                            <img src="https://i.ibb.co/b3WbQxS/tech-icon.png" alt="Tech" class="w-6 h-6 rounded-full object-cover">
+                            <span>Technology</span>
+                        </button>
+                        <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-classic-taupe hover:bg-pastel-ivory" data-category="lifestyle">
+                            <img src="httpsimg src="https://i.ibb.co/dKqV9zP/lifestyle-icon.png" alt="Lifestyle" class="w-6 h-6 rounded-full object-cover">
+                            <span>Lifestyle</span>
+                        </button>
+                        <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-classic-taupe hover:bg-pastel-ivory" data-category="travel">
+                            <img src="https." alt="Travel" class="w-6 h-6 rounded-full object-cover">
+                            <span>Travel</span>
+                        </button>
+                        <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-classic-taupe hover:bg-pastel-ivory" data-category="food">
+                            <img src="https://i.ibb.co/yYwJk2Y/food-icon.png" alt="Food" class="w-6 h-6 rounded-full object-cover">
+                            <span>Food</span>
+                        </button>
+                        <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-classic-taupe hover:bg-pastel-ivory" data-category="health">
+                            <img src="httpshttps://i.ibb.co/dG7bBfW/health-icon.png" alt="Health" class="w-6 h-6 rounded-full object-cover">
+                            <span>Health</span>
+                        </button>
+                        <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-classic-taupe hover:bg-pastel-ivory" data-category="business">
+                            <img src="https://i.ibb.co/HCbT1Yg/business-icon.png" alt="Business" class="w-6 h-6 rounded-full object-cover">
+                            <span>Business</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="p-4 border-t border-ivory-linen bg-ivory">
+                <div id="drawer-profile-info" class="hidden">
+                    <button id="drawer-logout-btn" class="w-full text-left flex items-center gap-3 px-4 py-2 text-base text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"></path></svg>
+                        <span>Sign Out</span>
+                    </button>
+                </div>
+                <div id="drawer-auth-links">
+                    <button id="drawer-login-btn" class="w-full text-left flex items-center gap-3 px-4 py-2 text-base font-medium text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"></path></svg>
+                        <span>Sign In / Sign Up</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="search-drawer-backdrop" class="fixed inset-0 bg-black/60 z-[100] opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out"></div>
+    <div id="search-drawer" class="fixed top-0 right-0 h-full w-96 max-w-[90vw] bg-ivory shadow-lg z-[110] transform translate-x-full transition-transform duration-300 ease-in-out">
+        <div class="flex flex-col h-full w-full">
+            <div class="flex items-center w-full bg-ivory border-b border-ivory-linen">
+                <form id="mobile-search-form" class="flex-1">
+                    <input type="text" id="search-drawer-input" name="q" placeholder="Search blogs..." autocomplete="off" autofocus>
+                </form>
+                <button id="close-search-drawer-btn" class="p-4 text-classic-taupe hover:text-ivory-brown">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="search-suggestions-container" class="flex-1 overflow-y-auto">
+                </div>
+        </div>
+    </div>
+    
+    <div id="notification-drawer-backdrop" class="fixed inset-0 bg-black/60 z-[100] opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out"></div>
+    <div id="notification-drawer" class="fixed top-0 right-0 h-full w-96 max-w-[90vw] bg-ivory shadow-lg z-[110] transform translate-x-full transition-transform duration-300 ease-in-out">
+        <div class="flex flex-col h-full w-full">
+            <div class="flex items-center justify-between w-full bg-ivory border-b border-ivory-linen p-4">
+                <h3 class="text-lg font-semibold text-ivory-brown">Notifications</h3>
+                <button id="close-notification-drawer-btn" class="p-2 text-classic-taupe hover:text-ivory-brown">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="notification-list-container" class="flex-1 overflow-y-auto p-4">
+                <p class="text-classic-taupe text-center">No new notifications.</p>
+            </div>
+        </div>
+    </div>
 
-     <a href="YOUR_WHATSAPP_LINK_HERE" target="_blank" rel="noopener noreferrer" class="transition-transform duration-300 hover:scale-110">
-        <img src="https://i.ibb.co/hF7ZH5yZ/Whats-App-Image-2025-09-03-at-17-39-40-dc76d901.jpg" alt="WhatsApp" class="w-14 h-14 rounded-full shadow-lg object-cover border-2 border-white">
-    </a>
+    <div id="auth-drawer-backdrop" class="fixed inset-0 bg-black/60 z-[100] opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out"></div>
+    <div id="auth-drawer" class="fixed top-0 right-0 h-full w-96 max-w-[90vw] bg-ivory shadow-lg z-[110] transform translate-x-full transition-transform duration-300 ease-in-out">
+        <div class="flex flex-col h-full w-full">
+            <div class="flex items-center justify-end w-full bg-ivory border-b border-ivory-linen p-2">
+                <button id="close-auth-drawer-btn" class="p-2 text-classic-taupe hover:text-ivory-brown">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-8">
+                
+                <div id="auth-drawer-login-view">
+                    <h2 class="text-2xl font-bold mb-2 text-ivory-brown">Sign In</h2>
+                    <form id="login-form-drawer" class="mt-6">
+                         <input type="email" name="login-email" placeholder="Email" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
+                         <input type="password" name="login-password" placeholder="Password" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
+                         <div class="text-right mb-4">
+                             <a href="#" id="auth-show-reset-link" class="text-sm text-ivory-brown hover:underline">Forgot Password?</a>
+                         </div>
+                         <button type="submit" class="w-full bg-ivory-brown text-off-white py-3 rounded-full font-bold hover:bg-classic-taupe">Sign In</button>
+                         <p id="login-error-drawer" class="text-red-500 text-sm mt-2 min-h-[20px]"></p>
+                    </form>
+                    <p class="mt-6 text-sm text-classic-taupe">New here? <a href="#" id="auth-show-signup-link" class="text-ivory-brown font-bold hover:underline">Join now</a></p>
+                </div>
 
-     <a href="YOUR_WHATSAPP_LINK_HERE" target="_blank" rel="noopener noreferrer" class="transition-transform duration-300 hover:scale-110">
-        <img src="https://i.ibb.co/7dGD0RBt/Whats-App-Image-2025-09-03-at-18-07-09-4ab67776.jpg" alt="WhatsApp" class="w-14 h-14 rounded-full shadow-lg object-cover border-2 border-white">
-    </a>
+                <div id="auth-drawer-signup-view" class="hidden">
+                    <h2 class="text-2xl font-bold mb-2 text-ivory-brown">Sign Up</h2>
+                    <form id="signup-form-drawer" class="mt-6">
+                        <input type="text" name="signup-name" placeholder="Your Name" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
+                        <input type="email" name="signup-email" placeholder="Email" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
+                        <input type="password" name="signup-password" placeholder="Password (6+ characters)" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
+                        <button type="submit" class="w-full bg-ivory-brown text-off-white py-3 rounded-full font-bold hover:bg-classic-taupe">Agree & Join</button>
+                        <p id="signup-error-drawer" class="text-red-500 text-sm mt-2. min-h-[20px]"></p>
+                    </form>
+                    <p class="mt-6 text-sm text-classic-taupe">Already a member? <a href="#" id="auth-show-login-link" class="text-ivory-brown font-bold hover:underline">Sign in</a></p>
+                </div>
 
-</div>
+                <div id="auth-drawer-reset-view" class="hidden">
+                    <h2 class="text-2xl font-bold mb-2 text-ivory-brown">Reset Password</h2>
+                    <p class="text-sm text-classic-taupe mt-2">Enter your email and we'll send you a link to reset your password.</p>
+                    <form id="reset-password-form-drawer" class="mt-6">
+                        <input type="email" name="reset-email" placeholder="Your Email Address" class="w-full p-3 border border-ivory-linen bg-off-white rounded-lg mb-4" required>
+                        <button type="submit" class="w-full bg-ivory-brown text-off-white py-3 rounded-full font-bold hover:bg-classic-taupe">Send Reset Link</button>
+                        <p id="reset-message-drawer" class="text-sm mt-3 min-h-[20px] text-center"></p>
+                    </form>
+                    <p class="mt-6 text-sm text-classic-taupe">Remembered your password? <a href="#" id="auth-back-to-login-link" class="text-ivory-brown font-bold hover:underline">Sign in</a></p>
+                </div>
 
+            </div>
+        </div>
+    </div>
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-   
+    
+    <script>
+        let blogTitleSuggestions = []; 
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const hamburgerBtn = document.getElementById('mobile-hamburger-btn');
+            const leftDrawerBackdrop = document.getElementById('left-drawer-backdrop');
+            const leftDrawer = document.getElementById('left-drawer');
+            const closeLeftDrawerBtn = document.getElementById('close-drawer-btn');
+
+            const mobileSearchBtn = document.getElementById('mobile-search-btn');
+            const desktopSearchBtn = document.getElementById('desktop-search-btn');
+            const searchDrawer = document.getElementById('search-drawer');
+            const searchDrawerBackdrop = document.getElementById('search-drawer-backdrop');
+            const closeSearchDrawerBtn = document.getElementById('close-search-drawer-btn');
+            const searchDrawerInput = document.getElementById('search-drawer-input');
+            const searchSuggestionsContainer = document.getElementById('search-suggestions-container');
+            const mobileSearchForm = document.getElementById('mobile-search-form');
+            
+            const bottomNavLoginBtn = document.getElementById('bottom-nav-login-btn');
+            const bottomNavProfileLink = document.getElementById('bottom-nav-profile-link');
+            const bottomNavAvatar = document.getElementById('bottom-nav-avatar');
+
+            const drawerLoginBtn = document.getElementById('drawer-login-btn');
+            const drawerLogoutBtn = document.getElementById('drawer-logout-btn');
+            const drawerProfileInfo = document.getElementById('drawer-profile-info');
+            const drawerAuthLinks = document.getElementById('drawer-auth-links');
+
+            const notificationBellBtn = document.getElementById('notification-bell-btn');
+            const notificationDrawer = document.getElementById('notification-drawer');
+            const notificationDrawerBackdrop = document.getElementById('notification-drawer-backdrop');
+            const closeNotificationDrawerBtn = document.getElementById('close-notification-drawer-btn');
+            
+            const authDrawer = document.getElementById('auth-drawer');
+            const authDrawerBackdrop = document.getElementById('auth-drawer-backdrop');
+            const closeAuthDrawerBtn = document.getElementById('close-auth-drawer-btn');
+            const loginBtn = document.getElementById('login-btn');
+            const signupBtn = document.getElementById('signup-btn');
+            
+            const authLoginView = document.getElementById('auth-drawer-login-view');
+            const authSignupView = document.getElementById('auth-drawer-signup-view');
+            const authResetView = document.getElementById('auth-drawer-reset-view');
+            
+            const authShowSignupLinks = document.querySelectorAll('#auth-show-signup-link');
+            const authShowLoginLinks = document.querySelectorAll('#auth-show-login-link');
+            const authShowResetLinks = document.querySelectorAll('#auth-show-reset-link');
+            const authBackToLoginLinks = document.querySelectorAll('#auth-back-to-login-link');
+            
+            const categoriesContainer = document.getElementById('categories-container');
+            const scrollLeftBtn = document.getElementById('scroll-left-btn');
+            const scrollRightBtn = document.getElementById('scroll-right-btn');
+
+            if (hamburgerBtn) {
+                hamburgerBtn.addEventListener('click', () => {
+                    document.body.classList.add('drawer-open');
+                });
+            }
+
+            const closeLeftDrawer = () => {
+                if (leftDrawer) {
+                    leftDrawer.classList.add('vibrate-anim');
+                    setTimeout(() => {
+                        document.body.classList.remove('drawer-open');
+                        leftDrawer.classList.remove('vibrate-anim');
+                    }, 300);
+                }
+            };
+
+            if (leftDrawerBackdrop) leftDrawerBackdrop.addEventListener('click', closeLeftDrawer);
+            if (closeLeftDrawerBtn) closeLeftDrawerBtn.addEventListener('click', closeLeftDrawer);
+            
+            const tabMenu = document.getElementById('drawer-tab-menu');
+            const tabCategories = document.getElementById('drawer-tab-categories');
+            const contentMenu = document.getElementById('drawer-menu-content');
+            const contentCategories = document.getElementById('drawer-categories-content');
+
+            if (tabMenu && tabCategories && contentMenu && contentCategories) {
+                tabMenu.addEventListener('click', () => {
+                    contentMenu.classList.remove('hidden');
+                    contentCategories.classList.add('hidden');
+                    tabMenu.classList.add('text-ivory-brown', 'border-yellow-400');
+                    tabMenu.classList.remove('text-classic-taupe', 'border-transparent');
+                    tabCategories.classList.add('text-classic-taupe', 'border-transparent');
+                    tabCategories.classList.remove('text-ivory-brown', 'border-yellow-400');
+                });
+
+                tabCategories.addEventListener('click', () => {
+                    contentMenu.classList.add('hidden');
+                    contentCategories.classList.remove('hidden');
+                    tabCategories.classList.add('text-ivory-brown', 'border-yellow-400');
+                    tabCategories.classList.remove('text-classic-taupe', 'border-transparent');
+                    tabMenu.classList.add('text-classic-taupe', 'border-transparent');
+                    tabMenu.classList.remove('text-ivory-brown', 'border-yellow-400');
+                });
+            }
+
+            if (leftDrawer) {
+                leftDrawer.querySelectorAll('.category-button, nav a, .theme-toggle-button').forEach(link => {
+                    link.addEventListener('click', () => {
+                        // drawer eka wahanne link ekak click kalama witharai
+                        if (link.tagName === 'A' || link.classList.contains('category-button')) {
+                            closeLeftDrawer();
+                        }
+                    });
+                });
+            }
+
+            const openSearchDrawer = (e) => {
+                if(e) e.preventDefault();
+                document.body.classList.add('search-drawer-open');
+                setTimeout(() => {
+                    if(searchDrawerInput) searchDrawerInput.focus();
+                }, 300);
+            };
+
+            const closeSearchDrawer = () => {
+                document.body.classList.remove('search-drawer-open');
+            };
+
+            if (mobileSearchBtn) mobileSearchBtn.addEventListener('click', openSearchDrawer);
+            if (desktopSearchBtn) desktopSearchBtn.addEventListener('click', openSearchDrawer);
+            if (searchDrawerBackdrop) searchDrawerBackdrop.addEventListener('click', closeSearchDrawer);
+            if (closeSearchDrawerBtn) closeSearchDrawerBtn.addEventListener('click', closeSearchDrawer);
+
+            if (searchDrawerInput && searchSuggestionsContainer) {
+                searchDrawerInput.addEventListener('input', () => {
+                    const query = searchDrawerInput.value.toLowerCase().trim();
+                    if (query.length === 0) {
+                        searchSuggestionsContainer.innerHTML = '';
+                        return;
+                    }
+                    
+                    const filteredSuggestions = blogTitleSuggestions.filter(item => 
+                        item.toLowerCase().includes(query)
+                    );
+                    
+                    searchSuggestionsContainer.innerHTML = '';
+                    
+                    if (filteredSuggestions.length > 0) {
+                        filteredSuggestions.forEach(text => {
+                            const item = document.createElement('div');
+                            item.className = 'search-suggestion-item';
+                            item.innerHTML = `
+                                <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path></svg>
+                                <span>${text}</span>
+                            `;
+                            
+                            item.addEventListener('click', () => {
+                                searchDrawerInput.value = text;
+                                mobileSearchForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                            });
+                            
+                            searchSuggestionsContainer.appendChild(item);
+                        });
+                    } else {
+                        searchSuggestionsContainer.innerHTML = `<p class="p-4 text-classic-taupe text-center">No results found for "${query}"</p>`;
+                    }
+                });
+            }
+            
+            if (mobileSearchForm) {
+                mobileSearchForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const query = searchDrawerInput.value;
+                    alert(`Searching for: ${query}`);
+                    closeSearchDrawer();
+                    searchDrawerInput.value = '';
+                    searchSuggestionsContainer.innerHTML = '';
+                });
+            }
+
+            const openNotificationDrawer = () => {
+                document.body.classList.add('notification-drawer-open');
+            };
+            const closeNotificationDrawer = () => {
+                document.body.classList.remove('notification-drawer-open');
+            };
+            
+            if (notificationBellBtn) notificationBellBtn.addEventListener('click', openNotificationDrawer);
+            if (notificationDrawerBackdrop) notificationDrawerBackdrop.addEventListener('click', closeNotificationDrawer);
+            if (closeNotificationDrawerBtn) closeNotificationDrawerBtn.addEventListener('click', closeNotificationDrawer);
+
+            const openAuthDrawer = (view = 'login') => {
+                if (!authLoginView || !authSignupView || !authResetView) return;
+                
+                authLoginView.classList.add('hidden');
+                authSignupView.classList.add('hidden');
+                authResetView.classList.add('hidden');
+                
+                if (view === 'signup') {
+                    authSignupView.classList.remove('hidden');
+                } else if (view === 'reset') {
+                    authResetView.classList.remove('hidden');
+                } else {
+                    authLoginView.classList.remove('hidden');
+                }
+                
+                document.body.classList.add('auth-drawer-open');
+                closeLeftDrawer();
+            };
+            
+            const closeAuthDrawer = () => {
+                document.body.classList.remove('auth-drawer-open');
+            };
+
+            if (loginBtn) loginBtn.addEventListener('click', () => openAuthDrawer('login'));
+            if (signupBtn) signupBtn.addEventListener('click', () => openAuthDrawer('signup'));
+            if (bottomNavLoginBtn) bottomNavLoginBtn.addEventListener('click', () => openAuthDrawer('login'));
+            if (drawerLoginBtn) drawerLoginBtn.addEventListener('click', () => openAuthDrawer('login'));
+            
+            authShowSignupLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); openAuthDrawer('signup'); }));
+            authShowLoginLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); openAuthDrawer('login'); }));
+            authShowResetLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); openAuthDrawer('reset'); }));
+            authBackToLoginLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); openAuthDrawer('login'); }));
+
+            if (authDrawerBackdrop) authDrawerBackdrop.addEventListener('click', closeAuthDrawer);
+            if (closeAuthDrawerBtn) closeAuthDrawerBtn.addEventListener('click', closeAuthDrawer);
+
+            const syncUI = (user) => {
+                if (user) {
+                    const avatarSrc = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'U')}&background=8B5E34&color=fff`;
+                    
+                    if (bottomNavLoginBtn) bottomNavLoginBtn.style.display = 'none';
+                    if (bottomNavProfileLink) bottomNavProfileLink.style.display = 'flex';
+                    if (bottomNavAvatar) bottomNavAvatar.src = avatarSrc;
+                    
+                    if (drawerAuthLinks) drawerAuthLinks.style.display = 'none';
+                    if (drawerProfileInfo) drawerProfileInfo.style.display = 'block';
+                    
+                    closeAuthDrawer();
+                } else {
+                    if (bottomNavLoginBtn) bottomNavLoginBtn.style.display = 'flex';
+                    if (bottomNavProfileLink) bottomNavProfileLink.style.display = 'none';
+                    
+                    if (drawerAuthLinks) drawerAuthLinks.style.display = 'block';
+                    if (drawerProfileInfo) drawerProfileInfo.style.display = 'none';
+                }
+            };
+            
+            if (typeof firebase !== 'undefined') {
+                firebase.auth().onAuthStateChanged(async (user) => {
+                    syncUI(user);
+                });
+            }
+
+            if (drawerLogoutBtn) {
+                drawerLogoutBtn.addEventListener('click', () => {
+                    const mainLogoutBtn = document.getElementById('logout-btn');
+                    if (mainLogoutBtn) {
+                        mainLogoutBtn.click();
+                    } else if (typeof firebase !== 'undefined') {
+                        firebase.auth().signOut();
+                    }
+                });
+            }
+
+            function checkCategoryScroll() {
+                if (!categoriesContainer || !scrollLeftBtn || !scrollRightBtn) return;
+                
+                if (window.innerWidth < 768) {
+                    scrollLeftBtn.classList.add('hidden');
+                    scrollRightBtn.classList.add('hidden');
+                    return;
+                }
+
+                const hasOverflow = categoriesContainer.scrollWidth > categoriesContainer.clientWidth;
+                
+                if (hasOverflow) {
+                    scrollLeftBtn.classList.remove('hidden');
+                    scrollRightBtn.classList.remove('hidden');
+                } else {
+                    scrollLeftBtn.classList.add('hidden');
+                    scrollRightBtn.classList.add('hidden');
+                }
+            }
+            
+            checkCategoryScroll();
+            window.addEventListener('resize', checkCategoryScroll);
+
+        });
+    </script>
     <script src="app.js"></script>
-    <script src="script.js"></script>
+    <script src="script.js"></script> 
 
 </body>
 </html>
