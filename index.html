@@ -15,11 +15,10 @@
     
     <script>
         tailwind.config = {
-            darkMode: 'class', // <-- DARK MODE ENABLE KALA
+            darkMode: 'class', 
             theme: {
                 extend: {
                     colors: {
-                        // === ME TIKA SAMPURNENMA WENAS KALA ===
                         'off-white': 'var(--color-off-white)',
                         'ivory': 'var(--color-ivory)',
                         'ivory-brown': 'var(--color-ivory-brown)',
@@ -246,73 +245,79 @@
         }
         /* --- END OF MODAL FIXES --- */
 
-        /* --- Google Translate Styles --- */
-        /* Dropdown eka lassanata header ekata set wenna */
-        #google_translate_element {
+        
+        /* ============================================== */
+        /* === GOOGLE TRANSLATE FIX (ALUTH WIDIHATA) === */
+        /* ============================================== */
+
+        /* ID eka wenuwata CLASS eka target karamu */
+        .google_translate_widget {
             margin-right: 8px;
         }
-        #google_translate_element .skiptranslate {
+        .google_translate_widget .skiptranslate {
             font-size: 0px; /* "Google" text eka hide karanna */
         }
-        #google_translate_element .goog-te-gadget-simple {
+        .google_translate_widget .goog-te-gadget-simple {
             background-color: transparent !important;
             border: 1px solid var(--color-ivory-linen) !important;
             border-radius: 9999px; /* Rounded pill shape */
             padding: 4px 8px;
             cursor: pointer;
         }
-        #google_translate_element .goog-te-gadget-icon {
+        .google_translate_widget .goog-te-gadget-icon {
              display: none !important; /* Google icon eka hide karanna */
         }
-        #google_translate_element .goog-te-menu-value span {
+        .google_translate_widget .goog-te-menu-value span {
             color: var(--color-classic-taupe) !important;
             font-weight: 500;
             font-family: 'Poppins', 'sans-serif';
             font-size: 14px;
         }
-        body.dark #google_translate_element .goog-te-menu-value span {
+        body.dark .google_translate_widget .goog-te-menu-value span {
             color: var(--color-classic-taupe) !important;
         }
-    /* --- Google Translate Bar Hide (v2 - Bulletproof) --- */
+        /* Mobile drawer eke style eka */
+        #google_translate_element_mobile .goog-te-gadget-simple {
+            width: 100%;
+            padding: 8px;
+            border-width: 2px;
+        }
+        
+        /* Mobile widget eka load wenakan podi loader ekak pennamu */
+        #google_translate_element_mobile:empty::before {
+            content: "Loading Languages...";
+            font-family: 'Poppins', 'sans-serif';
+            font-size: 14px;
+            color: var(--color-classic-taupe);
+            padding: 8px;
+            display: block;
+            border: 2px dashed var(--color-ivory-linen);
+            border-radius: 0.375rem;
+            text-align: center;
+        }
 
-/* Google inject කරන iframe එකේ ID එක පටන්ගන්න විදිහට select කරලා hide කරනවා */
-iframe[id^='goog-te-banner-frame'] {
-    display: none !important;
-}
-
-/* Google එකෙන් page එක පහලට තල්ලු කරන්න දාන 
-top, margin, or padding ඔක්කොම reset කරනවා 
-*/
-body {
-    top: 0 !important;
-    margin-top: 0 !important;
-    padding-top: 0 !important;
-}
-
-/* Tooltip එකත් hide කරමු */
-.goog-tooltip {
-    display: none !important;
-}
-.goog-tooltip:hover {
-    display: none !important;
-}
-.goog-text-highlight {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-}
-/* --- End Google Translate Fix --- */
+        /* Google Translate Bar Hide */
+        iframe[id^='goog-te-banner-frame'] {
+            display: none !important;
+        }
+        body {
+            top: 0 !important;
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+        .goog-tooltip {
+            display: none !important;
+        }
+        .goog-tooltip:hover {
+            display: none !important;
+        }
+        .goog-text-highlight {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        /* --- End Google Translate Fix --- */
     </style>
-
-    <script type="text/javascript">
-    function googleTranslateElementInit() {
-      new google.translate.TranslateElement({
-        pageLanguage: 'en',
-        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-      }, 'google_translate_element');
-    }
-    </script>
-    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 </head>  
 <body class="bg-off-white font-sans text-ivory-brown">
@@ -328,7 +333,7 @@ body {
             </a>
             <div class="flex items-center space-x-4">
                 
-                <div id="google_translate_element"></div>
+                <div id="google_translate_element_desktop" class="google_translate_widget hidden md:block"></div>
 
                 <button class="theme-toggle-button p-2 rounded-full text-classic-taupe hover:text-ivory-brown hover:bg-pastel-ivory" title="Toggle Theme">
                     <svg class="theme-toggle-light-icon w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-6.364-.386l1.591-1.591M3 12h2.25m.386-6.364l1.591 1.591zM12 9a3 3 0 100 6 3 3 0 000-6z" /></svg>
@@ -432,7 +437,7 @@ body {
                 <span>Technology</span>
             </button>
             <button class="category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="lifestyle">
-                <img src="httpsimg src="https://i.ibb.co/dKqV9zP/lifestyle-icon.png" alt="Lifestyle" class="w-6 h-6 rounded-full object-cover">
+                <img src="https://i.ibb.co/dKqV9zP/lifestyle-icon.png" alt="Lifestyle" class="w-6 h-6 rounded-full object-cover">
                 <span>Lifestyle</span>
             </button>
             <button class="category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="travel">
@@ -444,7 +449,7 @@ body {
                 <span>Food</span>
             </button>
             <button class="category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="health">
-                <img src="httpsimg src="https://i.ibb.co/dG7bBfW/health-icon.png" alt="Health" class="w-6 h-6 rounded-full object-cover">
+                <img src="https://i.ibb.co/dG7bBfW/health-icon.png" alt="Health" class="w-6 h-6 rounded-full object-cover">
                 <span>Health</span>
             </button>
             <button class="category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="business">
@@ -724,6 +729,12 @@ body {
             <div class="flex-1 overflow-y-auto">
                 <div id="drawer-menu-content" class="">
                     <nav class="flex flex-col text-sm font-medium text-classic-taupe">
+                        
+                        <div class="px-6 py-4 border-b border-ivory-linen md:hidden">
+                            <span class="text-sm font-semibold text-classic-taupe uppercase">Language</span>
+                            <div id="google_translate_element_mobile" class="google_translate_widget mt-2"></div>
+                        </div>
+
                         <a href="index.html" class="px-6 py-4 border-b border-ivory-linen text-yellow-500 font-bold">HOME</a>
                         <a href="#" class="px-6 py-4 border-b border-ivory-linen">SHOP</a>
                         <a href="#" class="px-6 py-4 border-b border-ivory-linen">BLOG</a>
@@ -770,11 +781,11 @@ body {
                             <span>Technology</span>
                         </button>
                         <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-classic-taupe hover:bg-pastel-ivory" data-category="lifestyle">
-                            <img src="httpsimg src="https://i.ibb.co/dKqV9zP/lifestyle-icon.png" alt="Lifestyle" class="w-6 h-6 rounded-full object-cover">
+                            <img src="https://i.ibb.co/dKqV9zP/lifestyle-icon.png" alt="Lifestyle" class="w-6 h-6 rounded-full object-cover">
                             <span>Lifestyle</span>
                         </button>
                         <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-classic-taupe hover:bg-pastel-ivory" data-category="travel">
-                            <img src="https." alt="Travel" class="w-6 h-6 rounded-full object-cover">
+                            <img src="https://i.ibb.co/QnN9QhS/travel-icon.png" alt="Travel" class="w-6 h-6 rounded-full object-cover">
                             <span>Travel</span>
                         </button>
                         <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-classic-taupe hover:bg-pastel-ivory" data-category="food">
@@ -782,7 +793,7 @@ body {
                             <span>Food</span>
                         </button>
                         <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-classic-taupe hover:bg-pastel-ivory" data-category="health">
-                            <img src="httpshttps://i.ibb.co/dG7bBfW/health-icon.png" alt="Health" class="w-6 h-6 rounded-full object-cover">
+                            <img src="https://i.ibb.co/dG7bBfW/health-icon.png" alt="Health" class="w-6 h-6 rounded-full object-cover">
                             <span>Health</span>
                         </button>
                         <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-classic-taupe hover:bg-pastel-ivory" data-category="business">
@@ -900,6 +911,44 @@ body {
             const leftDrawer = document.getElementById('left-drawer');
             const closeLeftDrawerBtn = document.getElementById('close-drawer-btn');
 
+            // ==============================================
+            // === ALUTH FIX EKA MEKE THIYENNE (HADUWA) ===
+            // ==============================================
+            let isMobileTranslateInitialized = false; // Flag eka
+
+            // Mobile widget eka load karana function eka
+            function initMobileTranslate() {
+                if (isMobileTranslateInitialized) return; // Ayeth load karanna epa
+
+                // Check karanna Google script eka load welada kiyala
+                if (window.google && window.google.translate) {
+                    try {
+                        new google.translate.TranslateElement({
+                            pageLanguage: 'en',
+                            layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+                        }, 'google_translate_element_mobile');
+                        isMobileTranslateInitialized = true;
+                        console.log("Mobile Translate Widget Initialized!");
+                    } catch (error) {
+                        console.error("Error initializing mobile translate widget:", error);
+                    }
+                } else {
+                    // Script eka thama load wela nattam, poddak indala ayeth try karamu
+                    console.log("Translate script not ready, retrying in 500ms...");
+                    setTimeout(initMobileTranslate, 500);
+                }
+            }
+
+            if (hamburgerBtn) {
+                hamburgerBtn.addEventListener('click', () => {
+                    document.body.classList.add('drawer-open');
+                    // Hamburger eka click karapu gaman mobile function eka call karanna
+                    initMobileTranslate(); 
+                });
+            }
+            // === END FIX ===
+
+
             const mobileSearchBtn = document.getElementById('mobile-search-btn');
             const desktopSearchBtn = document.getElementById('desktop-search-btn');
             const searchDrawer = document.getElementById('search-drawer');
@@ -942,11 +991,6 @@ body {
             const scrollLeftBtn = document.getElementById('scroll-left-btn');
             const scrollRightBtn = document.getElementById('scroll-right-btn');
 
-            if (hamburgerBtn) {
-                hamburgerBtn.addEventListener('click', () => {
-                    document.body.classList.add('drawer-open');
-                });
-            }
 
             const closeLeftDrawer = () => {
                 if (leftDrawer) {
@@ -1171,6 +1215,20 @@ body {
 
         });
     </script>
+    
+    <script type="text/javascript">
+    function googleTranslateElementInit() {
+      // Desktop eka witharak page load weddi hadamu
+      if (document.getElementById('google_translate_element_desktop')) {
+          new google.translate.TranslateElement({
+            pageLanguage: 'en',
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+          }, 'google_translate_element_desktop');
+      }
+    }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
     <script src="app.js"></script>
     <script src="script.js"></script> 
 

@@ -181,6 +181,28 @@
             border-color: var(--color-ivory-brown);
             color: var(--color-ivory-brown);
         }
+
+        /* CV Upload Button Style */
+        .file-input-label {
+            display: inline-block;
+            padding: 8px 12px;
+            cursor: pointer;
+            border: 1px solid var(--color-ivory-linen);
+            border-radius: 0.375rem;
+            background-color: var(--color-off-white);
+            font-weight: 500;
+            color: var(--color-classic-taupe);
+            transition: background-color 0.2s;
+        }
+        .file-input-label:hover {
+            background-color: var(--color-pastel-ivory);
+        }
+        .file-input-name {
+            margin-left: 10px;
+            font-style: italic;
+            color: var(--color-classic-taupe);
+        }
+
     </style>
 </head>  
 <body class="bg-off-white font-sans text-ivory-brown">
@@ -543,14 +565,42 @@
         <div class="bg-ivory p-6 md:p-8 rounded-lg shadow-xl w-full max-w-lg relative">
             <div class="relative text-center border-b border-ivory-linen pb-3 mb-4">
                 <h2 class="text-xl font-bold text-ivory-brown">Apply for Plus Membership</h2>
-                <p class="text-sm text-classic-taupe mt-1">Tell us why you want to become a content creator.</p>
+                <p class="text-sm text-classic-taupe mt-1">Fill out your details to become a creator.</p>
                 <button id="close-application-modal-btn" class="absolute top-0 right-0 text-3xl text-classic-taupe hover:text-ivory-brown">&times;</button>
             </div>
-            <form id="plus-application-form">
-                <div class="mt-4">
-                    <label for="application-reason" class="block text-sm font-medium text-classic-taupe">Why do you want to join?</label>
-                    <textarea id="application-reason" rows="5" class="mt-1 block w-full border border-ivory-linen rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-ivory-brown focus:border-ivory-brown bg-off-white" placeholder="Explain why you would be a great Plus member, what kind of content you plan to create, etc." required></textarea>
+            
+            <form id="plus-application-form" class="space-y-4">
+                <div>
+                    <label for="application-name" class="block text-sm font-medium text-classic-taupe">Full Name</label>
+                    <input type="text" id="application-name" class="mt-1 block w-full border border-ivory-linen rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-ivory-brown focus:border-ivory-brown bg-off-white" required>
                 </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="application-age" class="block text-sm font-medium text-classic-taupe">Age</label>
+                        <input type="number" id="application-age" class="mt-1 block w-full border border-ivory-linen rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-ivory-brown focus:border-ivory-brown bg-off-white" required>
+                    </div>
+                    <div>
+                        <label for="application-location" class="block text-sm font-medium text-classic-taupe">Location</label>
+                        <input type="text" id="application-location" placeholder="e.g., Colombo, SL" class="mt-1 block w-full border border-ivory-linen rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-ivory-brown focus:border-ivory-brown bg-off-white" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-classic-taupe">Upload your CV</label>
+                    <label for="application-cv" class="file-input-label mt-1">
+                        Choose File
+                    </label>
+                    <span id="application-cv-filename" class="file-input-name">No file selected</span>
+                    <input type="file" id="application-cv" class="sr-only" accept=".pdf,.doc,.docx" required>
+                    <p class="text-xs text-classic-taupe mt-1">Accepts .pdf, .doc, .docx (Max 5MB)</p>
+                </div>
+
+                <div>
+                    <label for="application-about" class="block text-sm font-medium text-classic-taupe">Something about You</label>
+                    <textarea id="application-about" rows="4" class="mt-1 block w-full border border-ivory-linen rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-ivory-brown focus:border-ivory-brown bg-off-white" placeholder="Tell us about yourself, your experience, and what you want to write about." required></textarea>
+                </div>
+                
                 <div class="mt-6 flex justify-end">
                     <button type="submit" id="submit-application-btn" class="bg-ivory-brown text-off-white py-2 px-6 rounded-md shadow-sm text-sm font-medium hover:bg-classic-taupe disabled:bg-classic-taupe/50">
                         Submit Application
@@ -560,19 +610,46 @@
             </form>
         </div>
     </div>
-
     <div id="pro-application-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-[100] p-4">
         <div class="bg-ivory p-6 md:p-8 rounded-lg shadow-xl w-full max-w-lg relative">
             <div class="relative text-center border-b border-ivory-linen pb-3 mb-4">
                 <h2 class="text-xl font-bold text-ivory-brown">Apply for Pro Membership</h2>
-                <p class="text-sm text-classic-taupe mt-1">Tell us about your experience to become a Pro member.</p>
+                <p class="text-sm text-classic-taupe mt-1">Fill out your details to become a Pro member.</p>
                 <button id="close-pro-application-modal-btn" class="absolute top-0 right-0 text-3xl text-classic-taupe hover:text-ivory-brown">&times;</button>
             </div>
-            <form id="pro-application-form">
-                <div class="mt-4">
-                    <label for="pro-application-reason" class="block text-sm font-medium text-classic-taupe">Why should you be a Pro?</label>
-                    <textarea id="pro-application-reason" rows="5" class="mt-1 block w-full border border-ivory-linen rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-ivory-brown focus:border-ivory-brown bg-off-white" placeholder="Explain your content creation experience, why you need Pro features, etc." required></textarea>
+
+            <form id="pro-application-form" class="space-y-4">
+                <div>
+                    <label for="pro-application-name" class="block text-sm font-medium text-classic-taupe">Full Name</label>
+                    <input type="text" id="pro-application-name" class="mt-1 block w-full border border-ivory-linen rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-ivory-brown focus:border-ivory-brown bg-off-white" required>
                 </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="pro-application-age" class="block text-sm font-medium text-classic-taupe">Age</label>
+                        <input type="number" id="pro-application-age" class="mt-1 block w-full border border-ivory-linen rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-ivory-brown focus:border-ivory-brown bg-off-white" required>
+                    </div>
+                    <div>
+                        <label for="pro-application-location" class="block text-sm font-medium text-classic-taupe">Location</label>
+                        <input type="text" id="pro-application-location" placeholder="e.g., Colombo, SL" class="mt-1 block w-full border border-ivory-linen rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-ivory-brown focus:border-ivory-brown bg-off-white" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-classic-taupe">Upload your CV</label>
+                    <label for="pro-application-cv" class="file-input-label mt-1">
+                        Choose File
+                    </label>
+                    <span id="pro-application-cv-filename" class="file-input-name">No file selected</span>
+                    <input type="file" id="pro-application-cv" class="sr-only" accept=".pdf,.doc,.docx" required>
+                    <p class="text-xs text-classic-taupe mt-1">Accepts .pdf, .doc, .docx (Max 5MB)</p>
+                </div>
+
+                <div>
+                    <label for="pro-application-about" class="block text-sm font-medium text-classic-taupe">Something about me</label>
+                    <textarea id="pro-application-about" rows="4" class="mt-1 block w-full border border-ivory-linen rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-ivory-brown focus:border-ivory-brown bg-off-white" placeholder="Explain your professional experience, why you need Pro features, etc." required></textarea>
+                </div>
+
                 <div class="mt-6 flex justify-end">
                     <button type="submit" id="submit-pro-application-btn" class="bg-ivory-brown text-off-white py-2 px-6 rounded-md shadow-sm text-sm font-medium hover:bg-classic-taupe disabled:bg-classic-taupe/50">
                         Submit Pro Application
@@ -582,7 +659,6 @@
             </form>
         </div>
     </div>
-
     <div id="share-profile-modal" class="fixed inset-0 z-[210] hidden flex items-center justify-center bg-black/60 p-4 animate-fade-in">
         <div class="bg-ivory p-8 rounded-lg shadow-xl w-full max-w-md relative animate-slide-up">
             <button class="close-share-modal absolute top-2 right-4 text-3xl text-classic-taupe hover:text-ivory-brown">&times;</button>

@@ -228,10 +228,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // ** UPDATED FUNCTION to handle different application types **
+    // =======================================================
+    // === ALUTH LOAD APPLICATIONS FUNCTION EKA ===
+    // =======================================================
     const loadApplications = async (applicationType = 'plusApplications') => {
         if (!applicationsTableBody) return;
-        applicationsTableBody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-500">Loading applications...</td></tr>`;
+        applicationsTableBody.innerHTML = `<tr><td colspan="7" class="text-center p-4 text-gray-500">Loading applications...</td></tr>`;
         
         try {
             const snapshot = await db.collection(applicationType).orderBy('submittedAt', 'desc').get();
@@ -247,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
             applicationsTableBody.innerHTML = '';
             if (snapshot.empty) {
                 const typeName = applicationType === 'plusApplications' ? 'Plus' : 'Pro';
-                applicationsTableBody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-500">No ${typeName} applications found.</td></tr>`;
+                applicationsTableBody.innerHTML = `<tr><td colspan="7" class="text-center p-4 text-gray-500">No ${typeName} applications found.</td></tr>`;
             } else {
                 snapshot.forEach(doc => {
                     const app = { id: doc.id, ...doc.data() };
@@ -265,14 +267,22 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button class="reject-app-btn px-3 py-1 text-xs font-medium bg-red-100 text-red-700 rounded-md hover:bg-red-200" data-app-id="${app.id}" data-type="${applicationType}">Reject</button>
                         `;
                     }
-
+                    
+                    // Aluth Data pennanna HTML eka haduwa
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td class="px-6 py-4">
-                            <div class="text-sm font-medium text-gray-900">${app.displayName}</div>
+                            <div class="text-sm font-medium text-gray-900">${app.fullName || app.displayName}</div>
                             <div class="text-sm text-gray-500">${app.email}</div>
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-600 max-w-sm truncate" title="${app.reason}">${app.reason}</td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-700"><strong>Age:</strong> ${app.age || 'N/A'}</div>
+                            <div class="text-sm text-gray-700"><strong>Loc:</strong> ${app.location || 'N/A'}</div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600 max-w-xs truncate" title="${app.about}">${app.about || app.reason}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <a href="${app.cvUrl}" target="_blank" class="text-sm text-blue-600 hover:underline" title="View CV">View CV</a>
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${appDate}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColors[app.status]}">${app.status}</span>
@@ -284,9 +294,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error(`Error loading applications from ${applicationType}:`, error);
-            applicationsTableBody.innerHTML = `<tr><td colspan="5" class="text-center p-6 text-red-500">Error loading applications.</td></tr>`;
+            applicationsTableBody.innerHTML = `<tr><td colspan="7" class="text-center p-6 text-red-500">Error loading applications.</td></tr>`;
         }
     };
+    // === END ALUTH FUNCTION ===
 
     // --- UI SETUP & EVENT LISTENERS ---
     

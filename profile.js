@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const auth = firebase.auth();
     const db = firebase.firestore();
+    const storage = firebase.storage(); // *** CV UPLOAD WALATA MEKA ONE ***
     const IMGBB_API_KEY = '8fb17a65d31f9a5e7b81c80861f9075f';
     console.log("Profile Page Script Initialized with Firebase Config!");
 
@@ -87,10 +88,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const plusApplicationModal = document.getElementById('plus-application-modal');
     const closeApplicationModalBtn = document.getElementById('close-application-modal-btn');
     const plusApplicationForm = document.getElementById('plus-application-form');
+    // *** ALUTH PLUS FORM FIELDS ***
+    const plusAppName = document.getElementById('application-name');
+    const plusAppAge = document.getElementById('application-age');
+    const plusAppLocation = document.getElementById('application-location');
+    const plusAppCvInput = document.getElementById('application-cv');
+    const plusAppCvFilename = document.getElementById('application-cv-filename');
+    const plusAppAbout = document.getElementById('application-about');
+
     const applyToProBtn = document.getElementById('apply-to-pro-btn');
     const proApplicationModal = document.getElementById('pro-application-modal');
     const closeProApplicationModalBtn = document.getElementById('close-pro-application-modal-btn');
     const proApplicationForm = document.getElementById('pro-application-form');
+    // *** ALUTH PRO FORM FIELDS ***
+    const proAppName = document.getElementById('pro-application-name');
+    const proAppAge = document.getElementById('pro-application-age');
+    const proAppLocation = document.getElementById('pro-application-location');
+    const proAppCvInput = document.getElementById('pro-application-cv');
+    const proAppCvFilename = document.getElementById('pro-application-cv-filename');
+    const proAppAbout = document.getElementById('pro-application-about');
 
     // --- Share Modal Selectors ---
     const shareProfileBtn = document.getElementById('share-profile-btn');
@@ -647,6 +663,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (plusApplicationModal) plusApplicationModal.classList.remove('hidden');
         });
     }
+    // *** ALUTH ***
+    if (applyToProBtn) {
+        applyToProBtn.addEventListener('click', () => {
+            if (proApplicationModal) proApplicationModal.classList.remove('hidden');
+        });
+    }
     
     if(logoutBtn) logoutBtn.addEventListener('click', () => auth.signOut());
     if(profileDropdownBtn) profileDropdownBtn.addEventListener('click', () => {
@@ -679,6 +701,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cancelEditBtn) cancelEditBtn.addEventListener('click', () => { if(editProfileModal) editProfileModal.classList.add('hidden'); });
     if (closeEditPostModalBtn) closeEditPostModalBtn.addEventListener('click', () => { if(editPostModal) editPostModal.classList.add('hidden'); });
     if (closeCreateModalBtn) closeCreateModalBtn.addEventListener('click', () => { if(createPostModal) createPostModal.classList.add('hidden'); });
+    // *** ALUTH ***
+    if (closeApplicationModalBtn) closeApplicationModalBtn.addEventListener('click', () => { if (plusApplicationModal) plusApplicationModal.classList.add('hidden'); });
+    if (closeProApplicationModalBtn) closeProApplicationModalBtn.addEventListener('click', () => { if (proApplicationModal) proApplicationModal.classList.add('hidden'); });
     
     // ALUTH: Share Modal Close Listeners
     if (closeShareProfileModalBtn) {
@@ -706,6 +731,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- 9. EVENT LISTENERS (Common UI) ---
+
+    // *** ALUTH: CV File Name Display Listeners ***
+    if (plusAppCvInput && plusAppCvFilename) {
+        plusAppCvInput.addEventListener('change', () => {
+            plusAppCvFilename.textContent = plusAppCvInput.files[0] ? plusAppCvInput.files[0].name : 'No file selected';
+        });
+    }
+    if (proAppCvInput && proAppCvFilename) {
+        proAppCvInput.addEventListener('change', () => {
+            proAppCvFilename.textContent = proAppCvInput.files[0] ? proAppCvInput.files[0].name : 'No file selected';
+        });
+    }
+    // *** END ALUTH ***
 
     if (hamburgerBtn) {
         hamburgerBtn.addEventListener('click', () => {
@@ -974,12 +1012,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // =======================================================
+    // === ALUTH PLUS APPLICATION SUBMIT LOGIC ===
+    // =======================================================
     if (plusApplicationForm) {
         plusApplicationForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('submit-application-btn');
             const statusMsg = document.getElementById('application-status-message');
-            const reason = document.getElementById('application-reason').value;
             const user = auth.currentUser;
 
             if (!user) {
@@ -987,10 +1027,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // Aluth data ganna
+            const fullName = plusAppName.value;
+            const age = plusAppAge.value;
+            const location = plusAppLocation.value;
+            const about = plusAppAbout.value;
+            const cvFile = plusAppCvInput.files[0];
+
+            // Validation
+            if (!fullName || !age || !location || !about || !cvFile) {
+                statusMsg.textContent = '❌ Please fill out all fields and upload your CV.';
+                statusMsg.className = 'text-center text-sm mt-4 text-red-600';
+                return;
+            }
+            if (cvFile.size > 5 * 1024 * 1024) { // 5MB limit
+                statusMsg.textContent = '❌ CV file is too large (Max 5MB).';
+                statusMsg.className = 'text-center text-sm mt-4 text-red-600';
+                return;
+            }
+
             submitBtn.disabled = true;
             submitBtn.textContent = 'Submitting...';
-            statusMsg.textContent = '';
-            statusMsg.className = 'text-center text-sm mt-4';
+            statusMsg.textContent = 'Uploading CV, please wait...';
+            statusMsg.className = 'text-center text-sm mt-4 text-classic-taupe';
 
             try {
                 const existingAppQuery = await db.collection('plusApplications').where('userId', '==', user.uid).where('status', '==', 'pending').get();
@@ -998,15 +1057,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error("You already have a pending application.");
                 }
 
+                // 1. CV eka Storage walata upload karanna
+                const storageRef = storage.ref(`cv_uploads/plus/${user.uid}/${cvFile.name}`);
+                const uploadTask = await storageRef.put(cvFile);
+                const cvUrl = await uploadTask.ref.getDownloadURL();
+                
+                statusMsg.textContent = 'CV uploaded! Submitting application...';
+
+                // 2. Data eka Firestore walata ready karanna
                 const applicationData = {
                     userId: user.uid,
-                    displayName: user.displayName || 'N/A',
-                    email: user.email,
-                    reason: reason,
+                    displayName: user.displayName || 'N/A', // Auth eken
+                    email: user.email, // Auth eken
+                    
+                    // Form eken gaththa aluth data
+                    fullName: fullName,
+                    age: age,
+                    location: location,
+                    about: about,
+                    cvUrl: cvUrl, // Upload karapu CV eke URL eka
+                    
                     submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
                     status: 'pending'
                 };
 
+                // 3. Firestore walata submit karanna
                 await db.collection('plusApplications').add(applicationData);
                 
                 statusMsg.textContent = '✅ Application submitted successfully! We will review it soon.';
@@ -1018,8 +1093,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (applyToPlusBtn) applyToPlusBtn.classList.add('hidden');
                 if (applyToPlusBtnMain) applyToPlusBtnMain.classList.add('hidden');
                 
+                plusApplicationForm.reset();
+                if(plusAppCvFilename) plusAppCvFilename.textContent = 'No file selected';
+
                 setTimeout(() => {
                     if (plusApplicationModal) plusApplicationModal.classList.add('hidden');
+                    statusMsg.textContent = '';
                 }, 3000);
 
             } catch (error) {
@@ -1033,12 +1112,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    // =======================================================
+    // === ALUTH PRO APPLICATION SUBMIT LOGIC ===
+    // =======================================================
     if (proApplicationForm) {
         proApplicationForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('submit-pro-application-btn');
             const statusMsg = document.getElementById('pro-application-status-message');
-            const reason = document.getElementById('pro-application-reason').value;
             const user = auth.currentUser;
 
             if (!user) {
@@ -1046,10 +1127,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // Aluth data ganna
+            const fullName = proAppName.value;
+            const age = proAppAge.value;
+            const location = proAppLocation.value;
+            const about = proAppAbout.value;
+            const cvFile = proAppCvInput.files[0];
+            
+            // Validation
+            if (!fullName || !age || !location || !about || !cvFile) {
+                statusMsg.textContent = '❌ Please fill out all fields and upload your CV.';
+                statusMsg.className = 'text-center text-sm mt-4 text-red-600';
+                return;
+            }
+            if (cvFile.size > 5 * 1024 * 1024) { // 5MB limit
+                statusMsg.textContent = '❌ CV file is too large (Max 5MB).';
+                statusMsg.className = 'text-center text-sm mt-4 text-red-600';
+                return;
+            }
+
             submitBtn.disabled = true;
             submitBtn.textContent = 'Submitting...';
-            statusMsg.textContent = '';
-            statusMsg.className = 'text-center text-sm mt-4';
+            statusMsg.textContent = 'Uploading CV, please wait...';
+            statusMsg.className = 'text-center text-sm mt-4 text-classic-taupe';
 
             try {
                 const existingAppQuery = await db.collection('proApplications').where('userId', '==', user.uid).where('status', '==', 'pending').get();
@@ -1057,15 +1157,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error("You already have a pending Pro application.");
                 }
 
+                // 1. CV eka Storage walata upload karanna
+                const storageRef = storage.ref(`cv_uploads/pro/${user.uid}/${cvFile.name}`);
+                const uploadTask = await storageRef.put(cvFile);
+                const cvUrl = await uploadTask.ref.getDownloadURL();
+                
+                statusMsg.textContent = 'CV uploaded! Submitting application...';
+
+                // 2. Data eka Firestore walata ready karanna
                 const applicationData = {
                     userId: user.uid,
-                    displayName: user.displayName || 'N/A',
-                    email: user.email,
-                    reason: reason,
+                    displayName: user.displayName || 'N/A', // Auth eken
+                    email: user.email, // Auth eken
+
+                    // Form eken gaththa aluth data
+                    fullName: fullName,
+                    age: age,
+                    location: location,
+                    about: about,
+                    cvUrl: cvUrl, // Upload karapu CV eke URL eka
+
                     submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
                     status: 'pending'
                 };
 
+                // 3. Firestore walata submit karanna
                 await db.collection('proApplications').add(applicationData);
                 
                 statusMsg.textContent = '✅ Pro application submitted successfully! We will review it soon.';
@@ -1073,8 +1189,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (applyToProBtn) applyToProBtn.classList.add('hidden');
                 
+                proApplicationForm.reset();
+                if(proAppCvFilename) proAppCvFilename.textContent = 'No file selected';
+
                 setTimeout(() => {
                     if (proApplicationModal) proApplicationModal.classList.add('hidden');
+                    statusMsg.textContent = '';
                 }, 3000);
 
             } catch (error) {
@@ -1083,7 +1203,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusMsg.classList.add('text-red-600');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit Application';
+                submitBtn.textContent = 'Submit Pro Application';
             }
         });
     }
