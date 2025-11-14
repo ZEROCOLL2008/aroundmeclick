@@ -1,4 +1,5 @@
-document.addEventListener('DOMContentLoaded', () => {
+// 'async' kiyana eka mekata add kala, mokada categories load wenakan inna ona nisa
+document.addEventListener('DOMContentLoaded', async () => {
     console.log("Index Page Script (script.js) Loaded!");
 
     let commentsListener = null;
@@ -28,8 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // --- END HELPER FUNCTIONS ---
 
+    // === MEWA OKKOMA ALUTH HTML EKATA GALAPENNA HADUWA ===
     const blogPostsGrid = document.getElementById('blog-posts-grid');
-    const searchInput = document.getElementById('search-input');
+    // const searchInput = document.getElementById('search-input'); // <-- MEKA AIN KALA. MEKA THAMAI PRASHNE.
     const postModal = document.getElementById('post-modal');
     const commentForm = document.getElementById('comment-form');
     const postModalContainer = document.getElementById('post-modal-container');
@@ -39,15 +41,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const scrollRightBtn = document.getElementById('scroll-right-btn');
     const loadMoreBtn = document.getElementById('load-more-btn');
     
-    const loginModal = document.getElementById('login-modal');
-    const signupModal = document.getElementById('signup-modal'); 
-    const resetPasswordModal = document.getElementById('reset-password-modal');
+    // Auth Modals (Mewa dan drawers, eth password reset eka thiyenawa)
+    const loginModal = document.getElementById('login-modal'); // Old modal
+    const resetPasswordModal = document.getElementById('reset-password-modal'); // Old modal
     const resetPasswordForm = document.getElementById('reset-password-form');
     const showResetPasswordLink = document.getElementById('show-reset-password-link');
     const backToLoginLink = document.getElementById('back-to-login-link');
     
     const newPasswordModal = document.getElementById('new-password-modal');
     const newPasswordForm = document.getElementById('new-password-form');
+    // === END DOM ELEMENTS ===
+
 
     const allCloseButtons = document.querySelectorAll('.close-modal-btn');
     allCloseButtons.forEach(button => {
@@ -108,6 +112,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     
     const handlePasswordReset = () => {
+        // This function is for the old modal, but we'll keep it.
+        // The new logic is in setupAuthDrawerListeners
         if (resetPasswordForm) {
             const actionCodeSettings = {
                 url: window.location.origin + window.location.pathname,
@@ -180,7 +186,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 auth.confirmPasswordReset(actionCode, newPassword).then(() => {
                     alert('Password has been reset successfully! Please sign in with your new password.');
                     if(newPasswordModal) newPasswordModal.classList.add('hidden');
-                    if(loginModal) loginModal.classList.remove('hidden');
+                    
+                    // Open the new auth drawer instead
+                    const drawerLoginBtn = document.getElementById('drawer-login-btn') || document.getElementById('login-btn');
+                    if (drawerLoginBtn) drawerLoginBtn.click();
                     
                     const url = new URL(window.location);
                     url.searchParams.delete('mode');
@@ -247,11 +256,223 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // ========== ALUTH FUNCTION EKA (CATEGORIES LOAD KARANA) ==========
+    const fetchAndDisplayCategories = async () => {
+        const container = document.getElementById('categories-container');
+        const drawerContainer = document.getElementById('drawer-categories-content');
+        if (!container || !drawerContainer) {
+            console.error("Category containers not found");
+            return;
+        }
+
+        // Main Nav Bar ("All Stories" button eka hadanawa)
+        let navBarHtml = `
+            <button class="category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-ivory-brown text-off-white rounded-full whitespace-nowrap font-medium" data-category="all">
+                <img src="https://i.ibb.co/P4S83fV/all-stories-icon.png" alt="All" class="w-6 h-6 rounded-full object-cover">
+                <span>All Stories</span>
+            </button>
+        `;
+        
+        // Drawer Menu ("All Stories" button eka hadanawa)
+        let drawerHtml = `
+            <div class="flex flex-col space-y-1">
+                <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-ivory-brown bg-pastel-ivory" data-category="all">
+                    <img src="https://i.ibb.co/P4S83fV/all-stories-icon.png" alt="All" class="w-6 h-6 rounded-full object-cover">
+                    <span>All Stories</span>
+                </button>
+        `;
+
+        try {
+            const snapshot = await db.collection('categories').orderBy('name', 'asc').get();
+            
+            if (snapshot.empty) {
+                console.log("No categories found in Firestore.");
+            } else {
+                snapshot.forEach(doc => {
+                    const category = doc.data();
+                    
+                    // Main Nav Bar button HTML eka
+                    navBarHtml += `
+                        <button class="category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="${category.name.toLowerCase()}">
+                            <img src="${category.iconUrl}" alt="${category.name}" class="w-6 h-6 rounded-full object-cover">
+                            <span>${category.name}</span>
+                        </button>
+                    `;
+
+                    // Drawer Menu button HTML eka
+                    drawerHtml += `
+                        <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-classic-taupe hover:bg-pastel-ivory" data-category="${category.name.toLowerCase()}">
+                            <img src="${category.iconUrl}" alt="${category.name}" class="w-6 h-6 rounded-full object-cover">
+                            <span>${category.name}</span>
+                        </button>
+                    `;
+                });
+            }
+            
+            drawerHtml += '</div>'; // Close drawer's flex container
+            
+            container.innerHTML = navBarHtml; // Main nav bar eka replace karanawa
+            drawerContainer.innerHTML = drawerHtml; // Drawer eka replace karanawa
+
+        } catch (error) {
+            console.error("Error fetching categories: ", error);
+            const errorMsg = '<p class="text-sm text-red-500">Could not load categories.</p>';
+            container.innerHTML = errorMsg;
+            drawerContainer.innerHTML = errorMsg;
+        }
+    };
+    // ========== END ALUTH FUNCTION EKA ==========
+
+    // ========== ALUTH FUNCTION EKA (AUTH LOGIC) ==========
+    const setupAuthDrawerListeners = () => {
+        const loginFormDrawer = document.getElementById('login-form-drawer');
+        const signupFormDrawer = document.getElementById('signup-form-drawer');
+        const resetFormDrawer = document.getElementById('reset-password-form-drawer');
+        
+        const loginErrorDrawer = document.getElementById('login-error-drawer');
+        const signupErrorDrawer = document.getElementById('signup-error-drawer');
+        const resetMessageDrawer = document.getElementById('reset-message-drawer');
+
+        // 1. Login Logic
+        if (loginFormDrawer) {
+            loginFormDrawer.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (loginErrorDrawer) loginErrorDrawer.textContent = '';
+                const email = loginFormDrawer['login-email'].value;
+                const password = loginFormDrawer['login-password'].value;
+                
+                const submitBtn = loginFormDrawer.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Signing In...';
+                }
+
+                auth.signInWithEmailAndPassword(email, password)
+                    .then(userCredential => {
+                        // UI update eka onAuthStateChanged eken handle wenawa
+                        document.body.classList.remove('auth-drawer-open');
+                        loginFormDrawer.reset();
+                    })
+                    .catch(error => {
+                        if (loginErrorDrawer) loginErrorDrawer.textContent = error.message;
+                    })
+                    .finally(() => {
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = 'Sign In';
+                        }
+                    });
+            });
+        }
+
+        // 2. Signup Logic
+        if (signupFormDrawer) {
+            signupFormDrawer.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (signupErrorDrawer) signupErrorDrawer.textContent = '';
+                const name = signupFormDrawer['signup-name'].value;
+                const email = signupFormDrawer['signup-email'].value;
+                const password = signupFormDrawer['signup-password'].value;
+
+                if (password.length < 6) {
+                    if (signupErrorDrawer) signupErrorDrawer.textContent = 'Password must be at least 6 characters.';
+                    return;
+                }
+
+                const submitBtn = signupFormDrawer.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Joining...';
+                }
+
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then(userCredential => {
+                        const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=8B5E34&color=fff`;
+                        return userCredential.user.updateProfile({
+                            displayName: name,
+                            photoURL: defaultAvatar
+                        }).then(() => {
+                            // Firestore database eke aluth user kenek create karanawa
+                            db.collection('users').doc(userCredential.user.uid).set({
+                                displayName: name,
+                                email: email,
+                                photoURL: defaultAvatar,
+                                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                                bio: '',
+                                role: 'user', // Default role eka
+                                followers: [],
+                                following: [],
+                                followersCount: 0,
+                                followingCount: 0
+                            }).then(() => {
+                                // UI update eka onAuthStateChanged eken handle wenawa
+                                document.body.classList.remove('auth-drawer-open');
+                                signupFormDrawer.reset();
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        if (signupErrorDrawer) signupErrorDrawer.textContent = error.message;
+                    })
+                    .finally(() => {
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = 'Agree & Join';
+                        }
+                    });
+            });
+        }
+
+        // 3. Reset Password Logic
+        if (resetFormDrawer) {
+            resetFormDrawer.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (resetMessageDrawer) {
+                     resetMessageDrawer.textContent = '';
+                     resetMessageDrawer.className = 'text-sm mt-3 min-h-[20px] text-center';
+                }
+                const email = resetFormDrawer['reset-email'].value;
+                
+                const submitBtn = resetFormDrawer.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Sending...';
+                }
+                
+                auth.sendPasswordResetEmail(email)
+                    .then(() => {
+                        if (resetMessageDrawer) {
+                            resetMessageDrawer.textContent = 'Check your email for a reset link!';
+                            resetMessageDrawer.classList.add('text-green-600');
+                        }
+                    })
+                    .catch(error => {
+                        if (resetMessageDrawer) {
+                            resetMessageDrawer.textContent = error.message;
+                            resetMessageDrawer.classList.add('text-red-500');
+                        }
+                    })
+                    .finally(() => {
+                         if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = 'Send Reset Link';
+                        }
+                    });
+            });
+        }
+    };
+    // ========== END AUTH LOGIC FUNCTION ==========
+
+
     const handleFollowClick = async (authorIdToFollow) => {
         const currentUser = auth.currentUser;
         if (!currentUser) {
             alert("Please sign in to follow authors.");
-            if(loginModal) loginModal.classList.remove('hidden');
+            // if(loginModal) loginModal.classList.remove('hidden'); // Old modal
+            
+            // Open new auth drawer
+            const drawerLoginBtn = document.getElementById('drawer-login-btn') || document.getElementById('login-btn');
+            if (drawerLoginBtn) drawerLoginBtn.click();
             return;
         }
         if (currentUser.uid === authorIdToFollow) {
@@ -437,7 +658,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const user = auth.currentUser;
         if (!user) {
             alert("Please log in to like a post.");
-            if(loginModal) loginModal.classList.remove('hidden');
+            // if(loginModal) loginModal.classList.remove('hidden'); // Old modal
+            
+            // Open new auth drawer
+            const drawerLoginBtn = document.getElementById('drawer-login-btn') || document.getElementById('login-btn');
+            if (drawerLoginBtn) drawerLoginBtn.click();
             return;
         }
         const postRef = db.collection('posts').doc(postId);
@@ -666,6 +891,14 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             let query = db.collection('posts').where('status', '==', 'approved').orderBy('createdAt', 'desc');
             if (selectedCategory !== 'all') query = query.where('category', '==', selectedCategory.toLowerCase());
+            
+            // *** Search Term Logic eka wenas kala ***
+            if (searchTerm) {
+                // Me query eka Firestore walata weda karanne naha. 
+                // Simple search ekak witharak karamu
+                // Eka nisa searchTerm eka me query eken passe filter karamu
+            }
+            
             if (loadMore && lastVisiblePost) query = query.startAfter(lastVisiblePost);
             query = query.limit(12);
             const snapshot = await query.get();
@@ -679,10 +912,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             
+            // *** Search Filter eka me thanata gaththa ***
             const filteredPosts = searchTerm ? posts.filter(post =>
                 (post.title && post.title.toLowerCase().includes(searchTerm)) ||
                 (post.tags && post.tags.some(tag => tag.toLowerCase().includes(searchTerm))) ||
-                (post.content && post.content.toLowerCase().includes(searchTerm))
+                (post.content && createSnippet(post.content, 1000).toLowerCase().includes(searchTerm)) // Snippet eka search karanna
             ) : posts;
 
             if (filteredPosts.length === 0 && !loadMore) {
@@ -691,16 +925,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             filteredPosts.forEach(post => {
                 const postCard = document.createElement('article');
-                // *** CARD CLASS EKA HADUWA ***
                 postCard.className = 'post-card flex flex-col rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-ivory cursor-pointer open-modal-trigger';
                 postCard.dataset.postId = post.id;
 
-                // *** HELPER FUNCTIONS USE KALA ***
                 const snippet = createSnippet(post.content, 80);
                 const readTime = calculateReadTime(post.content);
                 const category = post.category ? post.category.charAt(0).toUpperCase() + post.category.slice(1) : 'General';
 
-                // *** MEDIA (IMAGE/VIDEO) HTML EKA HADUWA (h-56 -> aspect-video) ***
                 const mediaHtml = post.youtubeVideoId ?
                     `<div class="aspect-video bg-black relative">
                         <iframe class="w-full h-full pointer-events-none" src="https://www.youtube.com/embed/${post.youtubeVideoId}" title="YouTube video player" frameborder="0"></iframe>
@@ -711,7 +942,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="absolute bottom-3 left-3 px-3 py-1 bg-white/90 text-ivory-brown rounded-full text-xs font-semibold backdrop-blur-sm">${category}</span>
                     </div>`;
                 
-                // *** SAMPURNA CARD HTML EKA HADUWA (Read Time eka add karala) ***
                 postCard.innerHTML = `
                     ${mediaHtml}
                     <div class="p-5 flex flex-col flex-grow">
@@ -780,28 +1010,53 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const setupListeners = () => {
-        if (searchInput) {
-            let debounceTimer;
-            searchInput.addEventListener('input', (e) => {
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(() => {
-                    const activeCategory = document.querySelector('.category-button.bg-ivory-brown')?.dataset.category || 'all';
-                    fetchAndDisplayPosts(e.target.value.toLowerCase(), activeCategory);
-                }, 500);
-            });
-        }
-        const categoryButtons = document.querySelectorAll('.category-button');
-        categoryButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                categoryButtons.forEach(btn => {
-                    btn.classList.remove('bg-ivory-brown', 'text-off-white');
-                    btn.classList.add('bg-pastel-ivory', 'text-ivory-brown');
+        // === PRASHNAYA THIBBA 'searchInput' EKA ME THANIN AIN KALA ===
+        // if (searchInput) { ... }
+        
+        // --- CATEGORY BUTTONS (Main Nav + Drawer) ---
+        // Me listener eka dan body ekata add karanawa, dynamic buttons walata weda karanna
+        document.body.addEventListener('click', (e) => {
+            const categoryBtn = e.target.closest('.category-button');
+            if (categoryBtn) {
+                const category = categoryBtn.dataset.category;
+                
+                // === ALUTH SEARCH INPUT EKE VALUE EKA GANNAWA ===
+                const searchDrawerInput = document.getElementById('search-drawer-input');
+                const searchTerm = searchDrawerInput ? searchDrawerInput.value.toLowerCase() : '';
+
+                // Main nav bar eke buttons update karanawa
+                document.querySelectorAll('#categories-container .category-button').forEach(btn => {
+                    if (btn.dataset.category === category) {
+                        btn.classList.add('bg-ivory-brown', 'text-off-white');
+                        btn.classList.remove('bg-pastel-ivory', 'text-ivory-brown', 'hover:bg-classic-taupe', 'hover:text-off-white');
+                    } else {
+                        btn.classList.remove('bg-ivory-brown', 'text-off-white');
+                        btn.classList.add('bg-pastel-ivory', 'text-ivory-brown', 'hover:bg-classic-taupe', 'hover:text-off-white');
+                    }
                 });
-                button.classList.add('bg-ivory-brown', 'text-off-white');
-                button.classList.remove('bg-pastel-ivory', 'text-ivory-brown');
-                fetchAndDisplayPosts(searchInput.value.toLowerCase(), button.dataset.category);
-            });
+
+                // Drawer eke buttons update karanawa
+                document.querySelectorAll('#drawer-categories-content .category-button').forEach(btn => {
+                     if (btn.dataset.category === category) {
+                        btn.classList.add('bg-pastel-ivory', 'text-ivory-brown');
+                        btn.classList.remove('text-classic-taupe');
+                    } else {
+                        btn.classList.remove('bg-pastel-ivory', 'text-ivory-brown');
+                        btn.classList.add('text-classic-taupe');
+                    }
+                });
+
+                // === SEARCH TERM EKA EKKA POSTS LOAD KARANAWA ===
+                fetchAndDisplayPosts(searchTerm, category);
+                
+                // Drawer eka wahanawa (mobile waladi)
+                const leftDrawer = document.getElementById('left-drawer');
+                if (leftDrawer && document.body.classList.contains('drawer-open')) { // 'open' class eka nemei, body class eka check karanna
+                    document.getElementById('left-drawer-backdrop').click();
+                }
+            }
         });
+
 
         document.body.addEventListener('click', (e) => {
             const likeBtn = e.target.closest('.like-btn, .like-btn-modal');
@@ -821,8 +1076,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const postId = likeBtn.dataset.likeId;
                 if (postId) handleLikeClick(postId);
             } else if (openTrigger) {
-                const postId = openTrigger.dataset.postId;
-                if (postId) openPostModal(postId);
+                if (!e.target.closest('.like-btn, .share-btn, .follow-btn')) {
+                     const postId = openTrigger.dataset.postId;
+                     if (postId) openPostModal(postId);
+                }
             } else if (followBtn) {
                 const authorId = followBtn.dataset.authorId;
                 if (authorId) handleFollowClick(authorId);
@@ -835,6 +1092,18 @@ document.addEventListener('DOMContentLoaded', () => {
             postModal.addEventListener('click', e => {
                 if (e.target === postModal) closeModal();
             });
+            
+            const readMoreBtn = document.getElementById('read-more-btn');
+            const postModalContainer = document.getElementById('post-modal-container');
+            if (readMoreBtn && postModalContainer) {
+                readMoreBtn.addEventListener('click', () => {
+                    postModalContainer.classList.add('fullscreen-modal'); 
+                    const enterIcon = toggleFullscreenBtn.querySelector('.enter-fullscreen-icon');
+                    const exitIcon = toggleFullscreenBtn.querySelector('.exit-fullscreen-icon');
+                    if (enterIcon) enterIcon.classList.add('hidden');
+                    if (exitIcon) exitIcon.classList.remove('hidden');
+                });
+            }
         }
 
         if (toggleFullscreenBtn && postModalContainer) {
@@ -859,10 +1128,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         const loginFromCommentBtn = document.getElementById('login-from-comment-btn');
-        if (loginFromCommentBtn && loginModal) {
+        if (loginFromCommentBtn) {
             loginFromCommentBtn.addEventListener('click', () => {
                 closeModal();
-                loginModal.classList.remove('hidden');
+                const drawerLoginBtn = document.getElementById('drawer-login-btn') || document.getElementById('login-btn');
+                if (drawerLoginBtn) drawerLoginBtn.click();
             });
         }
         document.addEventListener('keydown', (e) => {
@@ -902,31 +1172,30 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loadMoreBtn) {
         loadMoreBtn.addEventListener('click', () => {
             const selectedCategory = document.querySelector('.category-button.bg-ivory-brown')?.dataset.category || 'all';
-            fetchAndDisplayPosts(searchInput.value.toLowerCase(), selectedCategory, true);
+            // === ALUTH SEARCH INPUT EKEN VALUE EKA GANNAWA ===
+            const searchDrawerInput = document.getElementById('search-drawer-input');
+            const searchTerm = searchDrawerInput ? searchDrawerInput.value.toLowerCase() : '';
+            fetchAndDisplayPosts(searchTerm, selectedCategory, true);
         });
     }
 
-    const newHamburgerBtn = document.getElementById('new-hamburger-btn');
-    const sideDrawer = document.getElementById('side-drawer');
-    const drawerOverlay = document.getElementById('drawer-overlay');
+    // === INLINE SCRIPT EKE THIBBA LOGIC EKA MEKE THIYENNA ONE NE, ETH HARIYATAMA HARI IDS USE KARAMU ===
+    const mobileHamburgerBtn = document.getElementById('mobile-hamburger-btn');
+    const leftDrawer = document.getElementById('left-drawer');
+    const leftDrawerBackdrop = document.getElementById('left-drawer-backdrop');
 
-    if (newHamburgerBtn && sideDrawer && drawerOverlay) {
-        newHamburgerBtn.addEventListener('click', () => {
-            sideDrawer.classList.add('open');
-            drawerOverlay.classList.remove('hidden');
-        });
-
-        drawerOverlay.addEventListener('click', () => {
-            sideDrawer.classList.remove('open');
-            drawerOverlay.classList.add('hidden');
-        });
+    if (mobileHamburgerBtn && leftDrawer && leftDrawerBackdrop) {
+        // This logic is in the inline script, so it's fine
     }
     
     const drawerCategoriesLink = document.getElementById('drawer-categories-link');
     if (drawerCategoriesLink) {
         drawerCategoriesLink.addEventListener('click', () => {
-             sideDrawer.classList.remove('open');
-             drawerOverlay.classList.add('hidden');
+             if(leftDrawer) leftDrawer.classList.remove('open'); // 'open' class eka HTML eke naha
+             if(leftDrawerBackdrop) leftDrawerBackdrop.classList.add('hidden'); // 'hidden' class eka HTML eke naha
+             
+             // Body eken class eka ain karamu (inline script eka anuwa)
+             document.body.classList.remove('drawer-open');
         });
     }
     
@@ -950,30 +1219,37 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mobileSearchForm) {
         mobileSearchForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const query = document.getElementById('mobile-search-input').value;
+            const query = document.getElementById('search-drawer-input').value;
             console.log("Mobile Search Query:", query);
             
-            const desktopSearchInput = document.getElementById('search-input');
-            if(desktopSearchInput) {
-                desktopSearchInput.value = query;
-                const activeCategory = document.querySelector('.category-button.bg-ivory-brown')?.dataset.category || 'all';
-                // *** BUG EKA FIX KALA ("S" akura ain kala) ***
-                fetchAndDisplayPosts(query.toLowerCase(), activeCategory);
-            }
+            // === DESKTOP SEARCH INPUT EKAK NATHI NISA, DIRECTLY POSTS LOAD KARANAWA ===
+            const activeCategory = document.querySelector('.category-button.bg-ivory-brown')?.dataset.category || 'all';
+            fetchAndDisplayPosts(query.toLowerCase(), activeCategory);
+
+            // Close search drawer
+            document.body.classList.remove('search-drawer-open');
         });
     }
 
+    // ========== ME THIYENNE ALUTH LOADING ORDER EKA ==========
     setupSubscriptionForm();
-    handlePasswordReset();
-    handleNewPasswordSubmit();
-    handleActionFromURL();
+    handlePasswordReset(); // Old modal logic
+    handleNewPasswordSubmit(); // New password modal logic
+    handleActionFromURL(); // URL-based password reset
     setupHeroBackgroundSlider(); 
     setupFeaturedPostsSlider(); 
-    fetchAndDisplayPosts();
-    setupListeners();
+    
+    setupAuthDrawerListeners(); // *** ALUTH AUTH LOGIC EKA ATTACH KALA ***
+    
+    await fetchAndDisplayCategories(); // *** MULINMA CATEGORIES LOAD KARANAWA ***
+    
+    fetchAndDisplayPosts(); // <-- Ita passe posts load karanawa
+    setupListeners(); // <-- DAN meka call karama aluth category buttons walatath listeners set wei
     displayTopAuthorsByLikes();
     checkUrlForPostId();
 });
+// ========== END DOMCONTENTLOADED ==========
+
 
 async function displayTopAuthorsByLikes() {
     const container = document.getElementById('popular-authors-container');
@@ -1061,7 +1337,7 @@ async function displayTopAuthorsByLikes() {
 
 async function setupHeroBackgroundSlider() {
     const heroSwiperWrapper = document.querySelector('#hero-background-swiper .swiper-wrapper');
-    if (!heroSwiperWrapper) return;
+    if (!heroSwiperWrapper) return; // Oyage aluth HTML eke meka nathi nisa, meka run wenne naha. Eka aulak ne.
 
     const backgroundImages = [
         'https://images.unsplash.com/photo-1755429562521-cb944ea054ab?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%D%D',

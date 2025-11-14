@@ -246,12 +246,78 @@
         }
         /* --- END OF MODAL FIXES --- */
 
+        /* --- Google Translate Styles --- */
+        /* Dropdown eka lassanata header ekata set wenna */
+        #google_translate_element {
+            margin-right: 8px;
+        }
+        #google_translate_element .skiptranslate {
+            font-size: 0px; /* "Google" text eka hide karanna */
+        }
+        #google_translate_element .goog-te-gadget-simple {
+            background-color: transparent !important;
+            border: 1px solid var(--color-ivory-linen) !important;
+            border-radius: 9999px; /* Rounded pill shape */
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+        #google_translate_element .goog-te-gadget-icon {
+             display: none !important; /* Google icon eka hide karanna */
+        }
+        #google_translate_element .goog-te-menu-value span {
+            color: var(--color-classic-taupe) !important;
+            font-weight: 500;
+            font-family: 'Poppins', 'sans-serif';
+            font-size: 14px;
+        }
+        body.dark #google_translate_element .goog-te-menu-value span {
+            color: var(--color-classic-taupe) !important;
+        }
+    /* --- Google Translate Bar Hide (v2 - Bulletproof) --- */
+
+/* Google inject කරන iframe එකේ ID එක පටන්ගන්න විදිහට select කරලා hide කරනවා */
+iframe[id^='goog-te-banner-frame'] {
+    display: none !important;
+}
+
+/* Google එකෙන් page එක පහලට තල්ලු කරන්න දාන 
+top, margin, or padding ඔක්කොම reset කරනවා 
+*/
+body {
+    top: 0 !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Tooltip එකත් hide කරමු */
+.goog-tooltip {
+    display: none !important;
+}
+.goog-tooltip:hover {
+    display: none !important;
+}
+.goog-text-highlight {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+/* --- End Google Translate Fix --- */
     </style>
+
+    <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+      }, 'google_translate_element');
+    }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
 </head>  
 <body class="bg-off-white font-sans text-ivory-brown">
     
-<header class="sticky top-0 z-50 bg-ivory/80 backdrop-blur-lg shadow-sm">
-    <div class="container mx-auto px-4">
+<header class="sticky top-0 z-50 bg-ivory/80 backdrop-blur-lg shadow-sm notranslate"> <div class="container mx-auto px-4">
         <div class="hidden md:flex items-center justify-between h-16">
             <a href="index.html" class="flex-shrink-0">
                 <div class="flex items-center space-x-3">
@@ -262,6 +328,8 @@
             </a>
             <div class="flex items-center space-x-4">
                 
+                <div id="google_translate_element"></div>
+
                 <button class="theme-toggle-button p-2 rounded-full text-classic-taupe hover:text-ivory-brown hover:bg-pastel-ivory" title="Toggle Theme">
                     <svg class="theme-toggle-light-icon w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-6.364-.386l1.591-1.591M3 12h2.25m.386-6.364l1.591 1.591zM12 9a3 3 0 100 6 3 3 0 000-6z" /></svg>
                     <svg class="theme-toggle-dark-icon w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 008.25-4.498z" /></svg>
@@ -288,8 +356,9 @@
                                 <div class="p-3 border-b border-ivory-linen">
                                     <div class="flex items-center gap-3">
                                         <img id="dropdown-user-avatar" src="https://via.placeholder.com/40" alt="User Avatar" class="w-11 h-11 rounded-full object-cover">
-                                        <div>
-                                            <p id="dropdown-user-name" class="font-semibold text-ivory-brown truncate">Loading...</p>
+                                        
+                                        <div class="min-w-0"> 
+                                        <p id="dropdown-user-name" class="font-semibold text-ivory-brown truncate">Loading...</p>
                                             <p id="dropdown-user-email" class="text-sm text-classic-taupe truncate">loading...</p>
                                         </div>
                                     </div>
@@ -318,8 +387,7 @@
             </div>
         </div>
 
-        <div class="md:hidden flex items-center justify-between h-16 relative">
-            <button id="mobile-hamburger-btn" class="p-2 rounded-md text-ivory-brown hover:bg-ivory-linen">
+        <div class="md:hidden flex items-center justify-between h-16 relative notranslate"> <button id="mobile-hamburger-btn" class="p-2 rounded-md text-ivory-brown hover:bg-ivory-linen">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
             
@@ -342,16 +410,14 @@
     </div>
 </header>
 
-<section class="container mx-auto px-4 py-8 md:py-12">
-    <div class="w-full bg-pastel-ivory rounded-2xl shadow-lg overflow-hidden">
+<section class="container mx-auto px-4 py-8 md:py-12 notranslate"> <div class="w-full bg-pastel-ivory rounded-2xl shadow-lg overflow-hidden">
         <img src="https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80" 
              alt="Hero Banner" 
              class="w-full h-64 md:h-96 object-cover">
     </div>
 </section>
 
-<nav id="category-nav-bar" class="sticky top-16 z-40 bg-ivory/90 backdrop-blur-sm border-b border-ivory-linen transition-transform duration-300 ease-in-out">
-    <div class="container mx-auto px-4 relative">
+<nav id="category-nav-bar" class="sticky top-16 z-40 bg-ivory/90 backdrop-blur-sm border-b border-ivory-linen transition-transform duration-300 ease-in-out notranslate"> <div class="container mx-auto px-4 relative">
          <button id="scroll-left-btn" class="absolute left-0 top-1/2 -translate-y-1/2 bg-ivory/80 rounded-full p-1 shadow-md hover:bg-pastel-ivory z-10 hidden">
              <svg class="w-5 h-5 text-ivory-brown" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
          </button>
@@ -397,9 +463,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <div class="lg:col-span-3">
          <section class="mb-12">
-             <h3 class="text-2xl font-bold text-ivory-brown mb-6">Featured Stories</h3>
-             <div id="featured-swiper" class="swiper relative rounded-2xl shadow-lg">
-                 <div id="featured-swiper-wrapper" class="swiper-wrapper">
+             <h3 class="text-2xl font-bold text-ivory-brown mb-6 notranslate">Featured Stories</h3> <div id="featured-swiper" class="swiper relative rounded-2xl shadow-lg notranslate"> <div id="featured-swiper-wrapper" class="swiper-wrapper">
                      <div class="swiper-slide flex animate-pulse">
                          <div class="w-1/2 h-80 bg-pastel-ivory"></div>
                          <div class="w-1/2 p-8 flex flex-col bg-ivory">
@@ -418,22 +482,16 @@
              </div>
          </section>
             <section>
-                <h3 class="text-2xl font-bold text-ivory-brown mb-6">Latest Stories</h3>
-                
-                <div id="blog-posts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
+                <h3 class="text-2xl font-bold text-ivory-brown mb-6 notranslate">Latest Stories</h3> <div id="blog-posts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div class="loader mx-auto col-span-1 md:col-span-2 lg:col-span-3" 
                          style="height: 50px; width: 50px; border-width: 5px; border-top-color: #8B5E34;">
                     </div>
-
                 </div>
-            </section>
-            <div class="text-center mt-12">
-                 <button id="load-more-btn" class="bg-ivory-brown text-off-white px-6 py-3 rounded-full font-semibold hover:bg-classic-taupe transition-colors hidden">Load More Posts</button>
+                </section>
+            <div class="text-center mt-12 notranslate"> <button id="load-more-btn" class="bg-ivory-brown text-off-white px-6 py-3 rounded-full font-semibold hover:bg-classic-taupe transition-colors hidden">Load More Posts</button>
             </div>
         </div>
-      <aside class="lg:col-span-1">
-    <div class="bg-ivory p-6 rounded-xl shadow-sm sticky top-24">
+      <aside class="lg:col-span-1 notranslate"> <div class="bg-ivory p-6 rounded-xl shadow-sm sticky top-24">
         
         <div class="hidden lg:block">
             <h3 class="font-bold text-lg mb-4 text-ivory-brown">Popular Categories</h3>
@@ -494,7 +552,7 @@
 <div id="post-modal" class="fixed inset-0 z-[200] hidden bg-black bg-opacity-70 backdrop-blur-sm p-4 md:p-0 flex items-center justify-center">
     <div id="post-modal-container" class="relative bg-ivory rounded-lg shadow-2xl w-full max-w-2xl mx-auto flex flex-col max-h-[90vh] md:max-h-screen transition-all duration-300">
         
-        <div id="post-modal-loader" class="absolute inset-0 flex items-center justify-center bg-ivory/80 z-10 rounded-lg">
+        <div id="post-modal-loader" class="absolute inset-0 flex items-center justify-center bg-ivory/80 z-10 rounded-lg notranslate">
             <div class="loader"></div>
         </div>
         
@@ -504,8 +562,7 @@
                 <div class="flex-1 min-w-0">
                     <h3 id="post-modal-title" class="text-xl font-bold text-ivory-brown truncate"></h3>
                 </div>
-                <div class="flex items-center space-x-2 flex-shrink-0">
-                    <button id="toggle-fullscreen-btn" class="text-classic-taupe hover:text-ivory-brown" title="Toggle Fullscreen">
+                <div class="flex items-center space-x-2 flex-shrink-0 notranslate"> <button id="toggle-fullscreen-btn" class="text-classic-taupe hover:text-ivory-brown" title="Toggle Fullscreen">
                         <svg class="w-6 h-6 enter-fullscreen-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" /></svg>
                         <svg class="w-6 h-6 exit-fullscreen-icon hidden" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5M15 15l5.25 5.25" /></svg>
                     </button>
@@ -525,11 +582,10 @@
                     <div class="truncate-wrapper">
                         <div id="post-modal-description" class="text-ivory-brown leading-relaxed prose max-w-none"></div>
                     </div>
-                    <button id="read-more-btn" class="mt-2 font-semibold text-ivory-brown hover:underline">
-                        Read More...
+                    <button id="read-more-btn" class="mt-2 font-semibold text-ivory-brown hover:underline notranslate"> Read More...
                     </button>
-                    <div class="mt-6 pt-4 border-t border-ivory-linen flex items-center space-x-6">
-                        <button class="like-btn-modal flex items-center space-x-2 text-classic-taupe hover:text-red-500 transition-colors" data-like-id="">
+
+                    <div class="mt-6 pt-4 border-t border-ivory-linen flex items-center space-x-6 notranslate"> <button class="like-btn-modal flex items-center space-x-2 text-classic-taupe hover:text-red-500 transition-colors" data-like-id="">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"></path></svg>
                             <span class="like-count-modal font-semibold">0</span>
                         </button>
@@ -544,9 +600,7 @@
                     </div>
                     
                     <div class="mt-6 pt-4 border-t border-ivory-linen">
-                        <h4 class="text-lg font-bold text-ivory-brown mb-4">Comments</h4>
-                        <div id="comment-form-container" class="hidden">
-                            <form id="comment-form" class="flex items-start space-x-3 mb-6" data-post-id="">
+                        <h4 class="text-lg font-bold text-ivory-brown mb-4 notranslate">Comments</h4> <div id="comment-form-container" class="hidden notranslate"> <form id="comment-form" class="flex items-start space-x-3 mb-6" data-post-id="">
                                 <img id="comment-user-avatar" src="" alt="My Avatar" class="w-10 h-10 rounded-full">
                                 <div class="flex-1">
                                     <textarea id="comment-textarea" rows="2" class="w-full border border-ivory-linen rounded-md p-2 focus:ring-ivory-brown focus:border-ivory-brown bg-off-white" placeholder="Add a comment..."></textarea>
@@ -554,9 +608,9 @@
                                 </div>
                             </form>
                         </div>
-                         <div id="comment-login-prompt">
-                             <p class="text-center p-4 text-classic-taupe">Please <button id="login-from-comment-btn" class="font-semibold text-ivory-brown hover:underline">sign in</button> to leave a comment.</p>
+                         <div id="comment-login-prompt" class="notranslate"> <p class="text-center p-4 text-classic-taupe">Please <button id="login-from-comment-btn" class="font-semibold text-ivory-brown hover:underline">sign in</button> to leave a comment.</p>
                         </div>
+                        
                         <div id="comments-list" class="space-y-4"></div>
                     </div>
                 </div>
@@ -564,8 +618,7 @@
         </div>
     </div>
 </div>
-<footer class="bg-pastel-ivory border-t border-ivory-linen mt-16">
-    <div class="max-w-7xl mx-auto px-6 py-12">
+<footer class="bg-pastel-ivory border-t border-ivory-linen mt-16 notranslate"> <div class="max-w-7xl mx-auto px-6 py-12">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div class="md:col-span-2 space-y-4">
                 <h4 class="font-bold text-xl text-ivory-brown">Around Me Click</h4>
@@ -601,8 +654,7 @@
     </div>
 </footer>
 
-<div id="new-password-modal" class="modal-overlay hidden fixed inset-0 bg-black/60 flex justify-center items-center z-[210] animate-fade-in">
-    <div class="bg-ivory p-8 rounded-lg shadow-xl w-full max-w-md relative animate-slide-up">
+<div id="new-password-modal" class="modal-overlay hidden fixed inset-0 bg-black/60 flex justify-center items-center z-[210] animate-fade-in notranslate"> <div class="bg-ivory p-8 rounded-lg shadow-xl w-full max-w-md relative animate-slide-up">
         <h2 class="text-2xl font-bold mb-2 text-ivory-brown">Choose a New Password</h2>
         <p class="text-sm text-classic-taupe mt-2">Please enter your new password below.</p>
         <form id="new-password-form" class="mt-6">
@@ -614,8 +666,7 @@
     </div>
 </div>
 
-<div id="share-modal" class="fixed inset-0 z-[210] hidden flex items-center justify-center bg-black/60 p-4 animate-fade-in">
-    <div class="bg-ivory p-8 rounded-lg shadow-xl w-full max-w-md relative animate-slide-up">
+<div id="share-modal" class="fixed inset-0 z-[210] hidden flex items-center justify-center bg-black/60 p-4 animate-fade-in notranslate"> <div class="bg-ivory p-8 rounded-lg shadow-xl w-full max-w-md relative animate-slide-up">
         <button class="close-share-modal absolute top-2 right-4 text-3xl text-classic-taupe hover:text-ivory-brown">&times;</button>
         <h3 class="text-lg font-bold text-ivory-brown mb-4">Share this Post</h3>
         <p class="text-sm text-classic-taupe mb-2">Copy the link below or share directly to social media.</p>
@@ -640,8 +691,7 @@
     </div>
 </div>
 
-    <nav id="bottom-nav-bar" class="md:hidden fixed bottom-0 left-0 w-full bg-ivory/95 backdrop-blur-lg border-t border-ivory-linen z-40">
-        <div class="flex justify-around items-center h-16">
+    <nav id="bottom-nav-bar" class="md:hidden fixed bottom-0 left-0 w-full bg-ivory/95 backdrop-blur-lg border-t border-ivory-linen z-40 notranslate"> <div class="flex justify-around items-center h-16">
             <a href="index.html" class="flex flex-col items-center justify-center text-classic-taupe hover:text-ivory-brown">
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"></path></svg>
                 <span class="text-xs font-medium">Home</span>
@@ -662,10 +712,7 @@
             </a>
         </div>
     </nav>
-    <div id="left-drawer-backdrop" class="md:hidden fixed inset-0 bg-black/60 z-[60] opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out"></div>
-    
-    <div id="left-drawer" class="md:hidden fixed top-0 left-0 h-full w-80 max-w-[80vw] bg-ivory shadow-lg z-[70] transform -translate-x-full transition-transform duration-300 ease-in-out">
-        <div class="flex flex-col h-full">
+    <div id="left-drawer-backdrop" class="md:hidden fixed inset-0 bg-black/60 z-[60] opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out notranslate"></div> <div id="left-drawer" class="md:hidden fixed top-0 left-0 h-full w-80 max-w-[80vw] bg-ivory shadow-lg z-[70] transform -translate-x-full transition-transform duration-300 ease-in-out notranslate"> <div class="flex flex-col h-full">
             <div class="flex border-b border-ivory-linen relative">
                 <button id="drawer-tab-menu" class="flex-1 text-center py-4 font-semibold text-ivory-brown border-b-2 border-yellow-400">MENU</button>
                 <button id="drawer-tab-categories" class="flex-1 text-center py-4 font-semibold text-classic-taupe border-b-2 border-transparent">CATEGORIES</button>
@@ -763,9 +810,7 @@
         </div>
     </div>
     
-    <div id="search-drawer-backdrop" class="fixed inset-0 bg-black/60 z-[100] opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out"></div>
-    <div id="search-drawer" class="fixed top-0 right-0 h-full w-96 max-w-[90vw] bg-ivory shadow-lg z-[110] transform translate-x-full transition-transform duration-300 ease-in-out">
-        <div class="flex flex-col h-full w-full">
+    <div id="search-drawer-backdrop" class="fixed inset-0 bg-black/60 z-[100] opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out notranslate"></div> <div id="search-drawer" class="fixed top-0 right-0 h-full w-96 max-w-[90vw] bg-ivory shadow-lg z-[110] transform translate-x-full transition-transform duration-300 ease-in-out notranslate"> <div class="flex flex-col h-full w-full">
             <div class="flex items-center w-full bg-ivory border-b border-ivory-linen">
                 <form id="mobile-search-form" class="flex-1">
                     <input type="text" id="search-drawer-input" name="q" placeholder="Search blogs..." autocomplete="off" autofocus>
@@ -779,9 +824,7 @@
         </div>
     </div>
     
-    <div id="notification-drawer-backdrop" class="fixed inset-0 bg-black/60 z-[100] opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out"></div>
-    <div id="notification-drawer" class="fixed top-0 right-0 h-full w-96 max-w-[90vw] bg-ivory shadow-lg z-[110] transform translate-x-full transition-transform duration-300 ease-in-out">
-        <div class="flex flex-col h-full w-full">
+    <div id="notification-drawer-backdrop" class="fixed inset-0 bg-black/60 z-[100] opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out notranslate"></div> <div id="notification-drawer" class="fixed top-0 right-0 h-full w-96 max-w-[90vw] bg-ivory shadow-lg z-[110] transform translate-x-full transition-transform duration-300 ease-in-out notranslate"> <div class="flex flex-col h-full w-full">
             <div class="flex items-center justify-between w-full bg-ivory border-b border-ivory-linen p-4">
                 <h3 class="text-lg font-semibold text-ivory-brown">Notifications</h3>
                 <button id="close-notification-drawer-btn" class="p-2 text-classic-taupe hover:text-ivory-brown">
@@ -794,9 +837,7 @@
         </div>
     </div>
 
-    <div id="auth-drawer-backdrop" class="fixed inset-0 bg-black/60 z-[100] opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out"></div>
-    <div id="auth-drawer" class="fixed top-0 right-0 h-full w-96 max-w-[90vw] bg-ivory shadow-lg z-[110] transform translate-x-full transition-transform duration-300 ease-in-out">
-        <div class="flex flex-col h-full w-full">
+    <div id="auth-drawer-backdrop" class="fixed inset-0 bg-black/60 z-[100] opacity-0 pointer-events-none transition-opacity duration-300 ease-in-out notranslate"></div> <div id="auth-drawer" class="fixed top-0 right-0 h-full w-96 max-w-[90vw] bg-ivory shadow-lg z-[110] transform translate-x-full transition-transform duration-300 ease-in-out notranslate"> <div class="flex flex-col h-full w-full">
             <div class="flex items-center justify-end w-full bg-ivory border-b border-ivory-linen p-2">
                 <button id="close-auth-drawer-btn" class="p-2 text-classic-taupe hover:text-ivory-brown">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>

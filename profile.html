@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Profile - Around Me Click</title>
+    <title>User Profile - AroundMe.Click</title>
+    <link rel="icon" href="https://i.ibb.co/HTV3PDD3/Whats-App-Image-2025-09-03-at-18-08-17-eb407f7a-removebg-preview.png">
     
     <script>
       // Inline script to prevent FOUC (Flash of Un-styled Content)
-      // This runs before anything is rendered
       if (localStorage.getItem('theme') === 'dark') {
         document.documentElement.classList.add('dark');
       } else {
@@ -22,9 +22,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
     
+    <script src="https://cdn.tiny.cloud/1/g05mtt7puthyc4poi4et7fmwzo82ouqpbq3sqfwlmbm3qheq/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+
     <script>
         tailwind.config = {
-            darkMode: 'class', // <-- DARK MODE ENABLE KALA
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -53,252 +55,201 @@
         }
     </script>
     
-    <script src="https://cdn.tiny.cloud/1/g05mtt7puthyc4poi4et7fmwzo82ouqpbq3sqfwlmbm3qheq/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-    
     <style>
-        /* === DARK MODE CSS VARIABLES === */
         :root {
-            /* Light Mode (Original Colors) */
             --color-off-white: #FAF9F6;
             --color-ivory: #FFFFF0;
             --color-pastel-ivory: #F2E7D4;
             --color-ivory-linen: #EEE1CB;
             --color-ivory-brown: #8B5E34;
             --color-classic-taupe: #A68E7A;
-            --color-text-default: #8B5E34; /* For black text in dark mode */
-            --color-button-text: #FAF9F6; /* For white text in dark mode */
+            --color-text-default: #8B5E34;
+            --color-button-text: #FAF9F6;
         }
-
         body.dark {
-            /* Dark Mode (New Colors) */
-            --color-off-white: #111827;     /* Main BG: Gray 900 */
-            --color-ivory: #1f2937;       /* Card BG: Gray 800 */
-            --color-pastel-ivory: #374151; /* Hover BG: Gray 700 */
-            --color-ivory-linen: #4b5563;  /* Borders: Gray 600 */
-            --color-ivory-brown: #F2E7D4;  /* Primary Text: Pastel Ivory */
-            --color-classic-taupe: #9ca3af; /* Secondary Text: Gray 400 */
+            --color-off-white: #111827;
+            --color-ivory: #1f2937;
+            --color-pastel-ivory: #374151;
+            --color-ivory-linen: #4b5563;
+            --color-ivory-brown: #F2E7D4;
+            --color-classic-taupe: #9ca3af;
             --color-text-default: #F2E7D4;
             --color-button-text: #111827;
         }
-
-        /* Dark mode scrollbar */
         body.dark ::-webkit-scrollbar { background: var(--color-off-white); }
         body.dark ::-webkit-scrollbar-thumb { background: var(--color-ivory-linen); }
-
-        /* Fix Dark Mode Button Colors */
         body.dark #signup-btn {
             background-color: var(--color-pastel-ivory);
             color: var(--color-button-text);
         }
-        body.dark #signup-btn:hover {
-            background-color: var(--color-ivory-linen);
-        }
+        body.dark #signup-btn:hover { background-color: var(--color-ivory-linen); }
         body.dark .category-button[data-category="all"] {
              background-color: var(--color-pastel-ivory);
              color: var(--color-button-text);
         }
-        /* === END OF DARK MODE VARIABLES === */
-
-
-        body { font-family: 'Poppins', sans-serif; }
-        .font-serif { font-family: 'Poppins', sans-serif; } /* Changed Lora to Poppins for consistency */
-
-        .tox:not(.tox-tinymce-inline) .tox-editor-header:not(:focus-within):not(:focus) + .tox-edit-area {
-            border-top: 1px solid #EEE1CB; /* ivory-linen */
-        }
-        .tox.tox-tinymce-inline .tox-editor-header:not(:focus-within):not(:focus)+.tox-edit-area {
-            border-bottom: 1px solid #EEE1CB; /* ivory-linen */
-        }
-        .tox:focus-within {
-            outline: none !important;
-            box-shadow: none !important;
-            border-color: #A68E7A !important; /* classic-taupe */
-        }
         
-        /* --- ROLE-BASED UI CONTROL (from profile.html) --- */
-        #create-post-widget,
-        #header-create-post-btn { /* Note: header-create-post-btn is from index.html header */
-            display: none;
-        }
-        body.role-plus #create-post-widget,
-        body.role-pro #create-post-widget,
-        body.role-admin #create-post-widget {
-            display: block;
-        }
-        body.role-plus #header-create-post-btn,
-        body.role-pro #header-create-post-btn,
-        body.role-admin #header-create-post-btn {
-            display: inline-flex; 
-        }
-
-        /* --- Application Button Rules (from profile.html) --- */
-        #apply-to-plus-btn,
-        #apply-to-pro-btn {
-            display: none;
-        }
-        body.role-normal #apply-to-plus-btn {
-            display: inline-flex;
-        }
-        body.role-plus #apply-to-pro-btn {
-            display: inline-flex;
-        }
-
-        /* --- STYLES FROM INDEX.HTML --- */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--color-off-white); }
         ::-webkit-scrollbar-thumb { background: var(--color-classic-taupe); border-radius: 4px; }
+        .prose { max-width: 65ch; }
+        #categories-container::-webkit-scrollbar { display: none; }
+        #categories-container { -ms-overflow-style: none; scrollbar-width: none; }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--color-classic-taupe);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        footer { display: none; }
+        @media (min-width: 768px) { footer { display: block; } }
+        #bottom-nav-bar { box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05); }
         
-        footer {
-            display: none; 
-        }
-        @media (min-width: 768px) {
-            footer {
-                display: block; 
-            }
-        }
-
-        #bottom-nav-bar {
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .bottom-nav-creators-only {
-            display: none;
-        }
-        body.role-plus .bottom-nav-creators-only,
-        body.role-pro .bottom-nav-creators-only,
-        body.role-admin .bottom-nav-creators-only {
-            display: flex;
-        }
-
         @keyframes vibrate {
-          0%, 100% { transform: translateX(0); }
-          20%, 60% { transform: translateX(-3px); }
-          40%, 80% { transform: translateX(3px); }
+          0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-3px); } 40%, 80% { transform: translateX(3px); }
         }
-        .vibrate-anim {
-          animation: vibrate 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97);
-        }
-
-        /* --- Drawer Styles (from index.html) --- */
-        body.drawer-open #left-drawer {
-            transform: translateX(0);
-        }
-        body.drawer-open #left-drawer-backdrop {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        #search-drawer {
-            transition: transform 0.3s ease-in-out;
-        }
-        body.search-drawer-open #search-drawer {
-            transform: translateX(0);
-        }
-        body.search-drawer-open #search-drawer-backdrop {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .vibrate-anim { animation: vibrate 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+        
+        body.drawer-open #left-drawer { transform: translateX(0); }
+        body.drawer-open #left-drawer-backdrop { opacity: 1; pointer-events: auto; }
+        #search-drawer { transition: transform 0.3s ease-in-out; }
+        body.search-drawer-open #search-drawer { transform: translateX(0); }
+        body.search-drawer-open #search-drawer-backdrop { opacity: 1; pointer-events: auto; }
         #search-drawer-input {
             width: 100%; padding: 1rem; background-color: transparent; color: var(--color-ivory-brown);
             font-size: 1.125rem; line-height: 1.75rem; border: none; outline: none; box-shadow: none;
         }
         #search-drawer-input::placeholder { color: var(--color-classic-taupe); }
         .search-suggestion-item {
-            display: flex; align-items: center; gap: 1rem; padding: 1rem;
-            color: var(--color-classic-taupe); cursor: pointer;
+            display: flex; align-items: center; gap: 1rem; padding: 1rem; color: var(--color-classic-taupe); cursor: pointer;
         }
         .search-suggestion-item:hover { background-color: var(--color-pastel-ivory); color: var(--color-ivory-brown); }
         .search-suggestion-item svg { width: 1.25rem; height: 1.25rem; color: var(--color-classic-taupe); }
+        #notification-drawer { transition: transform 0.3s ease-in-out; }
+        body.notification-drawer-open #notification-drawer { transform: translateX(0); }
+        body.notification-drawer-open #notification-drawer-backdrop { opacity: 1; pointer-events: auto; }
+        #auth-drawer { transition: transform 0.3s ease-in-out; }
+        body.auth-drawer-open #auth-drawer { transform: translateX(0); }
+        body.auth-drawer-open #auth-drawer-backdrop { opacity: 1; pointer-events: auto; }
 
-        #notification-drawer {
-            transition: transform 0.3s ease-in-out;
+        /* === PROFILE PAGE ROLE CSS === */
+        /* Default walin okkoma sangawanna */
+        #normal-user-apply-section,
+        #creator-posts-section,
+        #create-post-widget,
+        #header-create-post-btn,
+        .bottom-nav-creators-only {
+            display: none;
         }
-        body.notification-drawer-open #notification-drawer {
-            transform: translateX(0);
+
+        /* Normal User kenekta pennana dewal */
+        /* 'role-normal' or 'role-user' dekama cover karanna */
+        body.role-normal #normal-user-apply-section,
+        body.role-user #normal-user-apply-section {
+            display: block;
         }
-        body.notification-drawer-open #notification-drawer-backdrop {
-            opacity: 1;
-            pointer-events: auto;
+
+        /* Creator (Plus, Pro, Admin) kenekta pennana dewal */
+        body.role-plus #creator-posts-section,
+        body.role-pro #creator-posts-section,
+        body.role-admin #creator-posts-section {
+            display: block;
         }
-        #auth-drawer {
-            transition: transform 0.3s ease-in-out;
+        
+        body.role-plus #create-post-widget,
+        body.role-pro #create-post-widget,
+        body.role-admin #create-post-widget {
+            display: block;
         }
-        body.auth-drawer-open #auth-drawer {
-            transform: translateX(0);
+
+        body.role-plus #header-create-post-btn,
+        body.role-pro #header-create-post-btn,
+        body.role-admin #header-create-post-btn {
+            display: inline-flex; 
         }
-        body.auth-drawer-open #auth-drawer-backdrop {
-            opacity: 1;
-            pointer-events: auto;
+
+        body.role-plus .bottom-nav-creators-only,
+        body.role-pro .bottom-nav-creators-only,
+        body.role-admin .bottom-nav-creators-only {
+            display: flex;
+        }
+        /* === END PROFILE ROLE CSS === */
+
+        .profile-tab.active {
+            border-color: var(--color-ivory-brown);
+            color: var(--color-ivory-brown);
         }
     </style>
-</head>
+</head>  
 <body class="bg-off-white font-sans text-ivory-brown">
+    
+<header class="sticky top-0 z-50 bg-ivory/80 backdrop-blur-lg shadow-sm">
+    <div class="container mx-auto px-4">
+        <div class="hidden md:flex items-center justify-between h-16">
+            <a href="index.html" class="flex-shrink-0">
+                <div class="flex items-center space-x-3">
+                    <img src="5.png" alt="Around Me Click Logo" class="h-10 w-10 rounded-lg object-contain">
+                    <span class="text-2xl font-bold text-ivory-brown">AroundMe.Click</span>
+                </div>
+                <p class="text-xs text-gray-900 dark:text-classic-taupe -mt-1 ml-14">Partnered with ZIDBIs</p>
+            </a>
+            <div class="flex items-center space-x-4">
+                
+                <button class="theme-toggle-button p-2 rounded-full text-classic-taupe hover:text-ivory-brown hover:bg-pastel-ivory" title="Toggle Theme">
+                    <svg class="theme-toggle-light-icon w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-6.364-.386l1.591-1.591M3 12h2.25m.386-6.364l1.591 1.591zM12 9a3 3 0 100 6 3 3 0 000-6z" /></svg>
+                    <svg class="theme-toggle-dark-icon w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 008.25-4.498z" /></svg>
+                </button>
+                <button id="desktop-search-btn" class="p-2 rounded-full text-classic-taupe hover:text-ivory-brown hover:bg-pastel-ivory" title="Search">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </button>
 
-    <header class="sticky top-0 z-50 bg-ivory/80 backdrop-blur-lg shadow-sm">
-        <div class="container mx-auto px-4">
-            <div class="hidden md:flex items-center justify-between h-16">
-                <a href="index.html" class="flex-shrink-0">
-                    <div class="flex items-center space-x-3">
-                        <img src="5.png" alt="Around Me Click Logo" class="h-10 w-10 rounded-lg object-contain">
-                        <span class="text-2xl font-bold text-ivory-brown">AroundMe.Click</span>
+                <button id="header-create-post-btn" class="bg-ivory-linen p-2 rounded-full text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown" title="Create Post">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                </button>
+
+                <div class="flex items-center flex-shrink-0">
+                    <div id="user-auth-links" class="flex items-center space-x-3">
+                        <button id="login-btn" class="px-4 py-2 hover:text-classic-taupe font-medium">Sign In</button>
+                        <button id="signup-btn" class="px-4 py-2 bg-ivory-brown text-off-white rounded-full hover:bg-classic-taupe font-medium">Get Started</button>
                     </div>
-                    <p class="text-xs text-gray-900 dark:text-classic-taupe -mt-1 ml-14">Partnered with ZIDBIs</p>
-                </a>
-                <div class="flex items-center space-x-4">
-                    
-                    <button class="theme-toggle-button p-2 rounded-full text-classic-taupe hover:text-ivory-brown hover:bg-pastel-ivory" title="Toggle Theme">
-                        <svg class="theme-toggle-light-icon w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-6.364-.386l1.591-1.591M3 12h2.25m.386-6.364l1.591 1.591zM12 9a3 3 0 100 6 3 3 0 000-6z" /></svg>
-                        <svg class="theme-toggle-dark-icon w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 008.25-4.498z" /></svg>
-                    </button>
-                    <button id="desktop-search-btn" class="p-2 rounded-full text-classic-taupe hover:text-ivory-brown hover:bg-pastel-ivory" title="Search">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    </button>
-
-                    <button id="header-create-post-btn" class="bg-ivory-linen p-2 rounded-full text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown" title="Create Post">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                        </svg>
-                    </button>
-
-                    <div class="flex items-center flex-shrink-0">
-                        <div id="user-auth-links" class="flex items-center space-x-3">
-                            <button id="login-btn" class="px-4 py-2 hover:text-classic-taupe font-medium">Sign In</button>
-                            <button id="signup-btn" class="px-4 py-2 bg-ivory-brown text-off-white rounded-full hover:bg-classic-taupe font-medium">Get Started</button>
-                        </div>
-                        <div id="user-profile-info" class="hidden flex items-center space-x-4">
-                            <button id="notification-bell-btn" class="relative p-2 text-ivory-brown hover:bg-pastel-ivory rounded-full">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                                <span id="notification-badge" class="hidden absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                    <div id="user-profile-info" class="hidden flex items-center space-x-4">
+                        <button id="notification-bell-btn" class="relative p-2 text-ivory-brown hover:bg-pastel-ivory rounded-full">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                            <span id="notification-badge" class="hidden absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                        </button>
+                        <div class="relative">
+                            <button id="profile-dropdown-btn" class="flex items-center">
+                                <img id="header-user-avatar" src="https://via.placeholder.com/40" alt="User" class="w-8 h-8 rounded-full">
                             </button>
-                            <div class="relative">
-                                <button id="profile-dropdown-btn" class="flex items-center">
-                                    <img id="header-user-avatar" src="https://via.placeholder.com/40" alt="User" class="w-8 h-8 rounded-full">
-                                </button>
-                                <div id="profile-dropdown-menu" class="hidden absolute right-0 mt-2 w-64 bg-ivory rounded-lg shadow-xl z-20 border border-ivory-linen">
-                                    <div class="p-3 border-b border-ivory-linen">
-                                        <div class="flex items-center gap-3">
-                                            <img id="dropdown-user-avatar" src="https://via.placeholder.com/40" alt="User Avatar" class="w-11 h-11 rounded-full object-cover">
-                                            <div>
-                                                <p id="dropdown-user-name" class="font-semibold text-ivory-brown truncate">Loading...</p>
-                                                <p id="dropdown-user-email" class="text-sm text-classic-taupe truncate">loading...</p>
-                                            </div>
+                            <div id="profile-dropdown-menu" class="hidden absolute right-0 mt-2 w-64 bg-ivory rounded-lg shadow-xl z-20 border border-ivory-linen">
+                                <div class="p-3 border-b border-ivory-linen">
+                                    <div class="flex items-center gap-3">
+                                        <img id="dropdown-user-avatar" src="https://via.placeholder.com/40" alt="User Avatar" class="w-11 h-11 rounded-full object-cover">
+                                        <div class="min-w-0"> <p id="dropdown-user-name" class="font-semibold text-ivory-brown truncate">Loading...</p>
+                                            <p id="dropdown-user-email" class="text-sm text-classic-taupe truncate">loading...</p>
                                         </div>
                                     </div>
-                                    <div class="py-2">
-                                        <a href="profile.html" class="flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
-                                            <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                            <span>My Profile</span>
-                                        </a>
-                                        <a id="admin-panel-link" href="admin.html" class="hidden flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"></path></svg>
-                                            <span>Admin Panel</span>
-                                        </a>
-                                    </div>
-                                    <div class="border-t border-ivory-linen py-2">
-                                        <button id="logout-btn" class="w-full text-left flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
-                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"></path></svg>
-                                            <span>Sign Out</span>
-                                        </button>
-                                    </div>
+                                </div>
+                                <div class="py-2">
+                                    <a href="profile.html" class="flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
+                                        <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                        <span>My Profile</span>
+                                    </a>
+                                    
+                                    <a id="admin-panel-link" href="admin.html" class="hidden flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"></path></svg>
+                                        <span>Admin Panel</span>
+                                    </a>
+                                </div>
+                                <div class="border-t border-ivory-linen py-2">
+                                    <button id="logout-btn" class="w-full text-left flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
+                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"></path></svg>
+                                        <span>Sign Out</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -329,6 +280,7 @@
             </div>
         </div>
     </header>
+    
     <main class="container mx-auto p-4 md:p-6 mt-6">
         <div class="bg-ivory rounded-xl shadow-sm overflow-hidden">
             <div class="h-48 md:h-64 bg-pastel-ivory">
@@ -340,18 +292,20 @@
                     <img id="profile-avatar" src="https://via.placeholder.com/150" alt="User Avatar" class="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-ivory shadow-lg">
                 </div>
 
-                <div class="text-right space-x-2">
-                    <button id="apply-to-plus-btn" class="px-4 py-2 bg-ivory-brown text-off-white rounded-full text-sm font-semibold hover:bg-classic-taupe transition-colors">
+                <div class="flex flex-col md:flex-row md:justify-end gap-2 md:items-center">
+                    <button id="apply-to-plus-btn" class="px-4 py-2 bg-ivory-brown text-off-white rounded-full text-sm font-semibold hover:bg-classic-taupe transition-colors w-full md:w-auto order-3 md:order-1">
                         Apply for Plus Membership
                     </button>
-                    <button id="apply-to-pro-btn" class="px-4 py-2 bg-classic-taupe text-off-white rounded-full text-sm font-semibold hover:bg-ivory-brown transition-colors">
+                    <button id="apply-to-pro-btn" class="px-4 py-2 bg-classic-taupe text-off-white rounded-full text-sm font-semibold hover:bg-ivory-brown transition-colors w-full md:w-auto order-4 md:order-2">
                         Apply for Pro Membership
                     </button>
-                    <button id="open-edit-modal-btn" class="px-4 py-2 border border-ivory-linen rounded-full text-sm font-semibold text-classic-taupe hover:bg-pastel-ivory transition-colors">
+                    <button id="share-profile-btn" class="px-4 py-2 border border-ivory-linen rounded-full text-sm font-semibold text-classic-taupe hover:bg-pastel-ivory transition-colors w-full md:w-auto order-2 md:order-3">
+                        Share
+                    </button>
+                    <button id="open-edit-modal-btn" class="px-4 py-2 border border-ivory-linen rounded-full text-sm font-semibold text-classic-taupe hover:bg-pastel-ivory transition-colors w-full md:w-auto order-1 md:order-4">
                         Edit Profile
                     </button>
                 </div>
-
                 <div class="mt-8">
                     <h1 id="profile-display-name" class="text-3xl font-bold text-ivory-brown">Loading Name...</h1>
                     <p id="profile-email" class="text-md text-classic-taupe">loading.email@example.com</p>
@@ -395,14 +349,37 @@
             </div>
         </div>
 
-        <div class="mt-8">
-            <h2 class="text-2xl font-bold text-ivory-brown mb-4">My Posts</h2>
+        <div id="creator-posts-section" class="mt-8">
+            <div class="border-b border-ivory-linen mb-6">
+                <nav class="flex space-x-8">
+                    <button id="my-posts-tab" class="profile-tab active py-4 px-1 border-b-2 border-transparent text-classic-taupe font-medium" data-tab="my-posts">
+                        My Posts
+                    </button>
+                    <button id="liked-posts-tab" class="profile-tab py-4 px-1 border-b-2 border-transparent text-classic-taupe font-medium" data-tab="liked-posts">
+                        Liked Posts
+                    </button>
+                </nav>
+            </div>
+            
             <div id="my-posts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <p class="text-classic-taupe col-span-full">Loading posts...</p>
-                </div>
+            </div>
         </div>
-    </main>
 
+        <div id="normal-user-apply-section" class="mt-8">
+            <div class="bg-ivory rounded-xl shadow-sm p-8 text-center animate-fade-in">
+                <h2 class="text-2xl font-bold text-ivory-brown mb-3">Become a Creator!</h2>
+                <p class="text-classic-taupe max-w-lg mx-auto mb-6">
+                    Want to share your own stories? Apply for a "Plus" membership to start publishing your articles on AroundMe.Click.
+                </p>
+                <button id="apply-to-plus-btn-main" class="open-plus-apply-modal px-6 py-3 bg-ivory-brown text-off-white rounded-full font-semibold hover:bg-classic-taupe transition-colors">
+                    Apply for Plus Membership
+                </button>
+            </div>
+        </div>
+
+    </main>
+    
     <div id="edit-post-modal" class="fixed inset-0 z-50 hidden bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-ivory rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
@@ -601,7 +578,34 @@
                         Submit Pro Application
                     </button>
                 </div>
-                 <p id="pro-application-status-message" class="text-center text-sm mt-4"></p> </form>
+                 <p id="pro-application-status-message" class="text-center text-sm mt-4"></p>
+            </form>
+        </div>
+    </div>
+
+    <div id="share-profile-modal" class="fixed inset-0 z-[210] hidden flex items-center justify-center bg-black/60 p-4 animate-fade-in">
+        <div class="bg-ivory p-8 rounded-lg shadow-xl w-full max-w-md relative animate-slide-up">
+            <button class="close-share-modal absolute top-2 right-4 text-3xl text-classic-taupe hover:text-ivory-brown">&times;</button>
+            <h3 class="text-lg font-bold text-ivory-brown mb-4">Share this Profile</h3>
+            <p class="text-sm text-classic-taupe mb-2">Copy the link below or share directly to social media.</p>
+    
+            <div class="flex items-center space-x-2">
+                <input type="text" id="share-profile-link-input" readonly class="w-full p-2 border border-ivory-linen rounded-lg bg-off-white text-classic-taupe">
+                <button id="copy-profile-link-btn" class="px-4 py-2 bg-ivory-brown text-off-white rounded-lg font-semibold hover:bg-classic-taupe">Copy</button>
+            </div>
+    
+            <div class="mt-4 pt-4 border-t border-ivory-linen flex items-center justify-center space-x-4">
+                <a id="facebook-profile-share-btn" href="#" target="_blank" rel="noopener noreferrer" title="Share on Facebook">
+                    <svg class="w-10 h-10 text-[#1877F2] hover:opacity-80 transition-opacity" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33V21.878A10.003 10.003 0 0022 12z"/>
+                    </svg>
+                </a>
+                <a id="whatsapp-profile-share-btn" href="#" target="_blank" rel="noopener noreferrer" title="Share on WhatsApp">
+                    <svg class="w-10 h-10 text-[#25D366] hover:opacity-80 transition-opacity" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.79.46 3.49 1.32 4.95L2 22l5.25-1.38c1.41.79 3.05 1.22 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zM9.53 8.5c.24-.12.55-.2 1.76.45 1.22.65 2.06 2.18 2.18 2.32.12.14.2.32.04.54-.16.22-.57.65-1.1.8-1.07.3-1.07.3-3.23-.52s-2.93-3-3.05-3.14c-.12-.14-.3-.14-.42-.14H4.75c-.14,0-.3,0-.42.14-.12.14-.53.57-.53 1.41,0 .84.55 1.64.63 1.76.08.12 1.07 1.73 2.63 2.4.47.2.85.32 1.14.41.47.14.87.12 1.2.08.38-.04 1.16-.48 1.32-0.94s.16-.86.12-.94c-.04-.08-.16-.12-.34-.2s-1.16-.57-1.34-.63c-.18-.06-.38-.06-.55.06-.18.12-.63.8-.77.94-.14.14-.28.16-.42.04-.14-.12-1.2-1.1-1.2-1.1C6.1 12.42 5.2 11.23 5.06 11c-.14-.24-.02-.38.1-.5s.28-.3.42-.42c.14-.12.2-.2.3-.34s.08-.22,0-.34c-.08-.12-1.05-1.2-1.05-1.2s-.3-.26-.6-.4c-.3-.14-.6-.14-.84-.02z"/>
+                    </svg>
+                </a>
+            </div>
         </div>
     </div>
     <footer class="bg-pastel-ivory border-t border-ivory-linen mt-16">
@@ -626,11 +630,11 @@
                         </a>
                         <a href="YOUR_INSTAGRAM_LINK_HERE" target="_blank" rel="noopener noreferrer" class="text-classic-taupe hover:text-ivory-brown transition-colors">
                             <span class="sr-only">Instagram</span>
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C9.283 2 9.044.01 7.878.06c-1.065.05-1.79.2-2.428.465a4.902 4.902 0 00-1.77 1.153A4.902 4.902 0 003.11 6.19c-.265.638-.415 1.363-.465 2.428C2.6 9.664 2.59 9.983 2.59 12s.01 2.336.06 3.4c.05 1.065.2 1.79.465 2.428a4.902 4.902 0 001.153 1.77 4.902 4.902 0 001.77 1.153c.638.265 1.363.415 2.428.465 1.066.05 1.405.06 4.122.06 2.717 0 3.056-.01 4.122-.06 1.065-.05 1.79-.2 2.428-.465a4.902 4.902 0 001.77-1.153 4.902 4.902 0 001.153-1.77c.265-.638.415-1.363.465-2.428.05-1.066.06-1.405.06-4.122s-.01-2.336-.06-3.4c-.05-1.065-.2-1.79-.465-2.428a4.902 4.902 0 00-1.153-1.77A4.902 4.902 0 0018.81 3.11c-.638-.265-1.363-.415-2.428-.465C15.336 2.6 15.017 2.59 12 2.59c-2.717 0-3.056.01-4.122.06zM12 4.865a7.135 7.135 0 110 14.27 7.135 7.135 0 010-14.27zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 10-2.88 0 1.44 1.44 0 002.88 0z" clip-rule="evenodd" /></svg>
+                            <svg class...></svg>
                         </a>
                         <a href="YOUR_WHATSAPP_LINK_HERE" target="_blank" rel="noopener noreferrer" class="text-classic-taupe hover:text-ivory-brown transition-colors">
                             <span class="sr-only">WhatsApp</span>
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.79.46 3.49 1.32 4.95L2 22l5.25-1.38c1.41.79 3.05 1.22 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zM9.53 8.5c.24-.12.55-.2 1.76.45 1.22.65 2.06 2.18 2.18 2.32.12.14.2.32.04.54-.16.22-.57.65-1.1.8-1.07.3-1.07.3-3.23-.52s-2.93-3-3.05-3.14c-.12-.14-.3-.14-.42-.14H4.75c-.14,0-.3,0-.42.14-.12.14-.53.57-.53 1.41,0 .84.55 1.64.63 1.76.08.12 1.07 1.73 2.63 2.4.47.2.85.32 1.14.41.47.14.87.12 1.2.08.38-.04 1.16-.48 1.32-0.94s.16-.86.12-.94c-.04-.08-.16-.12-.34-.2s-1.16-.57-1.34-.63c-.18-.06-.38-.06-.55.06-.18.12-.63.8-.77.94-.14.14-.28.16-.42.04-.14-.12-1.2-1.1-1.2-1.1C6.1 12.42 5.2 11.23 5.06 11c-.14-.24-.02-.38.1-.5s.28-.3.42-.42c.14-.12.2-.2.3-.34s.08-.22,0-.34c-.08-.12-1.05-1.2-1.05-1.2s-.3-.26-.6-.4c-.3-.14-.6-.14-.84-.02z" /></svg>
+                            <svg class...></svg>
                         </a>
                     </div>
                 </div>
@@ -640,6 +644,7 @@
             </div>
         </div>
     </footer>
+    
     <nav id="bottom-nav-bar" class="md:hidden fixed bottom-0 left-0 w-full bg-ivory/95 backdrop-blur-lg border-t border-ivory-linen z-40">
         <div class="flex justify-around items-center h-16">
             <a href="index.html" class="flex flex-col items-center justify-center text-classic-taupe hover:text-ivory-brown">
@@ -656,7 +661,8 @@
                 <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"></path></svg>
                 <span class="text-xs font-medium">Profile</span>
             </button>
-            <a id="bottom-nav-profile-link" href="profile.html" class="hidden flex-col items-center justify-center text-ivory-brown"> <img id="bottom-nav-avatar" src="https://via.placeholder.com/40" alt="User" class="w-7 h-7 rounded-full border-2 border-ivory-brown">
+            <a id="bottom-nav-profile-link" href="profile.html" class="hidden flex-col items-center justify-center text-ivory-brown"> 
+                <img id="bottom-nav-avatar" src="https://via.placeholder.com/40" alt="User" class="w-7 h-7 rounded-full border-2 border-ivory-brown">
                 <span class="text-xs font-medium">Profile</span>
             </a>
         </div>
@@ -689,6 +695,25 @@
                                 <span>Toggle Theme</span>
                             </span>
                         </button>
+                        </nav>
+    
+                    <div class="bg-pastel-ivory py-4 px-6 mt-0.5">
+                        <h3 class="font-bold text-ivory-brown uppercase">MY ACCOUNT</h3>
+                    </div>
+    
+                    <nav class="flex flex-col text-sm font-medium text-classic-taupe">
+                        <a href="#" class="flex items-center gap-4 px-6 py-4 border-b border-ivory-linen">
+                            <svg class="w-5 h-5 text-classic-taupe" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
+                            <span>WISHLIST</span>
+                        </a>
+                        <a href="#" class="flex items-center gap-4 px-6 py-4 border-b border-ivory-linen">
+                            <svg class="w-5 h-5 text-classic-taupe" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h18M16.5 3L21 7.5m0 0L16.5 12M21 7.5H3" /></svg>
+                            <span>COMPARE</span>
+                        </a>
+                        <a href="#" class="flex items-center gap-4 px-6 py-4 border-b border-ivory-linen">
+                            <svg class="w-5 h-5 text-classic-taupe" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                            <span>MY ACCOUNT</span>
+                        </a>
                     </nav>
                 </div>
     
@@ -800,327 +825,15 @@
             </div>
         </div>
     </div>
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     
     <script src="app.js"></script>
-    <script src="profile.js"></script> <script>
-        let blogTitleSuggestions = []; 
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const hamburgerBtn = document.getElementById('mobile-hamburger-btn');
-            const leftDrawerBackdrop = document.getElementById('left-drawer-backdrop');
-            const leftDrawer = document.getElementById('left-drawer');
-            const closeLeftDrawerBtn = document.getElementById('close-drawer-btn');
-
-            const mobileSearchBtn = document.getElementById('mobile-search-btn');
-            const desktopSearchBtn = document.getElementById('desktop-search-btn');
-            const searchDrawer = document.getElementById('search-drawer');
-            const searchDrawerBackdrop = document.getElementById('search-drawer-backdrop');
-            const closeSearchDrawerBtn = document.getElementById('close-search-drawer-btn');
-            const searchDrawerInput = document.getElementById('search-drawer-input');
-            const searchSuggestionsContainer = document.getElementById('search-suggestions-container');
-            const mobileSearchForm = document.getElementById('mobile-search-form');
-            
-            const bottomNavLoginBtn = document.getElementById('bottom-nav-login-btn');
-            const bottomNavProfileLink = document.getElementById('bottom-nav-profile-link');
-            const bottomNavAvatar = document.getElementById('bottom-nav-avatar');
-
-            const drawerLoginBtn = document.getElementById('drawer-login-btn');
-            const drawerLogoutBtn = document.getElementById('drawer-logout-btn');
-            const drawerProfileInfo = document.getElementById('drawer-profile-info');
-            const drawerAuthLinks = document.getElementById('drawer-auth-links');
-
-            const notificationBellBtn = document.getElementById('notification-bell-btn');
-            const notificationDrawer = document.getElementById('notification-drawer');
-            const notificationDrawerBackdrop = document.getElementById('notification-drawer-backdrop');
-            const closeNotificationDrawerBtn = document.getElementById('close-notification-drawer-btn');
-            
-            const authDrawer = document.getElementById('auth-drawer');
-            const authDrawerBackdrop = document.getElementById('auth-drawer-backdrop');
-            const closeAuthDrawerBtn = document.getElementById('close-auth-drawer-btn');
-            const loginBtn = document.getElementById('login-btn');
-            const signupBtn = document.getElementById('signup-btn');
-            
-            const authLoginView = document.getElementById('auth-drawer-login-view');
-            const authSignupView = document.getElementById('auth-drawer-signup-view');
-            const authResetView = document.getElementById('auth-drawer-reset-view');
-            
-            const authShowSignupLinks = document.querySelectorAll('#auth-show-signup-link');
-            const authShowLoginLinks = document.querySelectorAll('#auth-show-login-link');
-            const authShowResetLinks = document.querySelectorAll('#auth-show-reset-link');
-            const authBackToLoginLinks = document.querySelectorAll('#auth-back-to-login-link');
-            
-            // --- Logic for Create Button on Bottom Nav ---
-            const openCreateModalBottomNav = document.getElementById('open-create-modal-bottom-nav');
-            const createPostModal = document.getElementById('create-post-modal');
-            if (openCreateModalBottomNav && createPostModal) {
-                openCreateModalBottomNav.addEventListener('click', () => {
-                    createPostModal.classList.remove('hidden');
-                });
-            }
-            // --- End of new logic ---
-
-            if (hamburgerBtn) {
-                hamburgerBtn.addEventListener('click', () => {
-                    document.body.classList.add('drawer-open');
-                });
-            }
-
-            const closeLeftDrawer = () => {
-                if (leftDrawer) {
-                    leftDrawer.classList.add('vibrate-anim');
-                    setTimeout(() => {
-                        document.body.classList.remove('drawer-open');
-                        leftDrawer.classList.remove('vibrate-anim');
-                    }, 300);
-                }
-            };
-
-            if (leftDrawerBackdrop) leftDrawerBackdrop.addEventListener('click', closeLeftDrawer);
-            if (closeLeftDrawerBtn) closeLeftDrawerBtn.addEventListener('click', closeLeftDrawer);
-            
-            const tabMenu = document.getElementById('drawer-tab-menu');
-            const tabCategories = document.getElementById('drawer-tab-categories');
-            const contentMenu = document.getElementById('drawer-menu-content');
-            const contentCategories = document.getElementById('drawer-categories-content');
-
-            if (tabMenu && tabCategories && contentMenu && contentCategories) {
-                tabMenu.addEventListener('click', () => {
-                    contentMenu.classList.remove('hidden');
-                    contentCategories.classList.add('hidden');
-                    tabMenu.classList.add('text-ivory-brown', 'border-yellow-400');
-                    tabMenu.classList.remove('text-classic-taupe', 'border-transparent');
-                    tabCategories.classList.add('text-classic-taupe', 'border-transparent');
-                    tabCategories.classList.remove('text-ivory-brown', 'border-yellow-400');
-                });
-
-                tabCategories.addEventListener('click', () => {
-                    contentMenu.classList.add('hidden');
-                    contentCategories.classList.remove('hidden');
-                    tabCategories.classList.add('text-ivory-brown', 'border-yellow-400');
-                    tabCategories.classList.remove('text-classic-taupe', 'border-transparent');
-                    tabMenu.classList.add('text-classic-taupe', 'border-transparent');
-                    tabMenu.classList.remove('text-ivory-brown', 'border-yellow-400');
-                });
-            }
-
-            if (leftDrawer) {
-                leftDrawer.querySelectorAll('.category-button, nav a, .theme-toggle-button').forEach(link => {
-                    link.addEventListener('click', () => {
-                        // Don't close drawer if it's a tab or theme toggle
-                        if (link.id === 'drawer-tab-menu' || link.id === 'drawer-tab-categories' || link.classList.contains('theme-toggle-button')) {
-                           return;
-                        }
-                        closeLeftDrawer();
-                    });
-                });
-            }
-
-            const openSearchDrawer = (e) => {
-                if(e) e.preventDefault();
-                document.body.classList.add('search-drawer-open');
-                setTimeout(() => {
-                    if(searchDrawerInput) searchDrawerInput.focus();
-                }, 300);
-            };
-
-            const closeSearchDrawer = () => {
-                document.body.classList.remove('search-drawer-open');
-            };
-
-            if (mobileSearchBtn) mobileSearchBtn.addEventListener('click', openSearchDrawer);
-            if (desktopSearchBtn) desktopSearchBtn.addEventListener('click', openSearchDrawer);
-            if (searchDrawerBackdrop) searchDrawerBackdrop.addEventListener('click', closeSearchDrawer);
-            if (closeSearchDrawerBtn) closeSearchDrawerBtn.addEventListener('click', closeSearchDrawer);
-
-            if (searchDrawerInput && searchSuggestionsContainer) {
-                searchDrawerInput.addEventListener('input', () => {
-                    const query = searchDrawerInput.value.toLowerCase().trim();
-                    if (query.length === 0) {
-                        searchSuggestionsContainer.innerHTML = '';
-                        return;
-                    }
-                    // This page doesn't have blogTitleSuggestions, so we'll just show a basic message
-                    searchSuggestionsContainer.innerHTML = `<p class="p-4 text-classic-taupe text-center">Searching for "${query}"...</p>`;
-                });
-            }
-            
-            if (mobileSearchForm) {
-                mobileSearchForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const query = searchDrawerInput.value;
-                    alert(`Searching for: ${query}`);
-                    closeSearchDrawer();
-                    searchDrawerInput.value = '';
-                    searchSuggestionsContainer.innerHTML = '';
-                });
-            }
-
-            const openNotificationDrawer = () => {
-                document.body.classList.add('notification-drawer-open');
-            };
-            const closeNotificationDrawer = () => {
-                document.body.classList.remove('notification-drawer-open');
-            };
-            
-            if (notificationBellBtn) notificationBellBtn.addEventListener('click', openNotificationDrawer);
-            if (notificationDrawerBackdrop) notificationDrawerBackdrop.addEventListener('click', closeNotificationDrawer);
-            if (closeNotificationDrawerBtn) closeNotificationDrawerBtn.addEventListener('click', closeNotificationDrawer);
-
-            const openAuthDrawer = (view = 'login') => {
-                if (!authLoginView || !authSignupView || !authResetView) return;
-                
-                authLoginView.classList.add('hidden');
-                authSignupView.classList.add('hidden');
-                authResetView.classList.add('hidden');
-                
-                if (view === 'signup') {
-                    authSignupView.classList.remove('hidden');
-                } else if (view === 'reset') {
-                    authResetView.classList.remove('hidden');
-                } else {
-                    authLoginView.classList.remove('hidden');
-                }
-                
-                document.body.classList.add('auth-drawer-open');
-                closeLeftDrawer();
-            };
-            
-            const closeAuthDrawer = () => {
-                document.body.classList.remove('auth-drawer-open');
-            };
-
-            if (loginBtn) loginBtn.addEventListener('click', () => openAuthDrawer('login'));
-            if (signupBtn) signupBtn.addEventListener('click', () => openAuthDrawer('signup'));
-            if (bottomNavLoginBtn) bottomNavLoginBtn.addEventListener('click', () => openAuthDrawer('login'));
-            if (drawerLoginBtn) drawerLoginBtn.addEventListener('click', () => openAuthDrawer('login'));
-            
-            authShowSignupLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); openAuthDrawer('signup'); }));
-            authShowLoginLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); openAuthDrawer('login'); }));
-            authShowResetLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); openAuthDrawer('reset'); }));
-            authBackToLoginLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); openAuthDrawer('login'); }));
-
-            if (authDrawerBackdrop) authDrawerBackdrop.addEventListener('click', closeAuthDrawer);
-            if (closeAuthDrawerBtn) closeAuthDrawerBtn.addEventListener('click', closeAuthDrawer);
-
-            // This syncUI function is now crucial for the mobile nav bar
-            const syncUI = (user) => {
-                if (user) {
-                    const avatarSrc = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'U')}&background=8B5E34&color=fff`;
-                    
-                    if (bottomNavLoginBtn) bottomNavLoginBtn.style.display = 'none';
-                    if (bottomNavProfileLink) bottomNavProfileLink.style.display = 'flex'; // Use 'flex' for flex-col
-                    if (bottomNavAvatar) bottomNavAvatar.src = avatarSrc;
-                    
-                    if (drawerAuthLinks) drawerAuthLinks.style.display = 'none';
-                    if (drawerProfileInfo) drawerProfileInfo.style.display = 'block';
-                    
-                    closeAuthDrawer();
-                } else {
-                    if (bottomNavLoginBtn) bottomNavLoginBtn.style.display = 'flex';
-                    if (bottomNavProfileLink) bottomNavProfileLink.style.display = 'none';
-                    
-                    if (drawerAuthLinks) drawerAuthLinks.style.display = 'block';
-                    if (drawerProfileInfo) drawerProfileInfo.style.display = 'none';
-                }
-            };
-            
-            if (typeof firebase !== 'undefined') {
-                firebase.auth().onAuthStateChanged(async (user) => {
-                    syncUI(user);
-                    
-                    // Handle auth drawer forms (This logic is from index.html's script.js)
-                    const loginFormDrawer = document.getElementById('login-form-drawer');
-                    const signupFormDrawer = document.getElementById('signup-form-drawer');
-                    const resetPasswordFormDrawer = document.getElementById('reset-password-form-drawer');
-
-                    if(loginFormDrawer){
-                        loginFormDrawer.addEventListener('submit', (e) => {
-                            e.preventDefault();
-                            const email = loginFormDrawer['login-email'].value;
-                            const password = loginFormDrawer['login-password'].value;
-                            const errorEl = document.getElementById('login-error-drawer');
-                            firebase.auth().signInWithEmailAndPassword(email, password)
-                                .then((userCredential) => {
-                                    closeAuthDrawer();
-                                    loginFormDrawer.reset();
-                                })
-                                .catch((error) => {
-                                    errorEl.textContent = error.message;
-                                });
-                        });
-                    }
-
-                    if(signupFormDrawer){
-                        signupFormDrawer.addEventListener('submit', (e) => {
-                            e.preventDefault();
-                            const name = signupFormDrawer['signup-name'].value;
-                            const email = signupFormDrawer['signup-email'].value;
-                            const password = signupFormDrawer['signup-password'].value;
-                            const errorEl = document.getElementById('signup-error-drawer');
-                            
-                            firebase.auth().createUserWithEmailAndPassword(email, password)
-                                .then((userCredential) => {
-                                    const user = userCredential.user;
-                                    return user.updateProfile({
-                                        displayName: name
-                                    }).then(() => {
-                                        return firebase.firestore().collection('users').doc(user.uid).set({
-                                            displayName: name,
-                                            email: email,
-                                            role: 'normal',
-                                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                                            photoURL: '', bio: '', coverPhotoURL: '',
-                                            followers: [], following: [],
-                                            followersCount: 0, followingCount: 0
-                                        });
-                                    }).then(() => {
-                                        closeAuthDrawer();
-                                        signupFormDrawer.reset();
-                                    });
-                                })
-                                .catch((error) => {
-                                    errorEl.textContent = error.message;
-                                });
-                        });
-                    }
-
-                    if(resetPasswordFormDrawer) {
-                        resetPasswordFormDrawer.addEventListener('submit', (e) => {
-                            e.preventDefault();
-                            const email = resetPasswordFormDrawer['reset-email'].value;
-                            const messageEl = document.getElementById('reset-message-drawer');
-                            firebase.auth().sendPasswordResetEmail(email)
-                                .then(() => {
-                                    messageEl.textContent = "Check your email for a reset link!";
-                                    messageEl.style.color = "green";
-                                })
-                                .catch((error) => {
-                                    messageEl.textContent = error.message;
-                                    messageEl.style.color = "red";
-                                });
-                        });
-                    }
-                });
-            }
-
-            if (drawerLogoutBtn) {
-                drawerLogoutBtn.addEventListener('click', () => {
-                    const mainLogoutBtn = document.getElementById('logout-btn');
-                    if (mainLogoutBtn) {
-                        mainLogoutBtn.click();
-                    } else if (typeof firebase !== 'undefined') {
-                        firebase.auth().signOut();
-                    }
-                });
-            }
-
-        });
-    </script>
-    <script src="script.js"></script>
-
+    <script src="profile.js"></script>
+    
 </body>
 </html>
