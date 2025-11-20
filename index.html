@@ -47,81 +47,52 @@
     <style>
         /* === DARK MODE CSS VARIABLES === */
         :root {
-            /* Light Mode (Original Colors) */
             --color-off-white: #FAF9F6;
             --color-ivory: #FFFFF0;
             --color-pastel-ivory: #F2E7D4;
             --color-ivory-linen: #EEE1CB;
             --color-ivory-brown: #8B5E34;
             --color-classic-taupe: #A68E7A;
-            --color-text-default: #8B5E34; /* For black text in dark mode */
-            --color-button-text: #FAF9F6; /* For white text in dark mode */
+            --color-text-default: #8B5E34;
+            --color-button-text: #FAF9F6;
         }
 
         body.dark {
-            /* Dark Mode (New Colors) */
-            --color-off-white: #111827;     /* Main BG: Gray 900 */
-            --color-ivory: #1f2937;       /* Card BG: Gray 800 */
-            --color-pastel-ivory: #374151; /* Hover BG: Gray 700 */
-            --color-ivory-linen: #4b5563;  /* Borders: Gray 600 */
-            --color-ivory-brown: #F2E7D4;  /* Primary Text: Pastel Ivory */
-            --color-classic-taupe: #9ca3af; /* Secondary Text: Gray 400 */
+            --color-off-white: #111827;
+            --color-ivory: #1f2937;
+            --color-pastel-ivory: #374151;
+            --color-ivory-linen: #4b5563;
+            --color-ivory-brown: #F2E7D4;
+            --color-classic-taupe: #9ca3af;
             --color-text-default: #F2E7D4;
             --color-button-text: #111827;
         }
 
-        /* Dark mode scrollbar */
+        /* Scrollbar */
         body.dark ::-webkit-scrollbar { background: var(--color-off-white); }
         body.dark ::-webkit-scrollbar-thumb { background: var(--color-ivory-linen); }
-
-        /* Fix Dark Mode Button Colors */
-        body.dark #signup-btn {
-            background-color: var(--color-pastel-ivory);
-            color: var(--color-button-text);
-        }
-        body.dark #signup-btn:hover {
-            background-color: var(--color-ivory-linen);
-        }
-        body.dark .category-button[data-category="all"] {
-             background-color: var(--color-pastel-ivory);
-             color: var(--color-button-text);
-        }
-        
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--color-off-white); }
         ::-webkit-scrollbar-thumb { background: var(--color-classic-taupe); border-radius: 4px; }
+
+        /* Button Fixes */
+        body.dark #signup-btn { background-color: var(--color-pastel-ivory); color: var(--color-button-text); }
+        body.dark #signup-btn:hover { background-color: var(--color-ivory-linen); }
+        body.dark .category-button[data-category="all"] { background-color: var(--color-pastel-ivory); color: var(--color-button-text); }
+        
         .hover-zoom img { transition: transform 0.3s ease; }
         .hover-zoom:hover img { transform: scale(1.05); }
         .prose { max-width: 65ch; }
         
-        #post-modal .fullscreen-modal {
-            max-width: 100vw;
-            width: 100vw;
-            max-height: 100vh;
-            height: 100vh;
-            border-radius: 0;
-        }
-       
-       #post-modal-description > * {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap; 
-            line-height: 1.75; 
-        }
+        /* Modal Styles */
+        #post-modal .fullscreen-modal { max-width: 100vw; width: 100vw; max-height: 100vh; height: 100vh; border-radius: 0; }
+        #post-modal-description > * { display: flex; align-items: center; flex-wrap: wrap; line-height: 1.75; }
+        
         #categories-container::-webkit-scrollbar { display: none; }
         #categories-container { -ms-overflow-style: none; scrollbar-width: none; }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--color-classic-taupe);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--color-classic-taupe); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         footer { display: none; }
         @media (min-width: 768px) { footer { display: block; } }
@@ -132,197 +103,91 @@
         body.role-pro .bottom-nav-creators-only,
         body.role-admin .bottom-nav-creators-only { display: flex; }
 
-        @keyframes vibrate {
-          0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-3px); } 40%, 80% { transform: translateX(3px); }
-        }
+        /* Animations */
+        @keyframes vibrate { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-3px); } 40%, 80% { transform: translateX(3px); } }
         .vibrate-anim { animation: vibrate 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
 
+        /* Drawer Styles */
         body.drawer-open #left-drawer { transform: translateX(0); }
         body.drawer-open #left-drawer-backdrop { opacity: 1; pointer-events: auto; }
+        
         #search-drawer { transition: transform 0.3s ease-in-out; }
         body.search-drawer-open #search-drawer { transform: translateX(0); }
         body.search-drawer-open #search-drawer-backdrop { opacity: 1; pointer-events: auto; }
-        #search-drawer-input {
-            width: 100%; padding: 1rem; background-color: transparent; color: var(--color-ivory-brown);
-            font-size: 1.125rem; line-height: 1.75rem; border: none; outline: none; box-shadow: none;
-        }
+        #search-drawer-input { width: 100%; padding: 1rem; background-color: transparent; color: var(--color-ivory-brown); font-size: 1.125rem; border: none; outline: none; }
         #search-drawer-input::placeholder { color: var(--color-classic-taupe); }
-        .search-suggestion-item {
-            display: flex; align-items: center; gap: 1rem; padding: 1rem; color: var(--color-classic-taupe); cursor: pointer;
-        }
+        
+        #search-suggestions-container { max-height: 60vh; overflow-y: auto; padding-bottom: 20px; }
+        .search-suggestion-item { display: flex; align-items: center; gap: 1rem; padding: 1rem; color: var(--color-classic-taupe); cursor: pointer; }
         .search-suggestion-item:hover { background-color: var(--color-pastel-ivory); color: var(--color-ivory-brown); }
-        .search-suggestion-item svg { width: 1.25rem; height: 1.25rem; color: var(--color-classic-taupe); }
+
         #notification-drawer { transition: transform 0.3s ease-in-out; }
         body.notification-drawer-open #notification-drawer { transform: translateX(0); }
         body.notification-drawer-open #notification-drawer-backdrop { opacity: 1; pointer-events: auto; }
+        
         #auth-drawer { transition: transform 0.3s ease-in-out; }
         body.auth-drawer-open #auth-drawer { transform: translateX(0); }
         body.auth-drawer-open #auth-drawer-backdrop { opacity: 1; pointer-events: auto; }
+        #login-error-drawer { transition: all 0.3s ease; }
 
-        
-        /* ================================== */
-        /* ========= MODAL FIXES V2 ========= */
-        /* ================================== */
+        /* === MODAL FIXES === */
+        #post-modal-content-scroller .truncate-wrapper { max-height: 200px; overflow: hidden; position: relative; -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%); mask-image: linear-gradient(to bottom, black 70%, transparent 100%); }
+        #post-modal-content-scroller #read-more-btn { display: block; }
+        #post-modal-container.fullscreen-modal #post-modal-content-scroller .truncate-wrapper { max-height: none; overflow: visible; -webkit-mask-image: none; mask-image: none; }
+        #post-modal-container.fullscreen-modal #post-modal-content-scroller #read-more-btn { display: none; }
+        #post-modal-body-splitter { flex-direction: column; }
+        #post-modal-media-wrapper { padding: 1.5rem; padding-bottom: 0; background-color: var(--color-ivory); flex-shrink: 0; }
+        #post-modal-content-scroller { padding-top: 1.5rem; }
 
-        /* 1. Content Truncation (Default View) */
-        #post-modal-content-scroller .truncate-wrapper {
-            max-height: 200px; /* Text eka cut wena place eka */
-            overflow: hidden;
-            position: relative;
-            /* Fade out effect eka */
-            -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-            mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-        }
-        #post-modal-content-scroller #read-more-btn {
-            display: block; /* Default pennanawa */
-        }
-
-        /* 2. Fullscreen View (Truncation Remove) */
-        #post-modal-container.fullscreen-modal #post-modal-content-scroller .truncate-wrapper {
-            max-height: none;
-            overflow: visible;
-            -webkit-mask-image: none;
-            mask-image: none;
-        }
-        #post-modal-container.fullscreen-modal #post-modal-content-scroller #read-more-btn {
-            display: none; /* Fullscreen wala "Read More" button eka hide karanawa */
-        }
-
-
-        /* 3. Default (Mobile-first) View: Scoll eka */
-        #post-modal-body-splitter {
-            flex-direction: column;
-        }
-        #post-modal-media-wrapper {
-            padding: 1.5rem; 
-            padding-bottom: 0;
-            background-color: var(--color-ivory); /* CHANGED */
-            flex-shrink: 0;
-        }
-        #post-modal-content-scroller {
-             padding-top: 1.5rem;
-        }
-
-        /* 4. Fullscreen View (MOBILE): Yatin scroll wenna */
         @media (max-width: 767px) {
-            #post-modal-container.fullscreen-modal #post-modal-body-splitter {
-                flex-direction: column;
-                overflow-y: auto; /* *** MOBILE FIX: Fullscreen waladi full modal eka scroll wenawa *** */
-            }
-            #post-modal-container.fullscreen-modal #post-modal-media-wrapper {
-                padding: 0;
-                background-color: black;
-            }
-            #post-modal-container.fullscreen-modal #post-modal-content-scroller {
-                overflow-y: visible; /* Content eka scroll wenna ba, body-splitter eka scroll wena nisa */
-            }
+            #post-modal-container.fullscreen-modal #post-modal-body-splitter { flex-direction: column; overflow-y: auto; }
+            #post-modal-container.fullscreen-modal #post-modal-media-wrapper { padding: 0; background-color: black; }
+            #post-modal-container.fullscreen-modal #post-modal-content-scroller { overflow-y: visible; }
         }
-        
-        /* 5. Fullscreen View (DESKTOP): Side-by-side scroll */
         @media (min-width: 768px) {
-            #post-modal-container.fullscreen-modal #post-modal-body-splitter {
-                flex-direction: row;
-                overflow: hidden; /* Body eka scroll wenna ba */
-            }
-            #post-modal-container.fullscreen-modal #post-modal-media-wrapper {
-                flex-basis: 60%;
-                height: 100%;
-                padding: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background-color: black;
-            }
-            #post-modal-container.fullscreen-modal #post-modal-media-container {
-                width: 100%; height: 100%; max-height: 100%; aspect-ratio: auto; margin-bottom: 0;
-            }
-            #post-modal-container.fullscreen-modal #post-modal-content-scroller {
-                flex-basis: 40%;
-                height: 100%;
-                overflow-y: auto; /* *** DESKTOP FIX: Content eka witharak scroll wenawa *** */
-                padding-top: 1.5rem;
-            }
+            #post-modal-container.fullscreen-modal #post-modal-body-splitter { flex-direction: row; overflow: hidden; }
+            #post-modal-container.fullscreen-modal #post-modal-media-wrapper { flex-basis: 60%; height: 100%; padding: 0; display: flex; align-items: center; justify-content: center; background-color: black; }
+            #post-modal-container.fullscreen-modal #post-modal-media-container { width: 100%; height: 100%; max-height: 100%; aspect-ratio: auto; margin-bottom: 0; }
+            #post-modal-container.fullscreen-modal #post-modal-content-scroller { flex-basis: 40%; height: 100%; overflow-y: auto; padding-top: 1.5rem; }
         }
-        /* --- END OF MODAL FIXES --- */
 
-        
-        /* ============================================== */
-        /* === GOOGLE TRANSLATE FIX (ALUTH WIDIHATA) === */
-        /* ============================================== */
-
-        /* ID eka wenuwata CLASS eka target karamu */
-        .google_translate_widget {
-            margin-right: 8px;
-        }
-        .google_translate_widget .skiptranslate {
-            font-size: 0px; /* "Google" text eka hide karanna */
-        }
-        .google_translate_widget .goog-te-gadget-simple {
-            background-color: transparent !important;
+        /* GOOGLE TRANSLATE */
+        body { top: 0 !important; margin-top: 0 !important; padding-top: 0 !important; }
+        .skiptranslate iframe, .goog-te-banner-frame.skiptranslate { display: none !important; visibility: hidden !important; }
+        .google_translate_widget { display: inline-block; margin-right: 10px; }
+        .goog-te-gadget-simple {
+            background-color: rgba(255, 255, 240, 0.5) !important;
             border: 1px solid var(--color-ivory-linen) !important;
-            border-radius: 9999px; /* Rounded pill shape */
-            padding: 4px 8px;
+            padding: 6px 12px !important;
+            border-radius: 9999px !important;
+            font-family: 'Poppins', sans-serif !important;
+            font-size: 13px !important;
+            line-height: 20px !important;
+            display: flex !important;
+            align-items: center;
             cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
         }
-        .google_translate_widget .goog-te-gadget-icon {
-             display: none !important; /* Google icon eka hide karanna */
-        }
-        .google_translate_widget .goog-te-menu-value span {
-            color: var(--color-classic-taupe) !important;
-            font-weight: 500;
-            font-family: 'Poppins', 'sans-serif';
-            font-size: 14px;
-        }
-        body.dark .google_translate_widget .goog-te-menu-value span {
-            color: var(--color-classic-taupe) !important;
-        }
-        /* Mobile drawer eke style eka */
-        #google_translate_element_mobile .goog-te-gadget-simple {
-            width: 100%;
-            padding: 8px;
-            border-width: 2px;
-        }
-        
-        /* Mobile widget eka load wenakan podi loader ekak pennamu */
-        #google_translate_element_mobile:empty::before {
-            content: "Loading Languages...";
-            font-family: 'Poppins', 'sans-serif';
-            font-size: 14px;
-            color: var(--color-classic-taupe);
-            padding: 8px;
-            display: block;
-            border: 2px dashed var(--color-ivory-linen);
-            border-radius: 0.375rem;
-            text-align: center;
-        }
-
-        /* Google Translate Bar Hide */
-        iframe[id^='goog-te-banner-frame'] {
-            display: none !important;
-        }
-        body {
-            top: 0 !important;
-            margin-top: 0 !important;
-            padding-top: 0 !important;
-        }
-        .goog-tooltip {
-            display: none !important;
-        }
-        .goog-tooltip:hover {
-            display: none !important;
-        }
-        .goog-text-highlight {
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-        }
-        /* --- End Google Translate Fix --- */
+        body.dark .goog-te-gadget-simple { background-color: rgba(31, 41, 55, 0.5) !important; border-color: var(--color-classic-taupe) !important; }
+        .goog-te-gadget-simple:hover { background-color: var(--color-pastel-ivory) !important; border-color: var(--color-ivory-brown) !important; }
+        img.goog-te-gadget-icon { display: none !important; }
+        .goog-te-menu-value { margin: 0 !important; display: flex !important; align-items: center; }
+        .goog-te-menu-value span { color: var(--color-ivory-brown) !important; font-weight: 600 !important; text-transform: uppercase; font-size: 12px !important; border: none !important; }
+        body.dark .goog-te-menu-value span { color: var(--color-off-white) !important; }
+        .goog-te-menu-value span:last-child { display: none !important; }
+        .goog-te-gadget-simple::after { content: '▼'; font-size: 8px; color: var(--color-classic-taupe); margin-left: 8px; opacity: 0.7; }
+        .goog-tooltip, .goog-tooltip:hover { display: none !important; }
+        .goog-text-highlight { background-color: transparent !important; border: none !important; box-shadow: none !important; }
+        #google_translate_element_mobile { margin-top: 10px; width: 100%; display: flex; justify-content: center; }
+        #google_translate_element_mobile .goog-te-gadget-simple { width: 100% !important; justify-content: space-between !important; padding: 10px 15px !important; border-radius: 30px !important; }
     </style>
 
 </head>  
 <body class="bg-off-white font-sans text-ivory-brown">
     
-<header class="sticky top-0 z-50 bg-ivory/80 backdrop-blur-lg shadow-sm notranslate"> <div class="container mx-auto px-4">
+<header class="sticky top-0 z-50 bg-ivory/80 backdrop-blur-lg shadow-sm notranslate"> 
+    <div class="container mx-auto px-4">
         <div class="hidden md:flex items-center justify-between h-16">
             <a href="index.html" class="flex-shrink-0">
                 <div class="flex items-center space-x-3">
@@ -361,7 +226,6 @@
                                 <div class="p-3 border-b border-ivory-linen">
                                     <div class="flex items-center gap-3">
                                         <img id="dropdown-user-avatar" src="https://via.placeholder.com/40" alt="User Avatar" class="w-11 h-11 rounded-full object-cover">
-                                        
                                         <div class="min-w-0"> 
                                         <p id="dropdown-user-name" class="font-semibold text-ivory-brown truncate">Loading...</p>
                                             <p id="dropdown-user-email" class="text-sm text-classic-taupe truncate">loading...</p>
@@ -373,7 +237,6 @@
                                         <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
                                         <span>My Profile</span>
                                     </a>
-                                    
                                     <a id="admin-panel-link" href="admin.html" class="hidden flex items-center gap-3 px-4 py-2 text-classic-taupe hover:bg-pastel-ivory hover:text-ivory-brown rounded-md mx-1">
                                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"></path></svg>
                                         <span>Admin Panel</span>
@@ -392,7 +255,8 @@
             </div>
         </div>
 
-        <div class="md:hidden flex items-center justify-between h-16 relative notranslate"> <button id="mobile-hamburger-btn" class="p-2 rounded-md text-ivory-brown hover:bg-ivory-linen">
+        <div class="md:hidden flex items-center justify-between h-16 relative notranslate"> 
+            <button id="mobile-hamburger-btn" class="p-2 rounded-md text-ivory-brown hover:bg-ivory-linen">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
             
@@ -415,49 +279,31 @@
     </div>
 </header>
 
-<section class="container mx-auto px-4 py-8 md:py-12 notranslate"> <div class="w-full bg-pastel-ivory rounded-2xl shadow-lg overflow-hidden">
+<section class="container mx-auto px-4 py-8 md:py-12 notranslate"> 
+    <div class="w-full bg-pastel-ivory rounded-2xl shadow-lg overflow-hidden relative group">
         <img src="https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80" 
              alt="Hero Banner" 
-             class="w-full h-64 md:h-96 object-cover">
+             class="w-full h-64 md:h-96 object-cover transition-transform duration-700 group-hover:scale-105">
+        
+        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-6 md:p-10">
+            <div class="animate-slide-up">
+                <h2 class="text-white text-2xl md:text-4xl font-bold mb-2 drop-shadow-lg">Share Your World with Us</h2>
+                <p class="text-gray-200 text-sm md:text-lg max-w-xl drop-shadow-md">Discover stories, experiences, and ideas from writers around the globe. Join the community today.</p>
+            </div>
+        </div>
     </div>
 </section>
 
-<nav id="category-nav-bar" class="sticky top-16 z-40 bg-ivory/90 backdrop-blur-sm border-b border-ivory-linen transition-transform duration-300 ease-in-out notranslate"> <div class="container mx-auto px-4 relative">
+<nav id="category-nav-bar" class="sticky top-16 z-40 bg-ivory/90 backdrop-blur-sm border-b border-ivory-linen transition-transform duration-300 ease-in-out notranslate"> 
+    <div class="container mx-auto px-4 relative">
          <button id="scroll-left-btn" class="absolute left-0 top-1/2 -translate-y-1/2 bg-ivory/80 rounded-full p-1 shadow-md hover:bg-pastel-ivory z-10 hidden">
              <svg class="w-5 h-5 text-ivory-brown" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
          </button>
+         
          <div id="categories-container" class="flex flex-wrap justify-center md:flex-nowrap md:justify-center gap-2 py-4 md:px-8 overflow-x-auto">
-             
-            <button class="category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-ivory-brown text-off-white rounded-full whitespace-nowrap font-medium" data-category="all">
-                <img src="https://i.ibb.co/P4S83fV/all-stories-icon.png" alt="All" class="w-6 h-6 rounded-full object-cover">
-                <span>All Stories</span>
-            </button>
-            <button class="category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="technology">
-                <img src="https://i.ibb.co/b3WbQxS/tech-icon.png" alt="Tech" class="w-6 h-6 rounded-full object-cover">
-                <span>Technology</span>
-            </button>
-            <button class="category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="lifestyle">
-                <img src="https://i.ibb.co/dKqV9zP/lifestyle-icon.png" alt="Lifestyle" class="w-6 h-6 rounded-full object-cover">
-                <span>Lifestyle</span>
-            </button>
-            <button class="category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="travel">
-                <img src="https://i.ibb.co/QnN9QhS/travel-icon.png" alt="Travel" class="w-6 h-6 rounded-full object-cover">
-                <span>Travel</span>
-            </button>
-            <button class="category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="food">
-                <img src="https://i.ibb.co/yYwJk2Y/food-icon.png" alt="Food" class="w-6 h-6 rounded-full object-cover">
-                <span>Food</span>
-            </button>
-            <button class="category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="health">
-                <img src="https://i.ibb.co/dG7bBfW/health-icon.png" alt="Health" class="w-6 h-6 rounded-full object-cover">
-                <span>Health</span>
-            </button>
-            <button class="category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white" data-category="business">
-                <img src="https://i.ibb.co/HCbT1Yg/business-icon.png" alt="Business" class="w-6 h-6 rounded-full object-cover">
-                <span>Business</span>
-            </button>
-
+             <div class="loader w-6 h-6 border-2"></div> 
          </div>
+
         <button id="scroll-right-btn" class="absolute right-0 top-1/2 -translate-y-1/2 bg-ivory/80 rounded-full p-1 shadow-md hover:bg-pastel-ivory z-10 hidden">
             <svg class="w-5 h-5 text-ivory-brown" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
         </button>
@@ -468,26 +314,29 @@
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <div class="lg:col-span-3">
          <section class="mb-12">
-             <h3 class="text-2xl font-bold text-ivory-brown mb-6 notranslate">Featured Stories</h3> <div id="featured-swiper" class="swiper relative rounded-2xl shadow-lg notranslate"> <div id="featured-swiper-wrapper" class="swiper-wrapper">
-                     <div class="swiper-slide flex animate-pulse">
-                         <div class="w-1/2 h-80 bg-pastel-ivory"></div>
-                         <div class="w-1/2 p-8 flex flex-col bg-ivory">
-                             <div class="h-4 bg-pastel-ivory rounded w-1/4 mb-4"></div>
-                             <div class="h-8 bg-pastel-ivory rounded w-full mb-4"></div>
-                             <div class="h-8 bg-pastel-ivory rounded w-3/4 mb-6"></div>
-                             <div class="space-y-2 flex-grow">
-                                 <div class="h-4 bg-pastel-ivory rounded w-full"></div>
-                                 <div class="h-4 bg-pastel-ivory rounded w-2/3"></div>
-                             </div>
-                             <div class="h-10 bg-pastel-ivory rounded w-full mt-auto"></div>
-                         </div>
-                     </div>
-                 </div>
-                 <div class="swiper-pagination"></div>
+             <h3 class="text-2xl font-bold text-ivory-brown mb-6 notranslate">Featured Stories</h3> 
+             <div id="featured-swiper" class="swiper relative rounded-2xl shadow-lg notranslate"> 
+                 <div id="featured-swiper-wrapper" class="swiper-wrapper">
+                      <div class="swiper-slide flex animate-pulse">
+                          <div class="w-1/2 h-80 bg-pastel-ivory"></div>
+                          <div class="w-1/2 p-8 flex flex-col bg-ivory">
+                              <div class="h-4 bg-pastel-ivory rounded w-1/4 mb-4"></div>
+                              <div class="h-8 bg-pastel-ivory rounded w-full mb-4"></div>
+                              <div class="h-8 bg-pastel-ivory rounded w-3/4 mb-6"></div>
+                              <div class="space-y-2 flex-grow">
+                                  <div class="h-4 bg-pastel-ivory rounded w-full"></div>
+                                  <div class="h-4 bg-pastel-ivory rounded w-2/3"></div>
+                              </div>
+                              <div class="h-10 bg-pastel-ivory rounded w-full mt-auto"></div>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="swiper-pagination"></div>
              </div>
          </section>
             <section>
-                <h3 class="text-2xl font-bold text-ivory-brown mb-6 notranslate">Latest Stories</h3> <div id="blog-posts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <h3 class="text-2xl font-bold text-ivory-brown mb-6 notranslate">Latest Stories</h3> 
+                <div id="blog-posts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div class="loader mx-auto col-span-1 md:col-span-2 lg:col-span-3" 
                          style="height: 50px; width: 50px; border-width: 5px; border-top-color: #8B5E34;">
                     </div>
@@ -644,7 +493,7 @@
                     </a>
                     <a href="YOUR_INSTAGRAM_LINK_HERE" target="_blank" rel="noopener noreferrer" class="text-classic-taupe hover:text-ivory-brown transition-colors">
                         <span class="sr-only">Instagram</span>
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C9.283 2 9.044.01 7.878.06c-1.065.05-1.79.2-2.428.465a4.902 4.902 0 00-1.77 1.153A4.902 4.902 0 003.11 6.19c-.265.638-.415 1.363-.465 2.428C2.6 9.664 2.59 9.983 2.59 12s.01 2.336.06 3.4c.05 1.065.2 1.79.465 2.428a4.902 4.902 0 001.153 1.77 4.902 4.902 0 001.77 1.153c.638.265 1.363.415 2.428.465 1.066.05 1.405.06 4.122.06 2.717 0 3.056-.01 4.122-.06 1.065-.05 1.79-.2 2.428-.465a4.902 4.902 0 001.77-1.153 4.902 4.902 0 001.153-1.77c.265-.638.415-1.363.465-2.428.05-1.066.06-1.405.06-4.122s-.01-2.336-.06-3.4c-.05-1.065-.2-1.79-.465-2.428a4.902 4.902 0 00-1.153-1.77A4.902 4.902 0 0018.81 3.11c-.638-.265-1.363-.415-2.428-.465C15.336 2.6 15.017 2.59 12 2.59c-2.717 0-3.056.01-4.122.06zM12 4.865a7.135 7.135 0 110 14.27 7.135 7.135 0 010-14.27zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 10-2.88 0 1.44 1.44 0 002.88 0z" clip-rule="evenodd" /></svg>
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C9.283 2 9.044.01 7.878.06c-1.065.05-1.79.2-2.428.465a4.902 4.902 0 00-1.77 1.153A4.902 4.902 0 003.11 6.19c-.265.638-.415 1.363-.465 2.428C2.6 9.664 2.59 9.983 2.59 12s.01 2.336.06 3.4c.05 1.065.2 1.79.465 2.428a4.902 4.902 0 001.153 1.77 4.902 4.902 0 001.77 1.153c.638.265 1.363.415 2.428.465 1.066.05 1.405.06 4.122.06 2.717 0 3.056-.01 4.122-.06 1.065-.05 1.79-.2 2.428-.465a4.902 4.902 0 001.153 1.77 4.902 4.902 0 001.153-1.77c.265-.638.415-1.363.465-2.428.05-1.066.06-1.405.06-4.122s-.01-2.336-.06-3.4c-.05-1.065-.2-1.79-.465-2.428a4.902 4.902 0 00-1.153-1.77A4.902 4.902 0 0018.81 3.11c-.638-.265-1.363-.415-2.428-.465C15.336 2.6 15.017 2.59 12 2.59c-2.717 0-3.056.01-4.122.06zM12 4.865a7.135 7.135 0 110 14.27 7.135 7.135 0 010-14.27zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 10-2.88 0 1.44 1.44 0 002.88 0z" clip-rule="evenodd" /></svg>
                     </a>
                     <a href="YOUR_WHATSAPP_LINK_HERE" target="_blank" rel="noopener noreferrer" class="text-classic-taupe hover:text-ivory-brown transition-colors">
                         <span class="sr-only">WhatsApp</span>
@@ -731,8 +580,8 @@
                     <nav class="flex flex-col text-sm font-medium text-classic-taupe">
                         
                         <div class="px-6 py-4 border-b border-ivory-linen md:hidden">
-                            <span class="text-sm font-semibold text-classic-taupe uppercase">Language</span>
-                            <div id="google_translate_element_mobile" class="google_translate_widget mt-2"></div>
+                            <span class="text-sm font-semibold text-classic-taupe uppercase mb-2 block">Language</span>
+                            <div id="google_translate_element_mobile" class="google_translate_widget"></div>
                         </div>
 
                         <a href="index.html" class="px-6 py-4 border-b border-ivory-linen text-yellow-500 font-bold">HOME</a>
@@ -772,35 +621,7 @@
     
                 <div id="drawer-categories-content" class="hidden p-4">
                      <div class="flex flex-col space-y-1">
-                        <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-classic-taupe hover:bg-pastel-ivory" data-category="all">
-                            <img src="https://i.ibb.co/P4S83fV/all-stories-icon.png" alt="All" class="w-6 h-6 rounded-full object-cover">
-                            <span>All Stories</span>
-                        </button>
-                        <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-classic-taupe hover:bg-pastel-ivory" data-category="technology">
-                            <img src="https://i.ibb.co/b3WbQxS/tech-icon.png" alt="Tech" class="w-6 h-6 rounded-full object-cover">
-                            <span>Technology</span>
-                        </button>
-                        <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-classic-taupe hover:bg-pastel-ivory" data-category="lifestyle">
-                            <img src="https://i.ibb.co/dKqV9zP/lifestyle-icon.png" alt="Lifestyle" class="w-6 h-6 rounded-full object-cover">
-                            <span>Lifestyle</span>
-                        </button>
-                        <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-classic-taupe hover:bg-pastel-ivory" data-category="travel">
-                            <img src="https://i.ibb.co/QnN9QhS/travel-icon.png" alt="Travel" class="w-6 h-6 rounded-full object-cover">
-                            <span>Travel</span>
-                        </button>
-                        <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-classic-taupe hover:bg-pastel-ivory" data-category="food">
-                            <img src="https://i.ibb.co/yYwJk2Y/food-icon.png" alt="Food" class="w-6 h-6 rounded-full object-cover">
-                            <span>Food</span>
-                        </button>
-                        <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-classic-taupe hover:bg-pastel-ivory" data-category="health">
-                            <img src="https://i.ibb.co/dG7bBfW/health-icon.png" alt="Health" class="w-6 h-6 rounded-full object-cover">
-                            <span>Health</span>
-                        </button>
-                        <button class="category-button flex items-center gap-3 w-full text-left px-4 py-3 rounded-md font-medium text-classic-taupe hover:bg-pastel-ivory" data-category="business">
-                            <img src="https://i.ibb.co/HCbT1Yg/business-icon.png" alt="Business" class="w-6 h-6 rounded-full object-cover">
-                            <span>Business</span>
-                        </button>
-                    </div>
+                         </div>
                 </div>
             </div>
     
@@ -830,8 +651,7 @@
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <div id="search-suggestions-container" class="flex-1 overflow-y-auto">
-                </div>
+            <div id="search-suggestions-container" class="flex-1 overflow-y-auto"></div>
         </div>
     </div>
     
@@ -865,8 +685,7 @@
                              <a href="#" id="auth-show-reset-link" class="text-sm text-ivory-brown hover:underline">Forgot Password?</a>
                          </div>
                          <button type="submit" class="w-full bg-ivory-brown text-off-white py-3 rounded-full font-bold hover:bg-classic-taupe">Sign In</button>
-                         <p id="login-error-drawer" class="text-red-500 text-sm mt-2 min-h-[20px]"></p>
-                    </form>
+                         <p id="login-error-drawer" class="hidden"></p> </form>
                     <p class="mt-6 text-sm text-classic-taupe">New here? <a href="#" id="auth-show-signup-link" class="text-ivory-brown font-bold hover:underline">Join now</a></p>
                 </div>
 
@@ -901,336 +720,451 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-    
-    <script>
-        let blogTitleSuggestions = []; 
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const hamburgerBtn = document.getElementById('mobile-hamburger-btn');
-            const leftDrawerBackdrop = document.getElementById('left-drawer-backdrop');
-            const leftDrawer = document.getElementById('left-drawer');
-            const closeLeftDrawerBtn = document.getElementById('close-drawer-btn');
-
-            // ==============================================
-            // === ALUTH FIX EKA MEKE THIYENNE (HADUWA) ===
-            // ==============================================
-            let isMobileTranslateInitialized = false; // Flag eka
-
-            // Mobile widget eka load karana function eka
-            function initMobileTranslate() {
-                if (isMobileTranslateInitialized) return; // Ayeth load karanna epa
-
-                // Check karanna Google script eka load welada kiyala
-                if (window.google && window.google.translate) {
-                    try {
-                        new google.translate.TranslateElement({
-                            pageLanguage: 'en',
-                            layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-                        }, 'google_translate_element_mobile');
-                        isMobileTranslateInitialized = true;
-                        console.log("Mobile Translate Widget Initialized!");
-                    } catch (error) {
-                        console.error("Error initializing mobile translate widget:", error);
-                    }
-                } else {
-                    // Script eka thama load wela nattam, poddak indala ayeth try karamu
-                    console.log("Translate script not ready, retrying in 500ms...");
-                    setTimeout(initMobileTranslate, 500);
-                }
-            }
-
-            if (hamburgerBtn) {
-                hamburgerBtn.addEventListener('click', () => {
-                    document.body.classList.add('drawer-open');
-                    // Hamburger eka click karapu gaman mobile function eka call karanna
-                    initMobileTranslate(); 
-                });
-            }
-            // === END FIX ===
-
-
-            const mobileSearchBtn = document.getElementById('mobile-search-btn');
-            const desktopSearchBtn = document.getElementById('desktop-search-btn');
-            const searchDrawer = document.getElementById('search-drawer');
-            const searchDrawerBackdrop = document.getElementById('search-drawer-backdrop');
-            const closeSearchDrawerBtn = document.getElementById('close-search-drawer-btn');
-            const searchDrawerInput = document.getElementById('search-drawer-input');
-            const searchSuggestionsContainer = document.getElementById('search-suggestions-container');
-            const mobileSearchForm = document.getElementById('mobile-search-form');
-            
-            const bottomNavLoginBtn = document.getElementById('bottom-nav-login-btn');
-            const bottomNavProfileLink = document.getElementById('bottom-nav-profile-link');
-            const bottomNavAvatar = document.getElementById('bottom-nav-avatar');
-
-            const drawerLoginBtn = document.getElementById('drawer-login-btn');
-            const drawerLogoutBtn = document.getElementById('drawer-logout-btn');
-            const drawerProfileInfo = document.getElementById('drawer-profile-info');
-            const drawerAuthLinks = document.getElementById('drawer-auth-links');
-
-            const notificationBellBtn = document.getElementById('notification-bell-btn');
-            const notificationDrawer = document.getElementById('notification-drawer');
-            const notificationDrawerBackdrop = document.getElementById('notification-drawer-backdrop');
-            const closeNotificationDrawerBtn = document.getElementById('close-notification-drawer-btn');
-            
-            const authDrawer = document.getElementById('auth-drawer');
-            const authDrawerBackdrop = document.getElementById('auth-drawer-backdrop');
-            const closeAuthDrawerBtn = document.getElementById('close-auth-drawer-btn');
-            const loginBtn = document.getElementById('login-btn');
-            const signupBtn = document.getElementById('signup-btn');
-            
-            const authLoginView = document.getElementById('auth-drawer-login-view');
-            const authSignupView = document.getElementById('auth-drawer-signup-view');
-            const authResetView = document.getElementById('auth-drawer-reset-view');
-            
-            const authShowSignupLinks = document.querySelectorAll('#auth-show-signup-link');
-            const authShowLoginLinks = document.querySelectorAll('#auth-show-login-link');
-            const authShowResetLinks = document.querySelectorAll('#auth-show-reset-link');
-            const authBackToLoginLinks = document.querySelectorAll('#auth-back-to-login-link');
-            
-            const categoriesContainer = document.getElementById('categories-container');
-            const scrollLeftBtn = document.getElementById('scroll-left-btn');
-            const scrollRightBtn = document.getElementById('scroll-right-btn');
-
-
-            const closeLeftDrawer = () => {
-                if (leftDrawer) {
-                    leftDrawer.classList.add('vibrate-anim');
-                    setTimeout(() => {
-                        document.body.classList.remove('drawer-open');
-                        leftDrawer.classList.remove('vibrate-anim');
-                    }, 300);
-                }
-            };
-
-            if (leftDrawerBackdrop) leftDrawerBackdrop.addEventListener('click', closeLeftDrawer);
-            if (closeLeftDrawerBtn) closeLeftDrawerBtn.addEventListener('click', closeLeftDrawer);
-            
-            const tabMenu = document.getElementById('drawer-tab-menu');
-            const tabCategories = document.getElementById('drawer-tab-categories');
-            const contentMenu = document.getElementById('drawer-menu-content');
-            const contentCategories = document.getElementById('drawer-categories-content');
-
-            if (tabMenu && tabCategories && contentMenu && contentCategories) {
-                tabMenu.addEventListener('click', () => {
-                    contentMenu.classList.remove('hidden');
-                    contentCategories.classList.add('hidden');
-                    tabMenu.classList.add('text-ivory-brown', 'border-yellow-400');
-                    tabMenu.classList.remove('text-classic-taupe', 'border-transparent');
-                    tabCategories.classList.add('text-classic-taupe', 'border-transparent');
-                    tabCategories.classList.remove('text-ivory-brown', 'border-yellow-400');
-                });
-
-                tabCategories.addEventListener('click', () => {
-                    contentMenu.classList.add('hidden');
-                    contentCategories.classList.remove('hidden');
-                    tabCategories.classList.add('text-ivory-brown', 'border-yellow-400');
-                    tabCategories.classList.remove('text-classic-taupe', 'border-transparent');
-                    tabMenu.classList.add('text-classic-taupe', 'border-transparent');
-                    tabMenu.classList.remove('text-ivory-brown', 'border-yellow-400');
-                });
-            }
-
-            if (leftDrawer) {
-                leftDrawer.querySelectorAll('.category-button, nav a, .theme-toggle-button').forEach(link => {
-                    link.addEventListener('click', () => {
-                        // drawer eka wahanne link ekak click kalama witharai
-                        if (link.tagName === 'A' || link.classList.contains('category-button')) {
-                            closeLeftDrawer();
-                        }
-                    });
-                });
-            }
-
-            const openSearchDrawer = (e) => {
-                if(e) e.preventDefault();
-                document.body.classList.add('search-drawer-open');
-                setTimeout(() => {
-                    if(searchDrawerInput) searchDrawerInput.focus();
-                }, 300);
-            };
-
-            const closeSearchDrawer = () => {
-                document.body.classList.remove('search-drawer-open');
-            };
-
-            if (mobileSearchBtn) mobileSearchBtn.addEventListener('click', openSearchDrawer);
-            if (desktopSearchBtn) desktopSearchBtn.addEventListener('click', openSearchDrawer);
-            if (searchDrawerBackdrop) searchDrawerBackdrop.addEventListener('click', closeSearchDrawer);
-            if (closeSearchDrawerBtn) closeSearchDrawerBtn.addEventListener('click', closeSearchDrawer);
-
-            if (searchDrawerInput && searchSuggestionsContainer) {
-                searchDrawerInput.addEventListener('input', () => {
-                    const query = searchDrawerInput.value.toLowerCase().trim();
-                    if (query.length === 0) {
-                        searchSuggestionsContainer.innerHTML = '';
-                        return;
-                    }
-                    
-                    const filteredSuggestions = blogTitleSuggestions.filter(item => 
-                        item.toLowerCase().includes(query)
-                    );
-                    
-                    searchSuggestionsContainer.innerHTML = '';
-                    
-                    if (filteredSuggestions.length > 0) {
-                        filteredSuggestions.forEach(text => {
-                            const item = document.createElement('div');
-                            item.className = 'search-suggestion-item';
-                            item.innerHTML = `
-                                <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path></svg>
-                                <span>${text}</span>
-                            `;
-                            
-                            item.addEventListener('click', () => {
-                                searchDrawerInput.value = text;
-                                mobileSearchForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-                            });
-                            
-                            searchSuggestionsContainer.appendChild(item);
-                        });
-                    } else {
-                        searchSuggestionsContainer.innerHTML = `<p class="p-4 text-classic-taupe text-center">No results found for "${query}"</p>`;
-                    }
-                });
-            }
-            
-            if (mobileSearchForm) {
-                mobileSearchForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const query = searchDrawerInput.value;
-                    alert(`Searching for: ${query}`);
-                    closeSearchDrawer();
-                    searchDrawerInput.value = '';
-                    searchSuggestionsContainer.innerHTML = '';
-                });
-            }
-
-            const openNotificationDrawer = () => {
-                document.body.classList.add('notification-drawer-open');
-            };
-            const closeNotificationDrawer = () => {
-                document.body.classList.remove('notification-drawer-open');
-            };
-            
-            if (notificationBellBtn) notificationBellBtn.addEventListener('click', openNotificationDrawer);
-            if (notificationDrawerBackdrop) notificationDrawerBackdrop.addEventListener('click', closeNotificationDrawer);
-            if (closeNotificationDrawerBtn) closeNotificationDrawerBtn.addEventListener('click', closeNotificationDrawer);
-
-            const openAuthDrawer = (view = 'login') => {
-                if (!authLoginView || !authSignupView || !authResetView) return;
-                
-                authLoginView.classList.add('hidden');
-                authSignupView.classList.add('hidden');
-                authResetView.classList.add('hidden');
-                
-                if (view === 'signup') {
-                    authSignupView.classList.remove('hidden');
-                } else if (view === 'reset') {
-                    authResetView.classList.remove('hidden');
-                } else {
-                    authLoginView.classList.remove('hidden');
-                }
-                
-                document.body.classList.add('auth-drawer-open');
-                closeLeftDrawer();
-            };
-            
-            const closeAuthDrawer = () => {
-                document.body.classList.remove('auth-drawer-open');
-            };
-
-            if (loginBtn) loginBtn.addEventListener('click', () => openAuthDrawer('login'));
-            if (signupBtn) signupBtn.addEventListener('click', () => openAuthDrawer('signup'));
-            if (bottomNavLoginBtn) bottomNavLoginBtn.addEventListener('click', () => openAuthDrawer('login'));
-            if (drawerLoginBtn) drawerLoginBtn.addEventListener('click', () => openAuthDrawer('login'));
-            
-            authShowSignupLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); openAuthDrawer('signup'); }));
-            authShowLoginLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); openAuthDrawer('login'); }));
-            authShowResetLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); openAuthDrawer('reset'); }));
-            authBackToLoginLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); openAuthDrawer('login'); }));
-
-            if (authDrawerBackdrop) authDrawerBackdrop.addEventListener('click', closeAuthDrawer);
-            if (closeAuthDrawerBtn) closeAuthDrawerBtn.addEventListener('click', closeAuthDrawer);
-
-            const syncUI = (user) => {
-                if (user) {
-                    const avatarSrc = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'U')}&background=8B5E34&color=fff`;
-                    
-                    if (bottomNavLoginBtn) bottomNavLoginBtn.style.display = 'none';
-                    if (bottomNavProfileLink) bottomNavProfileLink.style.display = 'flex';
-                    if (bottomNavAvatar) bottomNavAvatar.src = avatarSrc;
-                    
-                    if (drawerAuthLinks) drawerAuthLinks.style.display = 'none';
-                    if (drawerProfileInfo) drawerProfileInfo.style.display = 'block';
-                    
-                    closeAuthDrawer();
-                } else {
-                    if (bottomNavLoginBtn) bottomNavLoginBtn.style.display = 'flex';
-                    if (bottomNavProfileLink) bottomNavProfileLink.style.display = 'none';
-                    
-                    if (drawerAuthLinks) drawerAuthLinks.style.display = 'block';
-                    if (drawerProfileInfo) drawerProfileInfo.style.display = 'none';
-                }
-            };
-            
-            if (typeof firebase !== 'undefined') {
-                firebase.auth().onAuthStateChanged(async (user) => {
-                    syncUI(user);
-                });
-            }
-
-            if (drawerLogoutBtn) {
-                drawerLogoutBtn.addEventListener('click', () => {
-                    const mainLogoutBtn = document.getElementById('logout-btn');
-                    if (mainLogoutBtn) {
-                        mainLogoutBtn.click();
-                    } else if (typeof firebase !== 'undefined') {
-                        firebase.auth().signOut();
-                    }
-                });
-            }
-
-            function checkCategoryScroll() {
-                if (!categoriesContainer || !scrollLeftBtn || !scrollRightBtn) return;
-                
-                if (window.innerWidth < 768) {
-                    scrollLeftBtn.classList.add('hidden');
-                    scrollRightBtn.classList.add('hidden');
-                    return;
-                }
-
-                const hasOverflow = categoriesContainer.scrollWidth > categoriesContainer.clientWidth;
-                
-                if (hasOverflow) {
-                    scrollLeftBtn.classList.remove('hidden');
-                    scrollRightBtn.classList.remove('hidden');
-                } else {
-                    scrollLeftBtn.classList.add('hidden');
-                    scrollRightBtn.classList.add('hidden');
-                }
-            }
-            
-            checkCategoryScroll();
-            window.addEventListener('resize', checkCategoryScroll);
-
-        });
-    </script>
-    
-    <script type="text/javascript">
-    function googleTranslateElementInit() {
-      // Desktop eka witharak page load weddi hadamu
-      if (document.getElementById('google_translate_element_desktop')) {
-          new google.translate.TranslateElement({
-            pageLanguage: 'en',
-            layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-          }, 'google_translate_element_desktop');
-      }
-    }
-    </script>
-    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
     <script src="app.js"></script>
+    
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const hamburgerBtn = document.getElementById('mobile-hamburger-btn');
+        const leftDrawerBackdrop = document.getElementById('left-drawer-backdrop');
+        const leftDrawer = document.getElementById('left-drawer');
+        const closeLeftDrawerBtn = document.getElementById('close-drawer-btn');
+
+        // 1. MOBILE TRANSLATE FIX
+        let isMobileTranslateInitialized = false;
+        function initMobileTranslate() {
+            if (isMobileTranslateInitialized) return;
+            if (window.google && window.google.translate) {
+                try {
+                    new google.translate.TranslateElement({
+                        pageLanguage: 'en',
+                        includedLanguages: 'en,si,ta,ja,ko,fr,de,es',
+                        layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                        autoDisplay: false
+                    }, 'google_translate_element_mobile');
+                    isMobileTranslateInitialized = true;
+                    setTimeout(() => {
+                        const mobileWidget = document.querySelector('#google_translate_element_mobile .goog-te-gadget-simple');
+                        if(mobileWidget) { mobileWidget.style.width = '100%'; mobileWidget.style.justifyContent = 'center'; }
+                    }, 200);
+                } catch (e) { console.error("Mobile translate error:", e); }
+            } else { setTimeout(initMobileTranslate, 500); }
+        }
+
+        if (hamburgerBtn) {
+            hamburgerBtn.addEventListener('click', () => {
+                document.body.classList.add('drawer-open');
+                setTimeout(initMobileTranslate, 100); 
+            });
+        }
+
+        // 2. MAIN LOGIC (Search, Categories, Rendering)
+        const searchDrawerInput = document.getElementById('search-drawer-input');
+        const searchSuggestionsContainer = document.getElementById('search-suggestions-container');
+        const mobileSearchForm = document.getElementById('mobile-search-form');
+        const postsGrid = document.getElementById('blog-posts-grid');
+        const sectionTitle = document.querySelector('section > h3.text-2xl');
+        const categoriesContainer = document.getElementById('categories-container'); // Dynamic Container
+
+        let allPostsData = [];
+        let blogTitleSuggestions = [];
+
+        function stripHtml(html) {
+           let tmp = document.createElement("DIV");
+           tmp.innerHTML = html;
+           return tmp.textContent || tmp.innerText || "";
+        }
+
+        // Helper: Render Posts
+        function renderPosts(posts) {
+            if (!postsGrid) return;
+            postsGrid.innerHTML = '';
+
+            if (posts.length === 0) {
+                postsGrid.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <p class="text-lg text-classic-taupe font-medium">No stories found.</p>
+                        <button onclick="window.location.href='index.html'" class="mt-4 text-ivory-brown hover:underline">View all stories</button>
+                    </div>`;
+                return;
+            }
+
+            posts.forEach(post => {
+                const article = document.createElement('article');
+                article.className = "bg-ivory rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300 flex flex-col h-full border border-ivory-linen group";
+                
+                // Main Post Image
+                const imgUrl = post.imageUrl || 'https://picsum.photos/400/300';
+                const category = post.category ? post.category.charAt(0).toUpperCase() + post.category.slice(1) : 'General';
+                
+                article.innerHTML = `
+                    <div class="relative h-48 overflow-hidden cursor-pointer view-post-trigger" data-post-id="${post.id}">
+                        <img src="${imgUrl}" alt="${post.title}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        <span class="absolute top-3 left-3 bg-ivory-brown/90 backdrop-blur-sm text-off-white text-xs px-3 py-1 rounded-full uppercase font-bold tracking-wide shadow-sm">${category}</span>
+                    </div>
+                    <div class="p-5 flex flex-col flex-grow">
+                        <h3 class="text-lg font-bold text-ivory-brown mb-2 line-clamp-2 cursor-pointer view-post-trigger hover:text-classic-taupe transition-colors" data-post-id="${post.id}">${post.title}</h3>
+                        <p class="text-classic-taupe text-sm line-clamp-3 mb-4 flex-grow leading-relaxed">${stripHtml(post.content).substring(0, 120)}...</p>
+                        <div class="flex items-center justify-between text-xs text-classic-taupe border-t border-ivory-linen pt-4 mt-auto">
+                            <div class="flex items-center gap-2">
+                                <div class="w-6 h-6 rounded-full bg-pastel-ivory flex items-center justify-center text-ivory-brown font-bold text-[10px]">${post.authorName ? post.authorName[0] : 'A'}</div>
+                                <span class="font-medium truncate max-w-[100px]">${post.authorName || 'Writer'}</span>
+                            </div>
+                            <span>${post.createdAt ? new Date(post.createdAt.toDate()).toLocaleDateString() : 'Recently'}</span>
+                        </div>
+                    </div>
+                `;
+                postsGrid.appendChild(article);
+            });
+        }
+
+        // ================================================
+        // === 3. DYNAMIC CATEGORY LOADING LOGIC (FIXED) ===
+        // ================================================
+        function loadDynamicCategories() {
+            if (!categoriesContainer) return;
+
+            // FIXED: Use onSnapshot instead of get() for real-time updates
+            db.collection('categories').orderBy('name').onSnapshot(snapshot => {
+                categoriesContainer.innerHTML = ''; 
+
+                // 1. Add "All Stories" Button
+                const allBtn = document.createElement('button');
+                allBtn.className = 'category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-ivory-brown text-off-white rounded-full whitespace-nowrap font-medium flex-shrink-0';
+                allBtn.dataset.category = 'all';
+                allBtn.innerHTML = `
+                    <img src="https://cdn-icons-png.flaticon.com/512/10473/10473267.png" class="w-6 h-6 rounded-full object-cover border border-white/20">
+                    <span>All Stories</span>
+                `;
+                categoriesContainer.appendChild(allBtn);
+
+                if(snapshot.empty) {
+                    console.log("No categories found in database.");
+                }
+
+                // 2. Add dynamic categories from Firestore
+                snapshot.forEach(doc => {
+                    const cat = doc.data();
+                    const btn = document.createElement('button');
+                    btn.className = 'category-button flex items-center gap-2 pl-2 pr-4 py-1.5 bg-pastel-ivory text-ivory-brown rounded-full whitespace-nowrap font-medium hover:bg-classic-taupe hover:text-off-white transition-colors flex-shrink-0';
+                    btn.dataset.category = cat.name.toLowerCase();
+                    
+                    // Image URL logic
+                    const fallbackIcon = 'https://cdn-icons-png.flaticon.com/512/56/56755.png';
+                    // Check both imageUrl (new format) and icon (old format if exists)
+                    const imgUrl = cat.imageUrl || cat.icon || fallbackIcon;
+
+                    btn.innerHTML = `
+                        <img src="${imgUrl}" alt="${cat.name}" 
+                             class="w-6 h-6 rounded-full object-cover border border-ivory-linen"
+                             onerror="this.src='${fallbackIcon}'"> 
+                        <span>${cat.name}</span>
+                    `;
+                    categoriesContainer.appendChild(btn);
+                });
+                
+                // Check scroll buttons visibility after loading
+                checkCategoryScroll();
+                
+            }, error => {
+                console.error("Error loading categories:", error);
+                categoriesContainer.innerHTML = '<p class="text-xs text-red-400">Error loading categories</p>';
+            });
+        }
+
+        // --- Category Click Listener (Event Delegation) ---
+        if (categoriesContainer) {
+            categoriesContainer.addEventListener('click', (e) => {
+                const btn = e.target.closest('.category-button');
+                if (!btn) return;
+
+                // UI Update
+                document.querySelectorAll('.category-button').forEach(b => {
+                    b.classList.remove('bg-ivory-brown', 'text-off-white');
+                    b.classList.add('bg-pastel-ivory', 'text-ivory-brown');
+                });
+                btn.classList.remove('bg-pastel-ivory', 'text-ivory-brown');
+                btn.classList.add('bg-ivory-brown', 'text-off-white');
+
+                // Filtering
+                const selectedCategory = btn.dataset.category;
+                if (sectionTitle) {
+                    sectionTitle.textContent = selectedCategory === 'all' 
+                        ? "All Stories" 
+                        : `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} Stories`;
+                }
+
+                if (selectedCategory === 'all') {
+                    renderPosts(allPostsData);
+                } else {
+                    const filteredPosts = allPostsData.filter(post => 
+                        post.category && post.category.toLowerCase() === selectedCategory.toLowerCase()
+                    );
+                    renderPosts(filteredPosts);
+                }
+            });
+        }
+
+        // --- 4. LOAD DATA ---
+        function initApp() {
+            if (typeof db !== 'undefined') {
+                if(postsGrid) postsGrid.innerHTML = '<div class="loader mx-auto col-span-full mt-12"></div>';
+                
+                // Load Posts
+                db.collection('posts').orderBy('createdAt', 'desc').limit(50).onSnapshot(snapshot => {
+                    allPostsData = [];
+                    blogTitleSuggestions = [];
+                    
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (data.status === 'approved') {
+                            const post = { id: doc.id, ...data };
+                            allPostsData.push(post);
+                            if (data.title) blogTitleSuggestions.push(data.title);
+                        }
+                    });
+                    renderPosts(allPostsData);
+                }, error => {
+                     console.error("Error fetching posts:", error);
+                     if(postsGrid) postsGrid.innerHTML = '<p class="text-center text-red-500">Error loading posts.</p>';
+                });
+
+                // Load Categories
+                loadDynamicCategories();
+            } else {
+                // Wait for Firebase to initialize
+                setTimeout(initApp, 500);
+            }
+        }
+        
+        // Start App
+        initApp();
+
+
+        // Search Suggestions
+        if (searchDrawerInput && searchSuggestionsContainer) {
+            searchDrawerInput.addEventListener('input', () => {
+                const query = searchDrawerInput.value.toLowerCase().trim();
+                searchSuggestionsContainer.innerHTML = ''; 
+                if (query.length === 0) return;
+                const filteredSuggestions = blogTitleSuggestions.filter(title => title.toLowerCase().includes(query));
+                if (filteredSuggestions.length > 0) {
+                    filteredSuggestions.slice(0, 8).forEach(title => {
+                        const item = document.createElement('div');
+                        item.className = 'p-3 border-b border-ivory-linen cursor-pointer hover:bg-pastel-ivory hover:text-ivory-brown transition-colors flex items-center gap-3 text-sm text-classic-taupe';
+                        item.innerHTML = `<svg class="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg><span>${title}</span>`;
+                        item.addEventListener('click', () => {
+                            searchDrawerInput.value = title;
+                            window.location.href = `index.html?search=${encodeURIComponent(title)}`;
+                        });
+                        searchSuggestionsContainer.appendChild(item);
+                    });
+                } else {
+                    searchSuggestionsContainer.innerHTML = `<div class="p-4 text-center text-gray-400 text-sm">No stories found.</div>`;
+                }
+            });
+        }
+        
+        if (mobileSearchForm) {
+            mobileSearchForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const query = searchDrawerInput.value;
+                if(query) window.location.href = `index.html?search=${encodeURIComponent(query)}`;
+            });
+        }
+
+        // UI Controls & Drawers (Auth, Search, Notifications, Sidebar)
+        const mobileSearchBtn = document.getElementById('mobile-search-btn');
+        const desktopSearchBtn = document.getElementById('desktop-search-btn');
+        const searchDrawer = document.getElementById('search-drawer');
+        const searchDrawerBackdrop = document.getElementById('search-drawer-backdrop');
+        const closeSearchDrawerBtn = document.getElementById('close-search-drawer-btn');
+        const bottomNavLoginBtn = document.getElementById('bottom-nav-login-btn');
+        const bottomNavProfileLink = document.getElementById('bottom-nav-profile-link');
+        const bottomNavAvatar = document.getElementById('bottom-nav-avatar');
+        const drawerLoginBtn = document.getElementById('drawer-login-btn');
+        const drawerLogoutBtn = document.getElementById('drawer-logout-btn');
+        const drawerProfileInfo = document.getElementById('drawer-profile-info');
+        const drawerAuthLinks = document.getElementById('drawer-auth-links');
+        const notificationBellBtn = document.getElementById('notification-bell-btn');
+        const notificationDrawerBackdrop = document.getElementById('notification-drawer-backdrop');
+        const closeNotificationDrawerBtn = document.getElementById('close-notification-drawer-btn');
+        const authDrawerBackdrop = document.getElementById('auth-drawer-backdrop');
+        const closeAuthDrawerBtn = document.getElementById('close-auth-drawer-btn');
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const authLoginView = document.getElementById('auth-drawer-login-view');
+        const authSignupView = document.getElementById('auth-drawer-signup-view');
+        const authResetView = document.getElementById('auth-drawer-reset-view');
+        const authShowSignupLinks = document.querySelectorAll('#auth-show-signup-link');
+        const authShowLoginLinks = document.querySelectorAll('#auth-show-login-link');
+        const authShowResetLinks = document.querySelectorAll('#auth-show-reset-link');
+        const authBackToLoginLinks = document.querySelectorAll('#auth-back-to-login-link');
+        const scrollLeftBtn = document.getElementById('scroll-left-btn');
+        const scrollRightBtn = document.getElementById('scroll-right-btn');
+
+        const closeLeftDrawer = () => {
+            if (leftDrawer) {
+                leftDrawer.classList.add('vibrate-anim');
+                setTimeout(() => {
+                    document.body.classList.remove('drawer-open');
+                    leftDrawer.classList.remove('vibrate-anim');
+                }, 300);
+            }
+        };
+
+        if (leftDrawerBackdrop) leftDrawerBackdrop.addEventListener('click', closeLeftDrawer);
+        if (closeLeftDrawerBtn) closeLeftDrawerBtn.addEventListener('click', closeLeftDrawer);
+        
+        const tabMenu = document.getElementById('drawer-tab-menu');
+        const tabCategories = document.getElementById('drawer-tab-categories');
+        const contentMenu = document.getElementById('drawer-menu-content');
+        const contentCategories = document.getElementById('drawer-categories-content');
+
+        if (tabMenu && tabCategories && contentMenu && contentCategories) {
+            tabMenu.addEventListener('click', () => {
+                contentMenu.classList.remove('hidden'); contentCategories.classList.add('hidden');
+                tabMenu.classList.add('text-ivory-brown', 'border-yellow-400'); tabMenu.classList.remove('text-classic-taupe', 'border-transparent');
+                tabCategories.classList.add('text-classic-taupe', 'border-transparent'); tabCategories.classList.remove('text-ivory-brown', 'border-yellow-400');
+            });
+            tabCategories.addEventListener('click', () => {
+                contentMenu.classList.add('hidden'); contentCategories.classList.remove('hidden');
+                tabCategories.classList.add('text-ivory-brown', 'border-yellow-400'); tabCategories.classList.remove('text-classic-taupe', 'border-transparent');
+                tabMenu.classList.add('text-classic-taupe', 'border-transparent'); tabMenu.classList.remove('text-ivory-brown', 'border-yellow-400');
+            });
+        }
+
+        if (leftDrawer) {
+            leftDrawer.querySelectorAll('.category-button, nav a, .theme-toggle-button').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (link.tagName === 'A' || link.classList.contains('category-button')) closeLeftDrawer();
+                });
+            });
+        }
+
+        const openSearchDrawer = (e) => {
+            if(e) e.preventDefault();
+            document.body.classList.add('search-drawer-open');
+            setTimeout(() => { if(searchDrawerInput) searchDrawerInput.focus(); }, 300);
+        };
+        const closeSearchDrawer = () => document.body.classList.remove('search-drawer-open');
+
+        if (mobileSearchBtn) mobileSearchBtn.addEventListener('click', openSearchDrawer);
+        if (desktopSearchBtn) desktopSearchBtn.addEventListener('click', openSearchDrawer);
+        if (searchDrawerBackdrop) searchDrawerBackdrop.addEventListener('click', closeSearchDrawer);
+        if (closeSearchDrawerBtn) closeSearchDrawerBtn.addEventListener('click', closeSearchDrawer);
+
+        const openNotificationDrawer = () => document.body.classList.add('notification-drawer-open');
+        const closeNotificationDrawer = () => document.body.classList.remove('notification-drawer-open');
+        if (notificationBellBtn) notificationBellBtn.addEventListener('click', openNotificationDrawer);
+        if (notificationDrawerBackdrop) notificationDrawerBackdrop.addEventListener('click', closeNotificationDrawer);
+        if (closeNotificationDrawerBtn) closeNotificationDrawerBtn.addEventListener('click', closeNotificationDrawer);
+
+        const openAuthDrawer = (view = 'login') => {
+            if (!authLoginView || !authSignupView || !authResetView) return;
+            authLoginView.classList.add('hidden'); authSignupView.classList.add('hidden'); authResetView.classList.add('hidden');
+            if (view === 'signup') authSignupView.classList.remove('hidden'); 
+            else if (view === 'reset') authResetView.classList.remove('hidden'); 
+            else authLoginView.classList.remove('hidden');
+            document.body.classList.add('auth-drawer-open'); closeLeftDrawer();
+        };
+        const closeAuthDrawer = () => document.body.classList.remove('auth-drawer-open');
+
+        if (loginBtn) loginBtn.addEventListener('click', () => openAuthDrawer('login'));
+        if (signupBtn) signupBtn.addEventListener('click', () => openAuthDrawer('signup'));
+        if (bottomNavLoginBtn) bottomNavLoginBtn.addEventListener('click', () => openAuthDrawer('login'));
+        if (drawerLoginBtn) drawerLoginBtn.addEventListener('click', () => openAuthDrawer('login'));
+        
+        authShowSignupLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); openAuthDrawer('signup'); }));
+        authShowLoginLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); openAuthDrawer('login'); }));
+        authShowResetLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); openAuthDrawer('reset'); }));
+        authBackToLoginLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); openAuthDrawer('login'); }));
+
+        if (authDrawerBackdrop) authDrawerBackdrop.addEventListener('click', closeAuthDrawer);
+        if (closeAuthDrawerBtn) closeAuthDrawerBtn.addEventListener('click', closeAuthDrawer);
+
+        // Login Logic
+        const loginFormDrawer = document.getElementById('login-form-drawer');
+        if(loginFormDrawer){
+            loginFormDrawer.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = loginFormDrawer['login-email'].value;
+                const password = loginFormDrawer['login-password'].value;
+                const errorEl = document.getElementById('login-error-drawer');
+                errorEl.textContent = ''; errorEl.className = 'hidden'; 
+                auth.signInWithEmailAndPassword(email, password)
+                    .then(() => {
+                        document.body.classList.remove('auth-drawer-open');
+                        loginFormDrawer.reset();
+                    })
+                    .catch((error) => { 
+                        let friendlyMsg = "Something went wrong. Please try again.";
+                        if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') friendlyMsg = "❌ Incorrect Email or Password.";
+                        else if (error.code === 'auth/invalid-email') friendlyMsg = "⚠️ Please enter a valid email address.";
+                        else if (error.code === 'auth/too-many-requests') friendlyMsg = "⏳ Too many attempts. Please try again later.";
+                        errorEl.textContent = friendlyMsg;
+                        errorEl.className = 'mt-4 p-3 bg-red-100 border border-red-400 text-red-700 text-sm rounded-lg text-center animate-fade-in block font-medium';
+                    });
+            });
+        }
+
+        const syncUI = (user) => {
+            if (user) {
+                const avatarSrc = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'U')}&background=8B5E34&color=fff`;
+                if (bottomNavLoginBtn) bottomNavLoginBtn.style.display = 'none';
+                if (bottomNavProfileLink) bottomNavProfileLink.style.display = 'flex';
+                if (bottomNavAvatar) bottomNavAvatar.src = avatarSrc;
+                if (drawerAuthLinks) drawerAuthLinks.style.display = 'none';
+                if (drawerProfileInfo) drawerProfileInfo.style.display = 'block';
+                closeAuthDrawer();
+            } else {
+                if (bottomNavLoginBtn) bottomNavLoginBtn.style.display = 'flex';
+                if (bottomNavProfileLink) bottomNavProfileLink.style.display = 'none';
+                if (drawerAuthLinks) drawerAuthLinks.style.display = 'block';
+                if (drawerProfileInfo) drawerProfileInfo.style.display = 'none';
+            }
+        };
+        
+        if (typeof firebase !== 'undefined') {
+            firebase.auth().onAuthStateChanged(async (user) => {
+                syncUI(user);
+            });
+        }
+
+        if (drawerLogoutBtn) {
+            drawerLogoutBtn.addEventListener('click', () => {
+                const mainLogoutBtn = document.getElementById('logout-btn');
+                if (mainLogoutBtn) { mainLogoutBtn.click(); } 
+                else if (typeof firebase !== 'undefined') { firebase.auth().signOut(); }
+            });
+        }
+
+        function checkCategoryScroll() {
+            if (!categoriesContainer || !scrollLeftBtn || !scrollRightBtn) return;
+            if (window.innerWidth < 768) {
+                scrollLeftBtn.classList.add('hidden'); scrollRightBtn.classList.add('hidden'); return;
+            }
+            const hasOverflow = categoriesContainer.scrollWidth > categoriesContainer.clientWidth;
+            if (hasOverflow) { scrollLeftBtn.classList.remove('hidden'); scrollRightBtn.classList.remove('hidden'); } 
+            else { scrollLeftBtn.classList.add('hidden'); scrollRightBtn.classList.add('hidden'); }
+        }
+        checkCategoryScroll();
+        window.addEventListener('resize', checkCategoryScroll);
+    });
+</script>
+
     <script src="script.js"></script> 
+
+<div id="qr-login-overlay" class="fixed inset-0 z-[300] hidden flex-col items-center justify-center bg-ivory/95 backdrop-blur-lg transition-opacity duration-500">
+    <div class="relative mb-6">
+        <div class="w-16 h-16 border-4 border-ivory-linen rounded-full"></div>
+        <div class="absolute top-0 left-0 w-16 h-16 border-4 border-ivory-brown rounded-full border-t-transparent animate-spin"></div>
+    </div>
+    
+    <h2 class="text-2xl font-bold text-ivory-brown animate-pulse">Linking your account...</h2>
+    <p class="text-classic-taupe mt-2 text-sm">Please wait while we verify your credentials.</p>
+</div>
 
 </body>
 </html>

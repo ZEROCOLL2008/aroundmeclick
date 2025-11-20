@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const auth = firebase.auth();
     const db = firebase.firestore();
-    const storage = firebase.storage(); // *** CV UPLOAD WALATA MEKA ONE ***
+    const storage = firebase.storage(); 
     const IMGBB_API_KEY = '8fb17a65d31f9a5e7b81c80861f9075f';
     console.log("Profile Page Script Initialized with Firebase Config!");
 
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('open-create-modal-article-btn'),
         document.getElementById('open-create-modal-media-btn'),
         document.getElementById('header-create-post-btn'),
-        document.getElementById('open-create-modal-bottom-nav') // Bottom nav create button
+        document.getElementById('open-create-modal-bottom-nav') 
     ];
     const closeCreateModalBtn = document.getElementById('close-create-modal-btn');
     const publishPostBtn = document.getElementById('publish-post-btn');
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const plusApplicationModal = document.getElementById('plus-application-modal');
     const closeApplicationModalBtn = document.getElementById('close-application-modal-btn');
     const plusApplicationForm = document.getElementById('plus-application-form');
-    // *** ALUTH PLUS FORM FIELDS ***
+    
     const plusAppName = document.getElementById('application-name');
     const plusAppAge = document.getElementById('application-age');
     const plusAppLocation = document.getElementById('application-location');
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const proApplicationModal = document.getElementById('pro-application-modal');
     const closeProApplicationModalBtn = document.getElementById('close-pro-application-modal-btn');
     const proApplicationForm = document.getElementById('pro-application-form');
-    // *** ALUTH PRO FORM FIELDS ***
+    
     const proAppName = document.getElementById('pro-application-name');
     const proAppAge = document.getElementById('pro-application-age');
     const proAppLocation = document.getElementById('pro-application-location');
@@ -116,6 +116,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyProfileLinkBtn = document.getElementById('copy-profile-link-btn');
     const facebookProfileShareBtn = document.getElementById('facebook-profile-share-btn');
     const whatsappProfileShareBtn = document.getElementById('whatsapp-profile-share-btn');
+
+    // --- Link Profile / QR Modal Selectors (NEW) ---
+    const linkProfileBtn = document.getElementById('link-profile-btn');
+    const linkProfileModal = document.getElementById('link-profile-modal');
+    const closeLinkProfileModalBtn = document.getElementById('close-link-profile-modal');
+    const verifyLinkBtn = document.getElementById('verify-link-btn');
+    const verificationInput = document.getElementById('verification-input');
+    const verificationDisplay = document.getElementById('verification-code-display');
+    const linkErrorMsg = document.getElementById('link-error-msg');
+    const linkVerifyView = document.getElementById('link-verify-view');
+    const linkQrView = document.getElementById('link-qr-view');
+    const qrcodeContainer = document.getElementById('qrcode-container');
 
     // --- Drawer / Common UI Selectors ---
     const hamburgerBtn = document.getElementById('mobile-hamburger-btn');
@@ -160,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let uploadedFiles = [];
     let newAvatarFile = null;
     let newCoverFile = null;
-    let currentProfileUid = null; // Profile eka view karana userge ID eka
+    let currentProfileUid = null; 
 
     // --- 3. HELPER FUNCTIONS ---
 
@@ -218,9 +230,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             snapshot.forEach(doc => {
                 const post = { id: doc.id, ...doc.data() };
-                // Public view ekedi status eka 'approved' nattam pennanna epa
                 if (isOwner || post.status === 'approved') {
-                    const postCard = createPostCard(post, isOwner); // Owner ta witharai menu eka pennanne
+                    const postCard = createPostCard(post, isOwner); 
                     myPostsGrid.appendChild(postCard);
                 }
             });
@@ -236,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const snapshot = await db.collection('posts')
                 .where('likedBy', 'array-contains', userId)
-                .where('status', '==', 'approved') // Liked posts pennuwath approved ewa witharak pennanna
+                .where('status', '==', 'approved')
                 .orderBy('createdAt', 'desc')
                 .get();
                 
@@ -247,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             snapshot.forEach(doc => {
                 const post = { id: doc.id, ...doc.data() };
-                const postCard = createPostCard(post, false); // Liked posts waladi menu pennanna epa
+                const postCard = createPostCard(post, false);
                 myPostsGrid.appendChild(postCard);
             });
         } catch (error) {
@@ -367,14 +378,12 @@ document.addEventListener('DOMContentLoaded', () => {
             loadComments(postId);
             postViewModal.classList.remove('hidden');
 
-            // === ALUTH LOGIC EKA: COMMENT WALATA SCROLL KARANNA ===
             if (scrollToComments) {
                 const commentsList = document.getElementById('comments-list');
                 if (commentsList) {
-                    // Modal eka open wenna podi welak deela scroll karanna
                     setTimeout(() => {
-                        commentsList.parentElement.scrollTop = commentsList.offsetTop - 50; // 50px padding
-                    }, 300); // 300ms animation eka nisa
+                        commentsList.parentElement.scrollTop = commentsList.offsetTop - 50; 
+                    }, 300);
                 }
             }
 
@@ -454,7 +463,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             await postRef.delete();
             alert('Post deleted successfully!');
-            loadUserPosts(user.uid, true); // Refresh the grid
+            loadUserPosts(user.uid, true);
         } catch (error) {
             console.error("Error deleting post:", error);
             alert(`Error: ${error.message}`);
@@ -563,7 +572,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.classList.remove('auth-drawer-open');
     };
 
-    // === ALUTH SHARE FUNCTION EKA ===
     const setupShareButton = (profileUid, displayName) => {
         if (!shareProfileBtn) return;
         
@@ -574,7 +582,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         shareProfileBtn.addEventListener('click', async () => {
             if (navigator.share) {
-                // Mobile Native Share
                 try {
                     await navigator.share({
                         title: `${displayName}'s Profile`,
@@ -587,7 +594,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             } else {
-                // Desktop Modal Share
                 if (shareProfileModal) {
                     if(shareProfileLinkInput) shareProfileLinkInput.value = url;
                     if(facebookProfileShareBtn) facebookProfileShareBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
@@ -599,6 +605,135 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // =======================================================
+    // === LINK PROFILE / QR CODE LOGIC (NEW) ===
+    // =======================================================
+    let currentVerificationCode = '';
+
+    // Generate Random 4-digit Code
+    function generateVerificationCode() {
+        return Math.floor(1000 + Math.random() * 9000).toString();
+    }
+
+    if (linkProfileBtn) {
+        linkProfileBtn.addEventListener('click', () => {
+            // 1. Reset Modal State
+            if(linkVerifyView) {
+                linkVerifyView.classList.remove('hidden');
+                linkVerifyView.classList.add('flex');
+            }
+            if(linkQrView) {
+                linkQrView.classList.add('hidden');
+                linkQrView.classList.remove('flex');
+            }
+            if(verificationInput) verificationInput.value = '';
+            if(linkErrorMsg) linkErrorMsg.classList.add('hidden');
+            if(qrcodeContainer) qrcodeContainer.innerHTML = ''; 
+
+            // 2. Generate New Code
+            currentVerificationCode = generateVerificationCode();
+            if(verificationDisplay) verificationDisplay.textContent = currentVerificationCode;
+
+            // 3. Show Modal
+            if (linkProfileModal) linkProfileModal.classList.remove('hidden');
+        });
+    }
+
+    if (closeLinkProfileModalBtn) {
+        closeLinkProfileModalBtn.addEventListener('click', () => {
+            if (linkProfileModal) linkProfileModal.classList.add('hidden');
+        });
+    }
+
+    if (linkProfileModal) {
+        linkProfileModal.addEventListener('click', (e) => {
+            if (e.target === linkProfileModal) linkProfileModal.classList.add('hidden');
+        });
+    }
+if (verifyLinkBtn) {
+        verifyLinkBtn.addEventListener('click', () => {
+            const userEnteredCode = verificationInput.value.trim();
+
+            if (userEnteredCode === currentVerificationCode) {
+                // --- SUCCESS ---
+                if (linkErrorMsg) linkErrorMsg.classList.add('hidden');
+                
+                // Switch Views
+                if (linkVerifyView) {
+                    linkVerifyView.classList.add('hidden');
+                    linkVerifyView.classList.remove('flex');
+                }
+                if (linkQrView) {
+                    linkQrView.classList.remove('hidden');
+                    linkQrView.classList.add('flex');
+                }
+
+                // Wait for DOM update
+                setTimeout(() => {
+                    const user = auth.currentUser;
+
+                    // 1. User ඉන්නවද Check කරනවා
+                    if (!user) {
+                        alert("Error: No user logged in to generate QR.");
+                        return;
+                    }
+
+                    // 2. QR Library එක Load වෙලාද බලනවා
+                    if (typeof QRCode === 'undefined') {
+                        alert("Error: QRCode library not loaded. Check internet.");
+                        return;
+                    }
+
+                    if (qrcodeContainer) {
+                        qrcodeContainer.innerHTML = ''; // Clear old QR
+
+                        // --- වැදගත්ම කොටස: URL එක හදන හැටි ---
+                        // මෙතන origin එක හරියට එනවද බලන්න
+                        const baseUrl = window.location.origin; 
+                        const loginUrl = `${baseUrl}/index.html?autologin=true&uid=${user.uid}&t=${Date.now()}`;
+
+                        console.log("GENERATED URL:", loginUrl); // Console එකේ බලන්න
+
+                        try {
+                            // QR Code එක හදනවා
+                            new QRCode(qrcodeContainer, {
+                                text: loginUrl,
+                                width: 180,
+                                height: 180,
+                                colorDark : "#8B5E34",
+                                colorLight : "#ffffff",
+                                correctLevel : QRCode.CorrectLevel.H
+                            });
+
+                            // --- DEBUGGING: ලින්ක් එක ඇස් දෙකෙන් බලාගන්න ---
+                            // QR එකට යටින් ලින්ක් එක පෙන්නනවා. මේක scan වෙන්නේ නැත්නම්
+                            // අඩුම තරමේ ලින්ක් එක හැදිලද කියලවත් බලාගන්න පුළුවන්.
+                            const debugText = document.createElement('p');
+                            debugText.className = "text-xs text-red-500 mt-2 break-all text-center border border-red-200 p-1 bg-red-50 rounded";
+                            debugText.style.maxWidth = "250px";
+                            debugText.textContent = "LINK: " + loginUrl;
+                            qrcodeContainer.appendChild(debugText);
+
+                        } catch (error) {
+                            console.error("QR Generation Error:", error);
+                            qrcodeContainer.textContent = "QR Error: " + error.message;
+                        }
+                    }
+                }, 100);
+
+            } else {
+                // --- ERROR ---
+                if (linkErrorMsg) linkErrorMsg.classList.remove('hidden');
+                if (verificationInput) {
+                    verificationInput.classList.add('border-red-500');
+                    setTimeout(() => {
+                        verificationInput.classList.remove('border-red-500');
+                    }, 2000);
+                }
+            }
+        });
+    }
+
     // --- 8. EVENT LISTENERS ---
 
     if (myPostsGrid) {
@@ -607,7 +742,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const editBtn = e.target.closest('.edit-post-btn');
             const deleteBtn = e.target.closest('.delete-post-btn');
             const menuBtn = e.target.closest('.post-menu-button');
-            const commentsTrigger = e.target.closest('.open-comments-trigger'); // ALUTH
+            const commentsTrigger = e.target.closest('.open-comments-trigger');
 
             if (menuBtn) {
                 const menu = menuBtn.nextElementSibling;
@@ -616,13 +751,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (viewTrigger) {
                 const postId = viewTrigger.dataset.postId;
-                if (postId) openPostViewModal(postId, false); // false = don't scroll
+                if (postId) openPostViewModal(postId, false);
             }
-            // === ALUTH: COMMENT CLICK ===
             if (commentsTrigger) {
                 e.preventDefault();
                 const postId = commentsTrigger.dataset.postId;
-                if (postId) openPostViewModal(postId, true); // true = scroll to comments
+                if (postId) openPostViewModal(postId, true);
             }
             if (editBtn) {
                 e.preventDefault();
@@ -643,7 +777,7 @@ document.addEventListener('DOMContentLoaded', () => {
         myPostsTab.addEventListener('click', () => {
             myPostsTab.classList.add('active');
             likedPostsTab.classList.remove('active');
-            if (currentProfileUid) loadUserPosts(currentProfileUid, true); // Assume owner
+            if (currentProfileUid) loadUserPosts(currentProfileUid, true);
         });
 
         likedPostsTab.addEventListener('click', () => {
@@ -663,7 +797,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (plusApplicationModal) plusApplicationModal.classList.remove('hidden');
         });
     }
-    // *** ALUTH ***
+    
     if (applyToProBtn) {
         applyToProBtn.addEventListener('click', () => {
             if (proApplicationModal) proApplicationModal.classList.remove('hidden');
@@ -701,11 +835,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cancelEditBtn) cancelEditBtn.addEventListener('click', () => { if(editProfileModal) editProfileModal.classList.add('hidden'); });
     if (closeEditPostModalBtn) closeEditPostModalBtn.addEventListener('click', () => { if(editPostModal) editPostModal.classList.add('hidden'); });
     if (closeCreateModalBtn) closeCreateModalBtn.addEventListener('click', () => { if(createPostModal) createPostModal.classList.add('hidden'); });
-    // *** ALUTH ***
+    
     if (closeApplicationModalBtn) closeApplicationModalBtn.addEventListener('click', () => { if (plusApplicationModal) plusApplicationModal.classList.add('hidden'); });
     if (closeProApplicationModalBtn) closeProApplicationModalBtn.addEventListener('click', () => { if (proApplicationModal) proApplicationModal.classList.add('hidden'); });
     
-    // ALUTH: Share Modal Close Listeners
+    // Share Modal Close Listeners
     if (closeShareProfileModalBtn) {
         closeShareProfileModalBtn.addEventListener('click', () => {
             if (shareProfileModal) shareProfileModal.classList.add('hidden');
@@ -732,7 +866,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 9. EVENT LISTENERS (Common UI) ---
 
-    // *** ALUTH: CV File Name Display Listeners ***
     if (plusAppCvInput && plusAppCvFilename) {
         plusAppCvInput.addEventListener('change', () => {
             plusAppCvFilename.textContent = plusAppCvInput.files[0] ? plusAppCvInput.files[0].name : 'No file selected';
@@ -743,7 +876,6 @@ document.addEventListener('DOMContentLoaded', () => {
             proAppCvFilename.textContent = proAppCvInput.files[0] ? proAppCvInput.files[0].name : 'No file selected';
         });
     }
-    // *** END ALUTH ***
 
     if (hamburgerBtn) {
         hamburgerBtn.addEventListener('click', () => {
@@ -829,7 +961,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Theme Toggle Logic
     const setTheme = (isDark) => {
         if (isDark) {
             document.documentElement.classList.add('dark');
@@ -923,7 +1054,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     title: document.getElementById('edit-post-title').value,
                     category: document.getElementById('edit-post-category').value.toLowerCase(),
                     content: tinymce.get('edit-post-content').getContent(),
-                    status: 'pending' // Resubmit for approval
+                    status: 'pending'
                 };
 
                 await postRef.update(postData);
@@ -1012,9 +1143,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // =======================================================
-    // === ALUTH PLUS APPLICATION SUBMIT LOGIC ===
-    // =======================================================
     if (plusApplicationForm) {
         plusApplicationForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1027,20 +1155,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Aluth data ganna
             const fullName = plusAppName.value;
             const age = plusAppAge.value;
             const location = plusAppLocation.value;
             const about = plusAppAbout.value;
             const cvFile = plusAppCvInput.files[0];
 
-            // Validation
             if (!fullName || !age || !location || !about || !cvFile) {
                 statusMsg.textContent = '❌ Please fill out all fields and upload your CV.';
                 statusMsg.className = 'text-center text-sm mt-4 text-red-600';
                 return;
             }
-            if (cvFile.size > 5 * 1024 * 1024) { // 5MB limit
+            if (cvFile.size > 5 * 1024 * 1024) { 
                 statusMsg.textContent = '❌ CV file is too large (Max 5MB).';
                 statusMsg.className = 'text-center text-sm mt-4 text-red-600';
                 return;
@@ -1057,31 +1183,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error("You already have a pending application.");
                 }
 
-                // 1. CV eka Storage walata upload karanna
                 const storageRef = storage.ref(`cv_uploads/plus/${user.uid}/${cvFile.name}`);
                 const uploadTask = await storageRef.put(cvFile);
                 const cvUrl = await uploadTask.ref.getDownloadURL();
                 
                 statusMsg.textContent = 'CV uploaded! Submitting application...';
 
-                // 2. Data eka Firestore walata ready karanna
                 const applicationData = {
                     userId: user.uid,
-                    displayName: user.displayName || 'N/A', // Auth eken
-                    email: user.email, // Auth eken
-                    
-                    // Form eken gaththa aluth data
+                    displayName: user.displayName || 'N/A', 
+                    email: user.email, 
                     fullName: fullName,
                     age: age,
                     location: location,
                     about: about,
-                    cvUrl: cvUrl, // Upload karapu CV eke URL eka
-                    
+                    cvUrl: cvUrl, 
                     submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
                     status: 'pending'
                 };
 
-                // 3. Firestore walata submit karanna
                 await db.collection('plusApplications').add(applicationData);
                 
                 statusMsg.textContent = '✅ Application submitted successfully! We will review it soon.';
@@ -1112,9 +1232,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // =======================================================
-    // === ALUTH PRO APPLICATION SUBMIT LOGIC ===
-    // =======================================================
     if (proApplicationForm) {
         proApplicationForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1127,20 +1244,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Aluth data ganna
             const fullName = proAppName.value;
             const age = proAppAge.value;
             const location = proAppLocation.value;
             const about = proAppAbout.value;
             const cvFile = proAppCvInput.files[0];
             
-            // Validation
             if (!fullName || !age || !location || !about || !cvFile) {
                 statusMsg.textContent = '❌ Please fill out all fields and upload your CV.';
                 statusMsg.className = 'text-center text-sm mt-4 text-red-600';
                 return;
             }
-            if (cvFile.size > 5 * 1024 * 1024) { // 5MB limit
+            if (cvFile.size > 5 * 1024 * 1024) { 
                 statusMsg.textContent = '❌ CV file is too large (Max 5MB).';
                 statusMsg.className = 'text-center text-sm mt-4 text-red-600';
                 return;
@@ -1157,31 +1272,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error("You already have a pending Pro application.");
                 }
 
-                // 1. CV eka Storage walata upload karanna
                 const storageRef = storage.ref(`cv_uploads/pro/${user.uid}/${cvFile.name}`);
                 const uploadTask = await storageRef.put(cvFile);
                 const cvUrl = await uploadTask.ref.getDownloadURL();
                 
                 statusMsg.textContent = 'CV uploaded! Submitting application...';
 
-                // 2. Data eka Firestore walata ready karanna
                 const applicationData = {
                     userId: user.uid,
-                    displayName: user.displayName || 'N/A', // Auth eken
-                    email: user.email, // Auth eken
-
-                    // Form eken gaththa aluth data
+                    displayName: user.displayName || 'N/A', 
+                    email: user.email, 
                     fullName: fullName,
                     age: age,
                     location: location,
                     about: about,
-                    cvUrl: cvUrl, // Upload karapu CV eke URL eka
-
+                    cvUrl: cvUrl, 
                     submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
                     status: 'pending'
                 };
 
-                // 3. Firestore walata submit karanna
                 await db.collection('proApplications').add(applicationData);
                 
                 statusMsg.textContent = '✅ Pro application submitted successfully! We will review it soon.';
@@ -1210,7 +1319,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 11. AUTH LOGIC (MAIN) ---
 
-    // Auth Drawer Form Listeners
     const loginFormDrawer = document.getElementById('login-form-drawer');
     const signupFormDrawer = document.getElementById('signup-form-drawer');
     const resetPasswordFormDrawer = document.getElementById('reset-password-form-drawer');
@@ -1281,14 +1389,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Comprehensive UI Sync Function (Header/Drawers/Nav)
     const syncUI = (user, userData = null) => {
         if (user) {
             const avatarSrc = (userData && userData.photoURL) || user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'U')}&background=8B5E34&color=fff`;
             const displayName = (userData && userData.displayName) || user.displayName || 'Anonymous';
             const email = user.email;
             
-            // Header
             if (userAuthLinks) userAuthLinks.classList.add('hidden');
             if (userProfileInfo) userProfileInfo.classList.remove('hidden');
             if (document.getElementById('header-user-avatar')) document.getElementById('header-user-avatar').src = avatarSrc;
@@ -1299,56 +1405,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('admin-panel-link').classList.remove('hidden');
             }
 
-            // Bottom Nav
             if (bottomNavLoginBtn) bottomNavLoginBtn.style.display = 'none';
             if (bottomNavProfileLink) bottomNavProfileLink.style.display = 'flex';
             if (bottomNavAvatar) bottomNavAvatar.src = avatarSrc;
             
-            // Left Drawer
             if (drawerAuthLinks) drawerAuthLinks.style.display = 'none';
             if (drawerProfileInfo) drawerProfileInfo.style.display = 'block';
             
             closeAuthDrawer();
         } else {
-            // Header
             if (userAuthLinks) userAuthLinks.classList.remove('hidden');
             if (userProfileInfo) userProfileInfo.classList.add('hidden');
             
-            // Bottom Nav
             if (bottomNavLoginBtn) bottomNavLoginBtn.style.display = 'flex';
             if (bottomNavProfileLink) bottomNavProfileLink.style.display = 'none';
             
-            // Left Drawer
             if (drawerAuthLinks) drawerAuthLinks.style.display = 'block';
             if (drawerProfileInfo) drawerProfileInfo.style.display = 'none';
         }
     };
 
-    // --- Main Auth State Change Listener ---
     auth.onAuthStateChanged(async (loggedInUser) => {
         const urlParams = new URLSearchParams(window.location.search);
         const profileUidFromUrl = urlParams.get('uid');
         let isViewingOwnProfile = false;
 
-        // Step 1: Determine which profile to load
         if (profileUidFromUrl) {
-            // A. PUBLIC VIEW: Viewing a profile from a link
             currentProfileUid = profileUidFromUrl;
             if (loggedInUser && loggedInUser.uid === currentProfileUid) {
                 isViewingOwnProfile = true;
             }
         } else if (loggedInUser) {
-            // B. MY PROFILE VIEW: Logged in, no UID in URL
             currentProfileUid = loggedInUser.uid;
             isViewingOwnProfile = true;
         } else {
-            // C. NO PROFILE, NOT LOGGED IN: Redirect
             console.log("No user specified and not logged in. Redirecting.");
             window.location.href = 'index.html';
             return;
         }
 
-        // --- PART 1: Handle LOGGED IN User UI (Header, Drawers) ---
         let loggedInUserData = null;
         if (loggedInUser) {
             try {
@@ -1358,9 +1453,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (e) { console.error("Error fetching logged-in user data for UI sync", e); }
         }
-        syncUI(loggedInUser, loggedInUserData); // Syncs header/navs with the *viewer's* info.
+        syncUI(loggedInUser, loggedInUserData); 
 
-        // --- PART 2: Load PROFILE User Data (Main Content) ---
         try {
             const userDocRef = db.collection('users').doc(currentProfileUid);
             const docSnap = await userDocRef.get();
@@ -1377,19 +1471,18 @@ document.addEventListener('DOMContentLoaded', () => {
             
             displayProfileData(profileUserData, { email: profileUserData.email });
 
-            // Set Body Class for CSS rules
             document.body.className = ''; 
             document.body.classList.add(`role-${userRole}`);
             if (localStorage.getItem('theme') === 'dark') {
                 document.documentElement.classList.add('dark');
             }
 
-            // Show/Hide Edit/Apply buttons based on who is viewing
             if (isViewingOwnProfile) {
                 if (openEditModalBtn) openEditModalBtn.classList.remove('hidden');
                 if (shareProfileBtn) shareProfileBtn.classList.remove('hidden');
+                // Link Profile Button (Only for owner)
+                if (linkProfileBtn) linkProfileBtn.classList.remove('hidden');
                 
-                // Check for applications
                 const plusAppQuery = db.collection('plusApplications').where('userId', '==', currentProfileUid).where('status', '==', 'pending').limit(1);
                 const proAppQuery = db.collection('proApplications').where('userId', '==', currentProfileUid).where('status', '==', 'pending').limit(1);
                 const [plusAppSnap, proAppSnap] = await Promise.all([plusAppQuery.get(), proAppQuery.get()]);
@@ -1414,19 +1507,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
             } else {
-                // Not viewing own profile
                 if (openEditModalBtn) openEditModalBtn.classList.add('hidden');
                 if (applyToPlusBtn) applyToPlusBtn.classList.add('hidden');
                 if (applyToProBtn) applyToProBtn.classList.add('hidden');
-                if (shareProfileBtn) shareProfileBtn.classList.remove('hidden'); // Anith ayata share karanna puluwan
+                // Hide Link Profile for others
+                if (linkProfileBtn) linkProfileBtn.classList.add('hidden');
+                if (shareProfileBtn) shareProfileBtn.classList.remove('hidden'); 
             }
 
-            // Load posts for creators
             if (userRole !== 'normal') {
                 loadUserPosts(currentProfileUid, isViewingOwnProfile);
             }
             
-            // Setup share button
             setupShareButton(currentProfileUid, profileUserData.displayName);
 
         } catch (error) {

@@ -1,5 +1,5 @@
 // =================================================================
-//     APP.JS - FINAL + DARK MODE TOGGLE LOGIC (FIXED)
+//    APP.JS - FINAL FULL VERSION (WITH QR LOGIN & ANIMATION)
 // =================================================================
 
 // --- FIREBASE INITIALIZATION ---
@@ -11,6 +11,7 @@ const firebaseConfig = {
     messagingSenderId: "270596039723",
     appId: "1:270596039723:web:8f0667a20236841484766e",
 };
+
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
@@ -23,7 +24,7 @@ let notificationListener = null;
 // --- NOTIFICATION LISTENER FUNCTION ---
 function listenForNotifications(userId) {
     if (notificationListener) {
-        notificationListener(); // Unsubscribe from any previous listener
+        notificationListener(); // Unsubscribe previous
     }
 
     const notificationsRef = db.collection('notifications')
@@ -50,20 +51,101 @@ function listenForNotifications(userId) {
             notificationBadge.classList.add('hidden');
         }
     }, error => {
-        console.error("Error listening to notifications: ", error);
+        console.log("Notification sync paused:", error.message);
     });
 }
 
+// =================================================
+// === QR CODE AUTO LOGIN LOGIC (WITH ANIMATION) ===
+// =================================================
+function checkQRLogin() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isAutoLogin = urlParams.get('autologin');
+    const targetUid = urlParams.get('uid');
+    const overlay = document.getElementById('qr-login-overlay');
 
-// --- SINGLE, UNIFIED DOMCONTENTLOADED LISTENER ---
+    // URL එකේ autologin=true සහ uid එකක් තියෙනවා නම්
+    if (isAutoLogin === 'true' && targetUid) {
+        console.log("QR Login Detected. Starting animation...");
+
+        // 1. Animation එක පෙන්වන්න
+        if (overlay) {
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+        }
+        
+        // දැනටමත් log වී ඇත්නම් නවත්වන්න, නමුත් URL Clean කරන්න
+        if (auth.currentUser) {
+            window.history.replaceState({}, document.title, "index.html");
+            if (overlay) overlay.classList.add('hidden');
+            return;
+        }
+
+        // 2. තත්පර 2.5 ක Delay එකක් (Animation එක පෙනෙන්න)
+        setTimeout(() => {
+            db.collection('users').doc(targetUid).get().then((doc) => {
+                if (doc.exists) {
+                    const userData = doc.data();
+                    
+                    // --- MANUAL UI UPDATE (To simulate login immediately) ---
+                    const userAuthLinks = document.getElementById('user-auth-links');
+                    const userProfileInfo = document.getElementById('user-profile-info');
+                    
+                    if (userAuthLinks) userAuthLinks.classList.add('hidden');
+                    if (userProfileInfo) userProfileInfo.classList.remove('hidden');
+                    
+                    const avatarSrc = userData.photoURL || 'https://via.placeholder.com/40';
+                    const displayName = userData.displayName || 'User';
+                    
+                    // Update Images & Text
+                    if (document.getElementById('header-user-avatar')) document.getElementById('header-user-avatar').src = avatarSrc;
+                    if (document.getElementById('dropdown-user-avatar')) document.getElementById('dropdown-user-avatar').src = avatarSrc;
+                    if (document.getElementById('dropdown-user-name')) document.getElementById('dropdown-user-name').textContent = displayName;
+                    
+                    // Mobile Menu Update
+                    const mobileAuthLinks = document.getElementById('mobile-auth-links');
+                    const mobileProfileInfo = document.getElementById('mobile-profile-info');
+                    if (mobileAuthLinks) mobileAuthLinks.classList.add('hidden');
+                    if (mobileProfileInfo) mobileProfileInfo.classList.remove('hidden');
+
+                    // Update Profile Links
+                    const profileLinks = document.querySelectorAll('a[href="profile.html"]');
+                    profileLinks.forEach(link => link.href = `profile.html?uid=${targetUid}`);
+
+                    // 3. Animation එක හංගන්න
+                    if (overlay) {
+                        overlay.classList.add('hidden');
+                        overlay.classList.remove('flex');
+                    }
+
+                    // Alert User
+                    alert(`Success! Linked to ${displayName}`);
+
+                    // URL එක Clean කරන්න
+                    window.history.replaceState({}, document.title, "index.html");
+
+                } else {
+                    alert("User not found!");
+                    if (overlay) overlay.classList.add('hidden');
+                }
+            }).catch((error) => {
+                console.error("Login Error:", error);
+                if (overlay) overlay.classList.add('hidden');
+            });
+
+        }, 2500); // 2.5 Seconds Delay
+    }
+}
+
+// --- MAIN DOMCONTENTLOADED LISTENER ---
 document.addEventListener('DOMContentLoaded', () => {
     console.log("app.js (Core) Script Loaded!");
 
-    // --- ELEMENT SELECTORS (DESKTOP & MOBILE) ---
+    // --- ELEMENT SELECTORS ---
     const loginModal = document.getElementById('login-modal');
     const signupModal = document.getElementById('signup-modal');
     
-    // Desktop elements
+    // Desktop
     const userAuthLinks = document.getElementById('user-auth-links');
     const userProfileInfo = document.getElementById('user-profile-info');
     const loginBtn = document.getElementById('login-btn');
@@ -72,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileDropdownBtn = document.getElementById('profile-dropdown-btn');
     const profileDropdownMenu = document.getElementById('profile-dropdown-menu');
 
-    // Mobile elements
+    // Mobile
     const hamburgerBtn = document.getElementById('hamburger-btn');
     const mobileMenu = document.getElementById('mobile-menu');
     const mobileAuthLinks = document.getElementById('mobile-auth-links');
@@ -81,60 +163,54 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileSignupBtn = document.getElementById('mobile-signup-btn');
     const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
     
-    // Admin Panel Links
+    // Admin Panel
     const adminPanelLink = document.getElementById('admin-panel-link');
     const mobileAdminPanelLink = document.getElementById('mobile-admin-panel-link');
 
     // =================================================
-    // === DARK MODE TOGGLE LOGIC (FIXED) ===
+    // === DARK MODE LOGIC ===
     // =================================================
     
-    // Desktop/Mobile buttons දෙකම class එකෙන් select කරගන්නවා
     const themeToggleBtns = document.querySelectorAll('.theme-toggle-button'); 
     const lightIcons = document.querySelectorAll('.theme-toggle-light-icon');
     const darkIcons = document.querySelectorAll('.theme-toggle-dark-icon');
-    // 'theme-toggle-text' ID eka HTML eke tibbe nathi nisa mama eka ain kara
 
-    // Function to set the theme
     function setTheme(isDark) {
         if (isDark) {
+            document.documentElement.classList.add('dark');
             document.body.classList.add('dark');
-            // Buttons දෙකේම icons update කරනවා
             lightIcons.forEach(icon => icon.classList.add('hidden'));
             darkIcons.forEach(icon => icon.classList.remove('hidden'));
             localStorage.setItem('theme', 'dark');
         } else {
+            document.documentElement.classList.remove('dark');
             document.body.classList.remove('dark');
-            // Buttons දෙකේම icons update කරනවා
             lightIcons.forEach(icon => icon.classList.remove('hidden'));
             darkIcons.forEach(icon => icon.classList.add('hidden'));
             localStorage.setItem('theme', 'light');
         }
     }
 
-    // Add click listener - හම්බවෙන හැම button එකටම දානවා
     if (themeToggleBtns.length > 0) {
         themeToggleBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                e.stopPropagation(); // Dropdown eka close wenna nathuwa inna
-                const isCurrentlyDark = document.body.classList.contains('dark');
+                e.stopPropagation();
+                const isCurrentlyDark = document.documentElement.classList.contains('dark') || document.body.classList.contains('dark');
                 setTheme(!isCurrentlyDark);
             });
         });
     }
 
-    // Page load weddi save karapu theme eka check karanna
+    // Initial Theme Check
     const savedTheme = localStorage.getItem('theme');
-    
-    // ***** DEFAULT LIGHT MODE FIX *****
-    // System eke dark mode on da kiyala balanne nathuwa, 
-    // save karala thibboth vitharak dark mode danawa.
-    if (savedTheme === 'dark') {
-        setTheme(true); // Save වෙලා තියෙන්නේ 'dark' නම් විතරක් dark දාන්න
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+        setTheme(true);
     } else {
-        setTheme(false); // නැත්නම් හැම වෙලේම light (normal) දාන්න
+        setTheme(false);
     }
-    // === END OF DARK MODE LOGIC ===
+    // =================================================
 
     // --- HAMBURGER MENU TOGGLE ---
     if (hamburgerBtn && mobileMenu) {
@@ -143,10 +219,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- AUTH STATE LISTENER (THE CORE OF THE APP) ---
+    // --- AUTH STATE LISTENER ---
     auth.onAuthStateChanged(async (user) => {
         if (user) {
-            // --- USER IS LOGGED IN ---
+            // === USER LOGGED IN ===
             if (userAuthLinks) userAuthLinks.classList.add('hidden');
             if (userProfileInfo) userProfileInfo.classList.remove('hidden');
             if (mobileAuthLinks) mobileAuthLinks.classList.add('hidden');
@@ -157,24 +233,22 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const userDoc = await db.collection('users').doc(user.uid).get();
                 let userData = {};
-                let userRole = 'normal'; // Default to 'normal'
+                let userRole = 'normal';
 
                 if (userDoc.exists) {
                     userData = userDoc.data();
                     userRole = userData.role || 'normal';
                 }
 
-                // --- ROLE-BASED UI CONTROL ---
+                // Role Classes
                 document.body.classList.remove('role-normal', 'role-plus', 'role-pro', 'role-admin');
                 document.body.classList.add(`role-${userRole}`);
-                console.log(`User role identified. Body class set to: role-${userRole}`);
-                // --- END OF ROLE CONTROL ---
-
-                // --- UPDATE USER INFO IN UI ---
+                
+                // Update UI
                 const displayName = userData.displayName || user.displayName || 'User';
                 const userEmail = user.email || '';
-                let userAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=8B5E34&color=fff`;
                 
+                let userAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=8B5E34&color=fff`;
                 if (userData.photoURL && userData.photoURL.trim() !== '') {
                     userAvatar = userData.photoURL;
                 } else if (user.photoURL && user.photoURL.trim() !== '') {
@@ -187,27 +261,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     { id: 'dropdown-user-name', prop: 'textContent', value: displayName },
                     { id: 'dropdown-user-email', prop: 'textContent', value: userEmail },
                 ];
+
                 elementsToUpdate.forEach(item => {
                     const el = document.getElementById(item.id);
                     if (el) el[item.prop] = item.value;
                 });
 
-                // Control "Admin Panel" link visibility
-                if (userRole === 'admin' || userRole === 'pro') {
-                    if (adminPanelLink) adminPanelLink.classList.remove('hidden');
-                    if (mobileAdminPanelLink) mobileAdminPanelLink.classList.remove('hidden');
-                } else {
-                    if (adminPanelLink) adminPanelLink.classList.add('hidden');
-                    if (mobileAdminPanelLink) mobileAdminPanelLink.classList.add('hidden');
-                }
+                // Admin Panel Visibility
+                const isAdminOrPro = (userRole === 'admin' || userRole === 'pro');
+                if (adminPanelLink) isAdminOrPro ? adminPanelLink.classList.remove('hidden') : adminPanelLink.classList.add('hidden');
+                if (mobileAdminPanelLink) isAdminOrPro ? mobileAdminPanelLink.classList.remove('hidden') : mobileAdminPanelLink.classList.add('hidden');
 
             } catch (error) {
                 console.error("Error fetching user data:", error);
-                document.body.classList.add('role-normal'); // Safe fallback
+                document.body.classList.add('role-normal'); 
             }
 
         } else {
-            // --- USER IS LOGGED OUT ---
+            // === USER LOGGED OUT ===
             if (userAuthLinks) userAuthLinks.classList.remove('hidden');
             if (userProfileInfo) userProfileInfo.classList.add('hidden');
             if (mobileAuthLinks) mobileAuthLinks.classList.remove('hidden');
@@ -215,13 +286,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             document.body.classList.remove('role-normal', 'role-plus', 'role-pro', 'role-admin');
 
-            if (notificationListener) {
-                notificationListener(); // Stop listening
-            }
+            if (notificationListener) notificationListener(); 
         }
     });
 
-    // --- MODAL & FORM LOGIC ---
+    // --- MODAL CONTROLS ---
     const showLoginModal = () => loginModal?.classList.remove('hidden');
     const showSignupModal = () => signupModal?.classList.remove('hidden');
 
@@ -236,15 +305,31 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    document.getElementById('show-signup-link')?.addEventListener('click', (e) => { e.preventDefault(); loginModal?.classList.add('hidden'); signupModal?.classList.remove('hidden'); });
-    document.getElementById('show-login-link')?.addEventListener('click', (e) => { e.preventDefault(); signupModal?.classList.add('hidden'); loginModal?.classList.remove('hidden'); });
+    document.getElementById('show-signup-link')?.addEventListener('click', (e) => { 
+        e.preventDefault(); 
+        loginModal?.classList.add('hidden'); 
+        signupModal?.classList.remove('hidden'); 
+    });
+    document.getElementById('show-login-link')?.addEventListener('click', (e) => { 
+        e.preventDefault(); 
+        signupModal?.classList.add('hidden'); 
+        loginModal?.classList.remove('hidden'); 
+    });
 
-    // --- Sign Out Logic ---
-    const signOutUser = () => auth.signOut();
+    // --- SIGN OUT ---
+    const signOutUser = async () => {
+        try {
+            await auth.signOut();
+            window.location.href = 'index.html';
+        } catch (error) {
+            console.error("Sign out error", error);
+        }
+    };
+
     if (logoutBtn) logoutBtn.addEventListener('click', signOutUser);
     if (mobileLogoutBtn) mobileLogoutBtn.addEventListener('click', signOutUser);
     
-    // --- DROPDOWN (DESKTOP ONLY) ---
+    // --- DROPDOWN ---
     if (profileDropdownBtn && profileDropdownMenu) {
         profileDropdownBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -254,13 +339,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', (e) => {
         if (profileDropdownMenu && !profileDropdownMenu.classList.contains('hidden')) {
             const isClickInside = profileDropdownMenu.contains(e.target) || profileDropdownBtn?.contains(e.target);
-            if (!isClickInside) {
-                profileDropdownMenu.classList.add('hidden');
-            }
+            if (!isClickInside) profileDropdownMenu.classList.add('hidden');
         }
     });
 
-    // --- Login Form Submission ---
+    // --- LOGIN FORM ---
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
         const loginError = document.getElementById('login-error');
@@ -274,12 +357,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (loginModal) loginModal.classList.add('hidden');
                 loginForm.reset();
             } catch (err) {
-                if (loginError) loginError.textContent = err.message;
+                if (loginError) loginError.textContent = "Invalid email or password.";
             }
         });
     }
 
-    // --- Signup Form Submission ---
+    // --- SIGNUP FORM ---
     const signupForm = document.getElementById('signup-form');
     if (signupForm) {
         const signupError = document.getElementById('signup-error');
@@ -294,19 +377,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const user = res.user;
                 await user.updateProfile({ displayName: name });
                 
-                // Create a corresponding user document in Firestore
                 await db.collection('users').doc(user.uid).set({
                     displayName: name,
                     email: email,
                     role: 'normal',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    photoURL: '',
-                    bio: '',
-                    coverPhotoURL: '',
-                    followers: [],
-                    following: [],
-                    followersCount: 0,
-                    followingCount: 0
+                    photoURL: '', bio: '', coverPhotoURL: '',
+                    followers: [], following: [], followersCount: 0, followingCount: 0
                 });
                 
                 if (signupModal) signupModal.classList.add('hidden');
@@ -317,15 +394,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- MOBILE CATEGORIES TOGGLE & HIDE ON SCROLL ---
+    // --- MOBILE CATEGORY NAV ---
     const categoryNavBar = document.getElementById('category-nav-bar');
     if (categoryNavBar) {
         const toggleCategoriesBtn = document.getElementById('toggle-categories-btn');
         let lastScrollY = window.scrollY;
 
         window.addEventListener('scroll', () => {
-            if (window.innerWidth >= 768) { // Only run on mobile
-                categoryNavBar.style.transform = ''; // Reset any mobile transforms
+            if (window.innerWidth >= 768) { 
+                categoryNavBar.style.transform = ''; 
+                categoryNavBar.classList.remove('-translate-y-full');
                 return;
             }
             const currentScrollY = window.scrollY;
@@ -343,4 +421,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
+
+    // --- INIT QR CHECK ---
+    // Run checkQRLogin after a short delay to ensure Firebase is ready
+    setTimeout(checkQRLogin, 500);
 });
